@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.4.1.js"></script>
+    <script src="Scripts/ajaxCalls.js"></script>
+    <script>
+        function Init() {
+            user = {
+                firstName: 'hadar',
+                lastName: 'tayar',
+                email: 'hadar@gmail.com',
+                password: '123456',
+                address: 'Israel',
+                picture: 'img'
+            };
+
+            console.log(user);
+            let api = "../api/Users";
+            ajaxCall("POST", api, JSON.stringify(user), postSuccess, postError)
+        }
+
+        function postSuccess(obj) {
+            console.log(obj);
+            alert("YAY");
+        }
+        function postError(err) {
+            alert("Error");
+            console.log(err);
+        }
+    </script>
+</head>
+<body onload="Init()">
+
+</body>
+</html>
