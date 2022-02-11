@@ -35,7 +35,7 @@ namespace finalServerSide.Controllers
             }
             else
             {
-                return Request.CreateErrorResponse(HttpStatusCode.NotFound, " Preferences already exists");
+                return Request.CreateErrorResponse(HttpStatusCode.Conflict, "Preferences already exists");
             }
         }
 
