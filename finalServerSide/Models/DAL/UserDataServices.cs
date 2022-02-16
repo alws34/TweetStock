@@ -298,13 +298,13 @@ namespace finalServerSide.Models.DAL
         private String BuildUpdateCommand(User user)
         {
             String command;
-
-            StringBuilder sb = new StringBuilder();
+            String pass = user.Password != "-1" ? "[Password]='"+user.Password+"'," : "";
+            StringBuilder string_builder = new StringBuilder();
             // use a string builder to create the dynamic string
-            sb.AppendFormat(" SET [FirstName]='{0}', [LastName]='{1}', [Email]='{2}', [Password]='{3}', [Address]='{4}', [Picture]='{5}'", user.FirstName, user.LastName, user.Email, user.Password, user.Address, user.Picture);
+            string_builder.AppendFormat(" SET [FirstName]='{0}', [LastName]='{1}', [Email]='{2}', "+pass+" [Picture]='{3}'", user.FirstName, user.LastName, user.Email, user.Picture);
             String prefix = "UPDATE Users_2022" + " ";
-            String end = "WHERE id= " + user.Id;
-            command = prefix + sb.ToString() + end;
+            String end = " WHERE id= " + user.Id;
+            command = prefix + string_builder.ToString() + end;
             return command;
         }
 

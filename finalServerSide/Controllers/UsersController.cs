@@ -27,20 +27,6 @@ namespace finalServerSide.Controllers
             }
         }
 
-        //public HttpResponseMessage Get(User user)
-        //{
-        //    User u = user.checkLogin(user.Email, user.Password);
-
-        //    if (u != null)
-        //    {
-        //        return Request.CreateResponse(HttpStatusCode.OK, u);
-        //    }
-        //    else
-        //    {
-        //        return Request.CreateErrorResponse(HttpStatusCode.NotFound, "User not found");
-        //    }
-        //}
-
         /* Get user by Id */
         public User Get(int id)
         {
@@ -73,14 +59,13 @@ namespace finalServerSide.Controllers
         /* Update User Details to the Users Tbl */
         public HttpResponseMessage Put(User user)
         {
-            int num = user.UpdateUser();
-            if (num == 1)
+            if (user.UpdateUser() == 1)
             {
                 return Request.CreateResponse(HttpStatusCode.OK, "User Updated");
             }
             else
             {
-                return Request.CreateErrorResponse(HttpStatusCode.NotFound, "user not found");
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "-1");
             }
         }
 
