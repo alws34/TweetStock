@@ -333,3 +333,6 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 desktop.ini
+final2/src/Components/Configs/FirebaseConfig.jsx
+final2/src/Components/Configs/apiUrlsKeys.jsx
+final2/src/Components/Configs/getLoggedUser.jsx

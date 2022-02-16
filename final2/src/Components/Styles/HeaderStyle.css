@@ -1,0 +1,60 @@
+.Eheader * {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.Eheader > html,
+body {
+  font-family: "Fira Code", monospace;
+  width: 100%;
+  height: 100%;
+  font-size: 20px;
+}
+
+.Eheader main {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.Eheader p {
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  font-size: 3rem;
+  background: linear-gradient(to bottom, #000, #000 60%, #fff 60%, #fff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-repeat: no-repeat;
+  transition: background 0.2s ease-out;
+  white-space: nowrap;
+  color: #356cc5;
+  /* color: #fff; */
+}
+
+.Eheader span {
+  position: relative;
+}
+
+.Eheader span:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: #b8d0f8;
+  bottom: 10px;
+  transition: all 0.2s ease-out;
+  border-radius: 3px;
+}
+
+.Eheader p:hover {
+  background-position: 0px 10px;
+}
+
+.Eheader span:hover:before {
+  transform: translateY(10px);
+}

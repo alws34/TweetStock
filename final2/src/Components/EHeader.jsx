@@ -1,5 +1,5 @@
 import React from "react";
-import "./HeaderStyle.css";
+import "./Styles/HeaderStyle.css";
 
 export default function EHeader(props) {
   return (
