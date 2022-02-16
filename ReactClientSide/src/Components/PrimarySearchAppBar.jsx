@@ -178,10 +178,10 @@ export default function PrimarySearchAppBar() {
 
   const handleCloseUserMenu = (setting) => {
     setAnchorElUser(null);
-    if (typeof setting != "string") return;
+    //if (typeof setting != "string") return;
     if (setting === "Logout") {
       MySwal.fire({
-        title: "Are you want to log out?",
+        title: "Are you sure?",
         showDenyButton: false,
         showCancelButton: true,
         confirmButtonText: "Yes",
@@ -191,7 +191,11 @@ export default function PrimarySearchAppBar() {
         }
       });
     } else {
-      navigate(navs[setting.toLowerCase()]);
+      try {
+        navigate(navs[setting.toLowerCase()]);
+      } catch (error) {
+        return;
+      }
     }
   };
 
