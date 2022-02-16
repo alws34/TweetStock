@@ -8,7 +8,7 @@ export const getLoggedUser = () => {
     console.log("sign", logged_user);
   } else {
     logged_user = {
-      Adress: null,
+      Address: null,
       Email: null,
       FirstName: "Guest",
       Id: null,
@@ -28,6 +28,7 @@ export const getRememberMe = () => {
 };
 
 export const saveUserLocalStorage = (user, remember_me) => {
+  console.log(user)
   localStorage.setItem(
     "TweetStock",
     JSON.stringify({

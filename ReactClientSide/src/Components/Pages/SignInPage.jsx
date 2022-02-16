@@ -10,9 +10,10 @@ import {
   Checkbox,
   Box,
   Grid,
+  Link,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { apiUrlUsers } from "../Configs/apiUrlsKeys";
 import { saveUserLocalStorage } from "../Configs/getLoggedUser";
@@ -184,7 +185,7 @@ export default function SignIn() {
                   onClick={() => navigate(navPaths["sign up"])}
                   variant="body2"
                 >
-                  Don't have an account? Sign Up
+                  <Link>Don't have an account? Sign Up</Link>
                 </Button>
               </Grid>
             </Grid>

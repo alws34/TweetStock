@@ -8,7 +8,6 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-// import { Row, Col } from "react-bootstrap";
 
 export default function New(props) {
   return (

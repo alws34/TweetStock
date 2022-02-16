@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider, styled } from "@mui/material/styles";
-import { CountrySelect } from "../CountrySelect";
 import { apiUrlUsers } from "../Configs/apiUrlsKeys";
 import { navPaths } from "../Configs/navPaths";
 import {
@@ -23,6 +22,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Camera from "../Camera";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import CountrySelect from "../CountrySelect";
 
 const MySwal = withReactContent(Swal);
 
@@ -49,7 +49,12 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   let user = getLoggedUser();
   const [img, setImg] = useState(user.Picture);
+  const [country, setCountry] = useState(user.Address);
 
+  const getCountry = (countryProp) => {
+    setCountry(countryProp);
+    console.log(country);
+  };
   const UpdateUser = () => {
     fetch(apiUrlUsers, {
       method: "PUT",
@@ -168,7 +173,7 @@ export default function ProfilePage() {
                   name="firstName"
                   fullWidth
                   id="firstName"
-                  defaultValue={`${user.FirstName}`}
+                  defaultValue={user.FirstName}
                   label="firstName"
                   autoFocus
                   inputProps={{
@@ -181,7 +186,7 @@ export default function ProfilePage() {
                 <TextField
                   fullWidth
                   id="lastName"
-                  defaultValue={`${user.LastName}`}
+                  defaultValue={user.LastName}
                   label="lastName"
                   name="lastName"
                   autoComplete="family-name"
@@ -195,7 +200,7 @@ export default function ProfilePage() {
                 <TextField
                   fullWidth
                   id="email"
-                  defaultValue={`${user.Email}`}
+                  defaultValue={user.Email}
                   label="email"
                   name="email"
                   autoComplete="email"
@@ -218,8 +223,8 @@ export default function ProfilePage() {
                 />
               </Grid>
               {/* <Grid item xs={12}>
-                  <CountrySelect id="country" sendToForm={getCountry} />
-                </Grid> */}
+                <CountrySelect id="country" sendToForm={getCountry} />
+              </Grid> */}
               <Grid item xs={12}>
                 <Camera img={img} setParentImg={setImg} />
                 <br />

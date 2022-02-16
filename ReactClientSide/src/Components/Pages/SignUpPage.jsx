@@ -8,8 +8,9 @@ import {
   Box,
   Typography,
   Container,
+  Link,
 } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useState } from "react";
 import { apiUrlUsers } from "../Configs/apiUrlsKeys";
@@ -212,9 +213,9 @@ export default function SignUp() {
               <Grid item>
                 <Button
                   onClick={() => navigate(navPaths["sign in"])}
-                  variant="body2"
+                  //variant="body2"
                 >
-                  Already have an account? Sign in
+                  <Link>Already have an account? Sign in </Link>
                 </Button>
               </Grid>
             </Grid>

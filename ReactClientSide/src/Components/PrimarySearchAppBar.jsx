@@ -178,7 +178,7 @@ export default function PrimarySearchAppBar() {
 
   const handleCloseUserMenu = (setting) => {
     setAnchorElUser(null);
-
+    if (typeof setting != "string") return;
     if (setting === "Logout") {
       MySwal.fire({
         title: "Are you want to log out?",
