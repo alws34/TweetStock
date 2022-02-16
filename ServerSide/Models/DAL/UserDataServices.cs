@@ -140,6 +140,7 @@ namespace finalServerSide.Models.DAL
                     u.FirstName = (string)dr["firstName"];
                     u.LastName = (string)dr["lastName"];
                     u.Email = (string)dr["email"];
+                    u.Address = (string)dr["address"];
                     u.Picture = (string)dr["picture"];
                 }
                 return u;
