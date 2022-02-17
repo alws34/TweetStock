@@ -1,7 +1,0 @@
-.favCards{
-    width: 100%;
-    grid-template-columns: repeat(auto-fit, minmax(270px, auto));
-    display: grid;
-    justify-content: center;
-    margin-top: 20px;
-}

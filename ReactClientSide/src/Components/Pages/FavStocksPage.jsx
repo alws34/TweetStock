@@ -121,6 +121,7 @@ export default function FavStocksPage() {
               name={s.displayName}
               symbol={s.symbol}
               priceNow={s.postMarketPrice}
+              currency={s.currency}
               openPrice={s.regularMarketOpen}
               closePrice={s.regularMarketPrice}
               prediction={0}
