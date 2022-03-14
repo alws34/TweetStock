@@ -13,7 +13,6 @@ export default function PopularTweets(props) {
   const navigate = useNavigate();
   const [tweetsArr, setTweetsArr] = useStateWithCallbackLazy([]);
   const [isLoading, setIsLoading] = useState(true);
-  //let ticker = 'tsla'//props.text;
   let ticker = useLocation().state;
   try {
     ticker = ticker.toUpperCase();
