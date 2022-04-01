@@ -3,14 +3,23 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { BrowserRouter } from "react-router-dom";
+//import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
+// ReactDOM.render(
+//   <BrowserRouter>
+//     {/* // <React.StrictMode> */}
+//     <App />
+//     {/* // </React.StrictMode>, */}
+//   </BrowserRouter>,
+//   document.getElementById("root")
+// );
 
 ReactDOM.render(
-  <BrowserRouter>
+  <HashRouter>
     {/* // <React.StrictMode> */}
     <App />
     {/* // </React.StrictMode>, */}
-  </BrowserRouter>,
+  </HashRouter>,
   document.getElementById("root")
 );
 

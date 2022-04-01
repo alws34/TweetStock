@@ -1,4 +1,6 @@
-const prefix = "/bgroup57/test2/tar1/build";
+//const prefix = "/bgroup57/test2/tar1/build";
+const prefix = "";
+
 
 export const navPaths = {
   home: prefix + "/",
