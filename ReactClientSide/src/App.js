@@ -24,7 +24,18 @@ function App() {
   });
 
   const flaskCommunication = () => {
-    console.log("test flask!");
+    let test = {
+      a: 1,
+      b: 2,
+    };
+    // GET
+    let ticker = "TSLA";
+    fetch(apiUrlFlask + `/getPrediction?ticker=${ticker}`)
+      .then((res) => {
+        console.log("Flask1!", res);
+        return res.json();
+      })
+      .then((res) => console.log("Flask!", res));
   };
 
   const handleTabClosing = (event) => {
