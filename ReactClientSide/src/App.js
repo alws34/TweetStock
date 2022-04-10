@@ -12,14 +12,20 @@ import { Routes, Route } from "react-router-dom";
 import { getRememberMe } from "./Components/Configs/getLoggedUser";
 import ProfilePage from "./Components/Pages/ProfilePage";
 import { navPaths } from "./Components/Configs/navPaths";
+import { apiUrlFlask } from "./Components/Configs/apiUrlsKeys";
 
 function App() {
   useEffect(() => {
+    flaskCommunication();
     window.addEventListener("beforeunload", handleTabClosing);
     return () => {
       window.removeEventListener("beforeunload", handleTabClosing);
     };
   });
+
+  const flaskCommunication = () => {
+    console.log("test flask!");
+  };
 
   const handleTabClosing = (event) => {
     event.preventDefault();
