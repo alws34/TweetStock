@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+<script>
+        function init(){
+            element = document.querySelector('#test')
+            const server_ip = 'http://10.0.0.85:5000'
+
+            fetch(server_ip + '/home')
+                .then(response => {
+                    console.log(response)
+                    return response.json()
+                })
+                .then(data => console.log(data))
+
+            fetch(server_ip + '/incomes',{
+                                method: 'POST',
+                                headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({a: 1, b: 'Textual content'})
+                            })
+                .then(response => response.json())
+                .then(data => console.log('returned ' , data))
+
+            //element.innerHTML = response
+
+
+        }
+
+    </script>
+
+</head>
+<body onload="init()">
+    <p id="test"></p>
+</body>
+</html>

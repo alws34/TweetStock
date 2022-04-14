@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import datetime
+import sklearn
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import os, sys, shutil
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api, reqparse
@@ -13,17 +15,20 @@ from TwitterAPI import TwitterAPI, TwitterOAuth, TwitterRequestError, TwitterCon
 import tweepy # tweeter API
 import math
 
-MODEL_PATH  = '' # get the 'tweetstock_model.h5' file path here.
+# ----------------------------------------------------------------------------------------------- #
+MODEL_PATH  = '/home/pi/Desktop/FinalProject/FlaskServer/Data/Networks/acc_0.724_TweetStock_model_#2187.h5' # get the 'tweetstock_model.h5' file path here.
 SERVER_PORT = 5000 # port which the server will run on.
 TWITTER_VERSION = 2 # twitter version.
 N_PAST = 1 # days on which the model was train to precict based on.
 MAX_TWEETS_RESULTS = 100 # max results for first tweets query.
 MIN_TWEET_STATS_SUM = 100
 MIN_USER_FOLLOWERS = 100 # min user followers num to be included
-
+# ----------------------------------------------------------------------------------------------- #
+app = Flask(__name__)
+CORS(app,resources={r"*": {"origins": "*"}})
+api = Api(app)
 pd.set_option('display.max_columns', None)
-
-
+# ----------------------------------------------------------------------------------------------- #
 def connect_to_twitter(version = TWITTER_VERSION): # v2 for now
     consumer_key = 'mymakG2knztQ2GYaTNaRGTIOi'
     consumer_secret = 'lGXmXu9K7DQftUjvVempNg1vGjS362zbKo7p12yaa5RrBelIlj'
@@ -53,7 +58,37 @@ def get_n_past_date(num_of_days):
 
     return date.isoformat('T')+'Z'
 
-def create_sequence(dataset, rows_at_a_time):
+def dict_to_df(data):
+    try:
+        keys = data[0].keys()
+        temp = {}
+        for key in keys:
+            temp[key] = []
+            for d in data:
+                temp[key].append(d[key])
+    except Exception as err:
+        print('dict_to_df()',err)
+        return None
+    #print(temp)
+    return pd.DataFrame.from_dict(temp)
+
+
+def get_df_mean(df, n_past=N_PAST):
+    if n_past == 1:
+        to_append = {}
+        for col in df:
+            print('col ', col)
+            to_append[col] = df[col].mean()
+        new_df = pd.DataFrame(columns=df.columns).append(to_append, ignore_index=True)
+        return new_df
+    else: return df.groupby(by='date').mean().reset_index()
+
+def scale_seq(seq):
+    scaler = MinMaxScaler()
+    return scaler.fit_transform(seq)
+
+def create_sequence(dataset, rows_at_a_time=N_PAST):
+    rows_at_a_time-=1 # today->tommorow instead of yesterday-->today
     sequences = []
     start_idx = 0
     features_df = dataset
@@ -61,9 +96,7 @@ def create_sequence(dataset, rows_at_a_time):
         sequences.append(features_df.iloc[start_idx:stop_idx])
         start_idx += 1
     return np.array(sequences)
-
-
-
+# ----------------------------------------------------------------------------------------------- #
 # Step 1
 def get_tweets(ticker, max_results = 10, n_past = 1, twitter_version=TWITTER_VERSION):
     print("Getting Tweets")
@@ -169,7 +202,7 @@ def get_users_engagement(tweets, max_tweets_results = 100, twitter_version=TWITT
                     u_n_replies += u_tweet['public_metrics']['reply_count']
                     u_n_likes += u_tweet['public_metrics']['like_count']
                     u_n_tweets += 1
-                print(u_n_tweets, u_n_rts, u_n_replies, u_n_likes, u_log_n_followers)
+                #print(u_n_tweets, u_n_rts, u_n_replies, u_n_likes, u_log_n_followers)
                 if math.log(u_log_n_followers,2) > 0 and u_n_tweets > 0:
                     eng = (u_n_rts + u_n_replies + u_n_likes)/math.log(u_log_n_followers,2)/u_n_tweets
                 else: eng = 0
@@ -204,30 +237,29 @@ def filter_users(tweets,threshold=MIN_USER_FOLLOWERS):
 def prep_data(data):
     print("Prepping model data")
 
-    keys = data[0].keys()
-    temp = {}
-    for key in keys:
-        temp[key] = []
-        for d in data:
-            temp[key].append(d[key])
-    print(temp)
-    df = pd.DataFrame.from_dict(temp)
+    #1 Transform from dictionary to df for easier data handling
+    df = dict_to_df(data)
 
+    #2 Select features
     features = ['n_replies', 'n_retweets', 'n_likes', 's_pos', 's_neg', 's_neu', 'u_engagement']
     df = df[features]
-    print('before mean', df)
-    df = df.mean() # problematic
-    print(df, len(df))
+
+    #3 Get df mean
+    print('before mean', df, len(df), df.shape)
+    df = get_df_mean(df)
+    print('after mean', df, len(df), df.shape)
+
+    #4 Create sequence from df
     test_seq = create_sequence(df, rows_at_a_time=N_PAST)
-    print(test_seq,test_seq.shape)
-    return data
+    print('\n\n', test_seq, test_seq.shape)
 
+    #5 Scale data
+    test_seq = test_seq.reshape((len(test_seq), test_seq.shape[2] * test_seq.shape[1]))
+    scaled_test_seq = scale_seq(test_seq)
 
-
-app = Flask(__name__)
-CORS(app,resources={r"*": {"origins": "*"}})
-api = Api(app)
-
+    # Return preped data
+    return scaled_test_seq
+# ----------------------------------------------------------------------------------------------- #
 #debug
 def get_prediction_dummy():
     ticker = "MSFT"
@@ -263,7 +295,7 @@ def get_prediction():
     #model = load_model(MODEL_PATH)
 
     return jsonify(args)
-
+# ----------------------------------------------------------------------------------------------- #
 if __name__ == '__main__':
     print("1")
     sentiment_analyzer = SentimentIntensityAnalyzer()
