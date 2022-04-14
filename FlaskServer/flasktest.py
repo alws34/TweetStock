@@ -87,6 +87,7 @@ def scale_seq(seq):
     scaler = MinMaxScaler()
     return scaler.fit_transform(seq)
 
+# problematic
 def create_sequence(dataset, rows_at_a_time=N_PAST):
     rows_at_a_time-=1 # today->tommorow instead of yesterday-->today
     sequences = []
@@ -250,7 +251,7 @@ def prep_data(data):
     print('after mean', df, len(df), df.shape)
 
     #4 Create sequence from df
-    test_seq = create_sequence(df, rows_at_a_time=N_PAST)
+    test_seq = create_sequence(df, rows_at_a_time=N_PAST) # problematic
     print('\n\n', test_seq, test_seq.shape)
 
     #5 Scale data
