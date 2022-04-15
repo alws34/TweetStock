@@ -9,14 +9,14 @@ from flask_restful import Resource, Api, reqparse
 from numpy import NaN
 from requests import put, get, post, delete
 from flask_cors import CORS
-#from tensorflow.keras.models import load_model
+from tensorflow.keras.models import load_model
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer # sentiment score
 from TwitterAPI import TwitterAPI, TwitterOAuth, TwitterRequestError, TwitterConnectionError, TwitterPager
 import tweepy # tweeter API
 import math
 
 # ----------------------------------------------------------------------------------------------- #
-MODEL_PATH  = '/home/pi/Desktop/FinalProject/FlaskServer/Data/Networks/acc_0.724_TweetStock_model_#2187.h5' # get the 'tweetstock_model.h5' file path here.
+MODEL_PATH  = './Data/Networks/acc_0.724_TweetStock_model_#2187.h5' # get the 'tweetstock_model.h5' file path here.
 SERVER_PORT = 5000 # port which the server will run on.
 TWITTER_VERSION = 2 # twitter version.
 N_PAST = 1 # days on which the model was train to precict based on.
@@ -76,8 +76,7 @@ def dict_to_df(data):
 def get_df_mean(df, n_past=N_PAST):
     if n_past == 1:
         to_append = {}
-        for col in df:
-            print('col ', col)
+        for col in df: 
             to_append[col] = df[col].mean()
         new_df = pd.DataFrame(columns=df.columns).append(to_append, ignore_index=True)
         return new_df
@@ -87,15 +86,23 @@ def scale_seq(seq):
     scaler = MinMaxScaler()
     return scaler.fit_transform(seq)
 
+def create_sequence(dataset):
+    return np.array(dataset)
+
 # problematic
-def create_sequence(dataset, rows_at_a_time=N_PAST):
+def create_sequence_old(dataset, rows_at_a_time=N_PAST):
+    print("creating seq")
     rows_at_a_time-=1 # today->tommorow instead of yesterday-->today
     sequences = []
     start_idx = 0
-    features_df = dataset
-    for stop_idx in range(rows_at_a_time,len(dataset)): 
+    features_df = dataset.copy()
+    print(dataset, len(dataset))
+    for stop_idx in range(rows_at_a_time,len(dataset)+1):
         sequences.append(features_df.iloc[start_idx:stop_idx])
+        print('iloc',start_idx,stop_idx, features_df.iloc[start_idx:stop_idx])
         start_idx += 1
+    print('seqs',sequences)
+    print('seq created!')
     return np.array(sequences)
 # ----------------------------------------------------------------------------------------------- #
 # Step 1
@@ -246,20 +253,20 @@ def prep_data(data):
     df = df[features]
 
     #3 Get df mean
-    print('before mean', df, len(df), df.shape)
+    #print('before mean', df, len(df), df.shape)
     df = get_df_mean(df)
-    print('after mean', df, len(df), df.shape)
+    #print('after mean', df, len(df), df.shape)
 
     #4 Create sequence from df
-    test_seq = create_sequence(df, rows_at_a_time=N_PAST) # problematic
+    test_seq = create_sequence(df)
     print('\n\n', test_seq, test_seq.shape)
 
     #5 Scale data
-    test_seq = test_seq.reshape((len(test_seq), test_seq.shape[2] * test_seq.shape[1]))
-    scaled_test_seq = scale_seq(test_seq)
+    test_seq = test_seq.reshape((len(test_seq), test_seq.shape[0] * test_seq.shape[1]))
+    #scaled_test_seq = scale_seq(test_seq)
 
     # Return preped data
-    return scaled_test_seq
+    return test_seq
 # ----------------------------------------------------------------------------------------------- #
 #debug
 def get_prediction_dummy():
@@ -285,7 +292,10 @@ def get_prediction_dummy():
     
     # Step 6
     preped = prep_data(filteredU_eng_filteredT_sent_tweets)
-
+    print('prepped', preped)
+    
+    pred = model.predict(preped)
+    print(pred)
 @app.route('/getPrediction', methods=['GET'])  # GET
 def get_prediction():
     args = request.args.to_dict()
@@ -298,6 +308,7 @@ def get_prediction():
     return jsonify(args)
 # ----------------------------------------------------------------------------------------------- #
 if __name__ == '__main__':
+    model = load_model(MODEL_PATH)
     print("1")
     sentiment_analyzer = SentimentIntensityAnalyzer()
     print("2")
