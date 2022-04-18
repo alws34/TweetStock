@@ -18,19 +18,23 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer  # sentimen
 from TwitterAPI import TwitterAPI, TwitterOAuth, TwitterRequestError, TwitterConnectionError, TwitterPager
 import tweepy  # tweeter API
 import math
+import csv
+from pathlib import Path
+
 
 # ----------------------------------------------------------------------------------------------- #
 # get the 'tweetstock_model.h5' file path here.
-MODEL_PATH = 'FlaskServer/Data/Networks/acc_0.724_TweetStock_model_#2187.h5'
+MODEL_PATH = Path(
+    '/home/pi/FinalProject/FlaskServer/Data/Networks/acc_0.724_TweetStock_model_#2187.h5')
 SERVER_PORT = 5000  # port which the server will run on.
 TWITTER_VERSION = 2  # twitter version.
 N_PAST = 1  # days on which the model was train to precict based on.
 MAX_TWEETS_RESULTS = 100  # max results for first tweets query.
-MIN_TWEET_STATS_SUM = 100
+MIN_TWEET_STATS_SUM = 0   # default = 25
 MIN_USER_FOLLOWERS = 100  # min user followers num to be included
 # ----------------------------------------------------------------------------------------------- #
 app = Flask(__name__)
-CORS(app, resources={r"*": {"origins": "*"}})
+CORS(app)  # , resources={r"*": {"origins": "*"}})
 api = Api(app)
 pd.set_option('display.max_columns', None)
 # ----------------------------------------------------------------------------------------------- #
@@ -56,7 +60,7 @@ def WriteToLog(msg):
             f.write(f'{tweet}\n')
 
 
-def get_n_past_date(num_of_days):
+def get_n_past_date(num_of_days=N_PAST):
     today = datetime.datetime.now()
     if num_of_days > 0:
         num_of_days *= -1
@@ -104,10 +108,10 @@ def scale_seq(seq):
 def create_sequence(dataset):
     return np.array(dataset)
 
-# problematic
 
-
+# problematic-gets chukns!! suitable for training
 def create_sequence_old(dataset, rows_at_a_time=N_PAST):
+
     print("creating seq")
     rows_at_a_time -= 1  # today->tommorow instead of yesterday-->today
     sequences = []
@@ -126,7 +130,7 @@ def create_sequence_old(dataset, rows_at_a_time=N_PAST):
 # Step 1
 
 
-def get_tweets(ticker, max_results=10, n_past=1, twitter_version=TWITTER_VERSION):
+def get_tweets(ticker, max_results=10, n_past=N_PAST, twitter_version=TWITTER_VERSION):
     print("Getting Tweets")
     if '$' in ticker:
         ticker = ticker.replace('$', '')
@@ -156,7 +160,7 @@ def get_tweets(ticker, max_results=10, n_past=1, twitter_version=TWITTER_VERSION
     elif twitter_version == 2:
         prms = {
             'tweet.fields': 'public_metrics,author_id,created_at',
-            'start_time': get_n_past_date(5),
+            'start_time': get_n_past_date(2),
             'query': ticker,
             'max_results': max_results,
             # 'user.fields':'public_metrics,description,username',
@@ -197,9 +201,8 @@ def get_tweets(ticker, max_results=10, n_past=1, twitter_version=TWITTER_VERSION
 
     return tweets
 
+
 # Step 2
-
-
 def get_sentiment(tweets):
     print("Getting Sentiment")
     for tweet in tweets:
@@ -208,9 +211,8 @@ def get_sentiment(tweets):
         # tweets['subjectivity'] = sentiment_analyzer.subjectivity_scores(tweet['text']) # optional
     return tweets
 
+
 # Step 3
-
-
 def filter_tweets(tweets, threshold=MIN_TWEET_STATS_SUM):
     print("Filtering Tweets")
     for tweet in tweets:
@@ -218,9 +220,8 @@ def filter_tweets(tweets, threshold=MIN_TWEET_STATS_SUM):
             tweets.remove(tweet)
     return tweets
 
+
 # Step 4
-
-
 def get_users_engagement(tweets, max_tweets_results=100, twitter_version=TWITTER_VERSION):
     print("Getting user engagement")
     if twitter_version == 1:
@@ -268,9 +269,8 @@ def get_users_engagement(tweets, max_tweets_results=100, twitter_version=TWITTER
 
     return tweets
 
+
 # Step 5
-
-
 def filter_users(tweets, threshold=MIN_USER_FOLLOWERS):
     print("Filtering users")
     for tweet in tweets:
@@ -278,41 +278,48 @@ def filter_users(tweets, threshold=MIN_USER_FOLLOWERS):
             tweets.remove(tweet)
     return tweets
 
+
 # Step 6
-
-
-def prep_data(data):
+def prep_data(df):
     print("Prepping model data")
-
-    # 1 Transform from dictionary to df for easier data handling
-    df = dict_to_df(data)
-
-    # 2 Select features
-    features = ['n_replies', 'n_retweets', 'n_likes',
+    # 1 Select features
+    features = ['tweet_id', 'n_replies', 'n_retweets', 'n_likes',
                 's_pos', 's_neg', 's_neu', 'u_engagement']
     df = df[features]
 
-    # 3 Get df mean
+    # 2 Get df mean
     #print('before mean', df, len(df), df.shape)
     df = get_df_mean(df)
     #print('after mean', df, len(df), df.shape)
 
-    # 4 Create sequence from df
+    # 3 Create sequence from df
     test_seq = create_sequence(df)
     print('\n\n', test_seq, test_seq.shape)
 
-    # 5 Scale data
+    # 4 Scale data
     test_seq = test_seq.reshape(
         (len(test_seq), test_seq.shape[0] * test_seq.shape[1]))
     #scaled_test_seq = scale_seq(test_seq)
 
     # Return preped data
-    return test_seq
+    return tf.convert_to_tensor(test_seq, dtype=tf.float32)
+
+
+# Step 7
+def get_pred(prepped_data):
+    pred = model.predict(prepped_data)
+    result = 1 if pred[0][1] >= pred[0][0] else -1
+    return result
 # ----------------------------------------------------------------------------------------------- #
 # debug
 
 
 def get_prediction_dummy():
+    result = {
+        'tweet_id': [],
+        'prediction': 0
+    }
+
     ticker = "MSFT"
     # Step 1
     tweets = get_tweets('TSLA', max_results=MAX_TWEETS_RESULTS,
@@ -337,29 +344,63 @@ def get_prediction_dummy():
         eng_filteredT_sent_tweets, threshold=MIN_USER_FOLLOWERS)
     print("after user filtering:", len(filteredU_eng_filteredT_sent_tweets))
 
-    # Step 6
+    # 6.0 Transform from dictionary to df for easier data handling
+    df = dict_to_df(filteredU_eng_filteredT_sent_tweets)
+    print(len(df))
+    for tweet_id in df['tweet_id']:
+        result['tweet_id'].append(tweet_id)
+        # filename="debug_pre_prepped_df"
+        # path = Path("/home/pi/FinalProject/FlaskServer/Data/Debug/"+filename+".csv")
+        # df.to_csv(path)
+    # Step 6.1
     preped = prep_data(filteredU_eng_filteredT_sent_tweets)
     print('prepped', preped)
 
-    # DEBUG
-    try:
-        preped_tensor = tf.convert_to_tensor(preped, dtype=tf.float32)
-    except Exception as e:
-        print(f"{e}")
-    pred = model.predict(preped_tensor)
-    print(pred)
+    result['prediction'] = get_pred(preped)
+
+    return jsonify(result)
 
 
 @app.route('/getPrediction', methods=['GET'])  # GET
 def get_prediction():
     args = request.args.to_dict()
     ticker = args['ticker']
+    result = {
+        'tweet_id': [],
+        'prediction': 0
+    }
 
-    tweets = get_tweets(ticker="TSLA", n_past=N_PAST)
+    # Step 1
+    tweets = get_tweets('TSLA', max_results=MAX_TWEETS_RESULTS,
+                        n_past=N_PAST, twitter_version=TWITTER_VERSION)
+    if tweets == None:
+        print("Couldnt get tweets @get_tweets")
+        return
+    # Step 2
+    sent_tweets = get_sentiment(tweets)
 
-    #model = load_model(MODEL_PATH)
+    # Step 3
+    filteredT_sent_tweets = filter_tweets(
+        sent_tweets, threshold=MIN_TWEET_STATS_SUM)
 
-    return jsonify(args)
+    # Step 4
+    eng_filteredT_sent_tweets = get_users_engagement(filteredT_sent_tweets)
+
+    # Step 5
+    filteredU_eng_filteredT_sent_tweets = filter_users(
+        eng_filteredT_sent_tweets, threshold=MIN_USER_FOLLOWERS)
+
+    # Step 6.0 Transform from dictionary to df for easier data handling
+    df = dict_to_df(filteredU_eng_filteredT_sent_tweets)
+    for tweet_id in df['tweet_id']:
+        result['tweet_id'].append(tweet_id)
+    # Step 6.1
+    preped = prep_data(df)
+    print('prepped', preped)
+
+    result['prediction'] = get_pred(preped)
+
+    return jsonify(result)
 
 
 # ----------------------------------------------------------------------------------------------- #
@@ -370,5 +411,8 @@ if __name__ == '__main__':
     print("2")
     twitter = connect_to_twitter()
     print("3")
-    get_prediction_dummy()  # debug
+    # get_prediction_dummy()  # debug
+    # df = pd.read_csv("/home/pi/FinalProject/FlaskServer/Data/Debug/debug_pre_prepped_df.csv")
+    # p = prep_data(df)
+
     app.run(host='0.0.0.0', port=SERVER_PORT, debug=True)
