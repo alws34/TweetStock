@@ -1,68 +1,90 @@
-import React, { createRef, useEffect, useRef, useState } from "react";
-import { Player } from "@lottiefiles/react-lottie-player";
+import React, { useState } from "react";
+import Lottie from "react-lottie";
 import MovingComponent from "react-moving-text";
-
-const hat_animation_path = "./Images/hat2.json";
-
-const pred_css = {
-  flex: 1,
-  textAlign: "center",
-  height: "100vh",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-};
-
-const Loading = () => {
-  return (
-    <Player
-      autoplay
-      loop
-      src={hat_animation_path}
-      style={{ height: "300px", width: "300px" }}
-    ></Player>
-  );
-};
-
-const Pred = (props) => {
-  const symbol = props.dir === "up" ? "⬆️" : "⬇️";
-  const dir = props.dir === "up" ? "normal" : "reverse";
-
-  return (
-    <div>
-      <MovingComponent
-        type="bounce"
-        duration="1000ms"
-        delay="0s"
-        direction={dir}
-        timing="ease"
-        iteration="1"
-        fillMode="none"
-        style={{ height: "200px", flex: 1, "padding-top": "100px" }}
-      >
-        <h1 style={{ "padding-right": "20px" }}>
-          {props.ticker}
-          <br />
-          {symbol}
-        </h1>
-      </MovingComponent>
-    </div>
-  );
-};
+import upChart from "./Images/up_chart_v1.json";
+import downChart from "./Images/down_chart_v1.json";
+import hat_ph from "./Images/pred_ph_hat.json";
 
 export default function Prediction(props) {
   const [isLoading, setIsLoading] = useState(true);
-  const pred_here = () => {
-    setIsLoading(false);
+
+  const pred_here = () => setIsLoading(false);
+
+  const Loading = (props) => {
+    const loading_lottie_opts = {
+      loop: true,
+      autoplay: true,
+      speed: props.speed,
+      animationData: hat_ph,
+      rendererSettings: {
+        preserveAspectRatio: "xMidYMid slice",
+      },
+    };
+    return (
+      <Lottie
+        options={loading_lottie_opts}
+        height={props.height}
+        width={props.widthå}
+      />
+    );
+  };
+
+  const Pred = (props) => {
+    const animationsForChaining = ["fadeInFromBottom", "bounce"];
+    const [animationIndex, setAnimationIndex] = useState(0);
+    const [animationType, setAnimationType] = useState(
+      animationsForChaining[0]
+    );
+    const handleChainAnimation = () => {
+      setAnimationIndex(animationIndex + 1);
+      setAnimationType(animationsForChaining[animationIndex + 1]);
+    };
+
+    const symbol_lottie_opts = {
+      loop: false,
+      autoplay: true,
+      speed: props.speed,
+      animationData: props.dir === "up" ? upChart : downChart,
+      rendererSettings: {
+        preserveAspectRatio: "xMidYMid slice",
+      },
+    };
+    return (
+      <div
+        style={{ fontWeight: "bolder", marginBottom: 0, textAlign: "center" }}
+      >
+        <MovingComponent
+          onAnimationEnd={handleChainAnimation}
+          type={animationType}
+          duration={animationType === "bounce" ? "1250ms" : "175ms"}
+          direction={
+            props.dir === "down" && animationType === "bounce"
+              ? "reverse"
+              : "normal"
+          }
+          timing="ease"
+          iteration="1"
+          fillmode="forward"
+        >
+          <Lottie options={symbol_lottie_opts} width={props.width} />
+          <p style={{ margin: 0 }}>{props.dir}</p>
+        </MovingComponent>
+      </div>
+    );
   };
 
   return (
     <div>
-      <div style={pred_css}>
+      <div>
         {isLoading ? (
-          <Loading />
+          <Loading height={"100%"} width={"100%"} speed={0.6} />
         ) : (
-          <Pred ticker={props.ticker} dir={props.dir} />
+          <Pred
+            ticker={props.ticker}
+            dir={props.dir}
+            speed={0.75}
+            width={"35%"}
+          />
         )}
       </div>
       <button onClick={pred_here}>pred</button>
