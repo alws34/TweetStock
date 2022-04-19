@@ -546,7 +546,7 @@ def Auto_Run_Model(model_params):
 
 
 def run_auto_test():
-    test_threshold = 0.0
+    test_threshold = 0.65
     tickers = ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT']
     feature_sets = [features, features2]
     actv_funcs_all = ['relu', 'tanh', 'sigmoid']
