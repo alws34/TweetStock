@@ -344,14 +344,33 @@ def get_prediction_dummy():
         eng_filteredT_sent_tweets, threshold=MIN_USER_FOLLOWERS)
     print("after user filtering:", len(filteredU_eng_filteredT_sent_tweets))
 
+    for tweet in filteredU_eng_filteredT_sent_tweets:
+        result['tweets'].append({
+            'tweet_id': tweet['tweet_id'],
+            'user_engagement': tweet['u_engagament'],
+            'sentiment': {
+                's_pos':tweet['s_pos'],
+                's_neg':tweet['s_neg'],
+                's_neu':tweet['s_neu']
+              }
+        })
+
+
     # 6.0 Transform from dictionary to df for easier data handling
     df = dict_to_df(filteredU_eng_filteredT_sent_tweets)
     print(len(df))
-    for tweet_id in df['tweet_id']:
-        result['tweet_id'].append(tweet_id)
+    
+    
+    # for tweet_id,user_eng in zip(df['tweet_id'],df['u_engagement']):
+    #     result['tweets'].append({
+    #         'tweet_id': tweet_id,
+    #         'user_engagement': user_eng
+    #     })
         # filename="debug_pre_prepped_df"
         # path = Path("/home/pi/FinalProject/FlaskServer/Data/Debug/"+filename+".csv")
         # df.to_csv(path)
+    
+    
     # Step 6.1
     preped = prep_data(filteredU_eng_filteredT_sent_tweets)
     print('prepped', preped)
@@ -366,7 +385,7 @@ def get_prediction():
     args = request.args.to_dict()
     ticker = args['ticker']
     result = {
-        'tweet_id': [],
+        'tweets': [],
         'prediction': 0
     }
 
@@ -390,10 +409,21 @@ def get_prediction():
     filteredU_eng_filteredT_sent_tweets = filter_users(
         eng_filteredT_sent_tweets, threshold=MIN_USER_FOLLOWERS)
 
+    for tweet in filteredU_eng_filteredT_sent_tweets:
+        result['tweets'].append({
+            'tweet_id': tweet['tweet_id'],
+            'user_engagement': tweet['u_engagament']
+        })
+
     # Step 6.0 Transform from dictionary to df for easier data handling
     df = dict_to_df(filteredU_eng_filteredT_sent_tweets)
-    for tweet_id in df['tweet_id']:
-        result['tweet_id'].append(tweet_id)
+
+    # for tweet_id,user_eng in zip(df['tweet_id'],df['u_engagement']):
+    #     result['tweets'].append({
+    #         'tweet_id': tweet_id,
+    #         'user_engagement': user_eng
+    #     })
+
     # Step 6.1
     preped = prep_data(df)
     print('prepped', preped)
