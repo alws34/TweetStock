@@ -537,8 +537,11 @@ def Auto_Run_Model(model_params):
     test_label = tf.convert_to_tensor(
         to_categorical(test_label), dtype=tf.float32)
 
-    history = network.fit(train_seq, train_label, epochs=model_params['epochs'], batch_size=model_params['batch_size'], validation_data=(
-        validation_seq, validation_label))
+    try:
+        history = network.fit(train_seq, train_label, epochs=model_params['epochs'], batch_size=model_params['batch_size'], validation_data=(
+            validation_seq, validation_label))
+    except Exception as err:
+        return None, None, None
 
     test_loss, test_acc = network.evaluate(test_seq, test_label)
     clear_console(f'Acc = {test_acc}')
@@ -582,12 +585,12 @@ def run_auto_test():
                                             'batch_size': 8
                                         }
 
-                                    model, test_Acc, history = Auto_Run_Model(
-                                        prms)
-                                    if float(test_Acc) > test_threshold:
-                                        save_model(model, 'ticker_'+ticker+'_opt_'+optimizer+'_acc_'+str(
-                                            round(test_Acc, 3)) + '_TweetStock_model_#'+str(n_model), prms, history)
-                                        n_model += 1
+                                    model, test_Acc, history = Auto_Run_Model(prms)
+                                    if test_Acc != None:                                
+                                        if float(test_Acc) > test_threshold:
+                                            save_model(model, 'ticker_'+ticker+'_opt_'+optimizer+'_acc_'+str(
+                                                round(test_Acc, 3)) + '_TweetStock_model_#'+str(n_model), prms, history)
+                                            n_model += 1
 
 
 '''
