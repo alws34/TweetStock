@@ -16,11 +16,11 @@ import { useState } from "react";
 import { apiUrlUsers } from "../Configs/apiUrlsKeys";
 import { getRememberMe, saveUserLocalStorage } from "../Configs/getLoggedUser";
 import { navPaths } from "../Configs/navPaths";
-import CountrySelect from "../CountrySelect";
+import CountrySelect from "../Functional Components/CountrySelect";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import Camera from "../Camera";
+import Camera from "../Functional Components/Camera";
 
 const MySwal = withReactContent(Swal);
 

@@ -30,6 +30,8 @@
     "react-firebase-chat-api": "^0.0.36",
     "react-firebase-hooks": "^5.0.2",
     "react-js-pull-to-refresh": "^1.2.3",
+    "react-lottie": "^1.2.3",
+    "react-moving-text": "^0.0.7",
     "react-plotly.js": "^2.5.1",
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",

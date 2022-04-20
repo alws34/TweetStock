@@ -27,11 +27,11 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { getLoggedUser } from "./Configs/getLoggedUser";
+import { getLoggedUser } from "../Configs/getLoggedUser";
 // import { useStateWithCallbackLazy } from "use-state-with-callback";
-import { rapidApiKey } from "./Configs/apiUrlsKeys";
-import "./Styles/NavBarStyle.css";
-import { navPaths } from "./Configs/navPaths";
+import { rapidApiKey } from "../Configs/apiUrlsKeys";
+import "../Styles/NavBarStyle.css";
+import { navPaths } from "../Configs/navPaths";
 
 const MySwal = withReactContent(Swal);
 

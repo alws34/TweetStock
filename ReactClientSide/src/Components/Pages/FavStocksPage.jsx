@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import FavCard from "../FavCard";
-import EHeader from "../EHeader";
+import FavCard from "../Functional Components/FavCard";
+import EHeader from "../Functional Components/EHeader";
 // import { Container, Row, Col } from 'react-bootstrap';
 import "../Styles/FavCardsStyle.css";
 import { apiUrlFavorites, rapidApiKey } from "../Configs/apiUrlsKeys";
 import { getLoggedUser } from "../Configs/getLoggedUser";
-import LoadingCirle from "../LoadingCircle";
+import LoadingCirle from "../Functional Components/LoadingCircle";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);

@@ -2,7 +2,7 @@ import { React, useEffect, useState, useMemo } from "react";
 import Chart from "react-apexcharts";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { navPaths } from "./Configs/navPaths";
+import { navPaths } from "../Configs/navPaths";
 
 const round = (number) => {
   return number ? +number.toFixed(2) : null;

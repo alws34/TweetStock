@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Lottie from "react-lottie";
 import MovingComponent from "react-moving-text";
-import upChart from "./Images/up_chart_v1.json";
-import downChart from "./Images/down_chart_v1.json";
-import hat_ph from "./Images/pred_ph_hat.json";
+import upChart from "../Images/up_chart_v1.json";
+import downChart from "../Images/down_chart_v1.json";
+import hat_ph from "../Images/pred_ph_hat.json";
 
 export default function Prediction(props) {
-  const [isLoading, setIsLoading] = useState(true);
+  //const [isLoading, setIsLoading] = useState(props.dir === null ? true : false);
 
-  const pred_here = () => setIsLoading(false);
+  //const pred_here = () => setIsLoading(false);
 
   const Loading = (props) => {
     const loading_lottie_opts = {
@@ -24,7 +24,7 @@ export default function Prediction(props) {
       <Lottie
         options={loading_lottie_opts}
         height={props.height}
-        width={props.widthå}
+        width={props.width}
       />
     );
   };
@@ -73,10 +73,12 @@ export default function Prediction(props) {
     );
   };
 
+  //useEffect(setIsLoading(props.dir === null ? true : false), []);
+
   return (
-    <div>
+    <div style={{ height: props.size, width: props.size }}>
       <div>
-        {isLoading ? (
+        {props.isLoading ? (
           <Loading height={"100%"} width={"100%"} speed={0.6} />
         ) : (
           <Pred
@@ -87,7 +89,7 @@ export default function Prediction(props) {
           />
         )}
       </div>
-      <button onClick={pred_here}>pred</button>
+      {/* <button onClick={pred_here}>pred</button> */}
     </div>
   );
 }

@@ -19,10 +19,10 @@ import {
   saveUserLocalStorage,
 } from "../Configs/getLoggedUser";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Camera from "../Camera";
+import Camera from "../Functional Components/Camera";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import CountrySelect from "../CountrySelect";
+import CountrySelect from "../Functional Components/CountrySelect";
 
 const MySwal = withReactContent(Swal);
 

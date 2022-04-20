@@ -3,7 +3,7 @@ import Webcam from "react-webcam";
 import { Button } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import { styled } from "@mui/material/styles";
-import "./Styles/Camera.css";
+import "../Styles/Camera.css";
 export default function Camera(props) {
   const img = props.img;
   const webRef = useRef(null);

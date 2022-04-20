@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useStateWithCallbackLazy } from "use-state-with-callback";
-import { TwitterTweetEmbed } from "react-twitter-embed";
 import { useLocation, useNavigate } from "react-router-dom";
-import { apiUrlTwitter } from "../Configs/apiUrlsKeys";
-import LoadingCircle from "../LoadingCircle";
-import Eheader from "../EHeader";
+import { apiUrlTwitter, apiUrlFlask } from "../Configs/apiUrlsKeys";
+import LoadingCircle from "../Functional Components/LoadingCircle";
+import Eheader from "../Functional Components/EHeader";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import Prediction from "../Functional Components/Prediction";
+import Tweet from "../Functional Components/Tweet";
 
 export default function PopularTweets(props) {
   const MySwal = withReactContent(Swal);
@@ -21,7 +22,11 @@ export default function PopularTweets(props) {
     console.log(e);
   }
   useEffect(() => {
-    // if (ticker) {
+    fetchTwitterPopularTweets(ticker);
+    //fetchFlaskStockPrediction(ticker);
+  }, []);
+
+  const fetchTwitterPopularTweets = (ticker) => {
     fetch(apiUrlTwitter + `/?ticker=${ticker}`, {
       method: "GET",
       headers: new Headers({
@@ -48,10 +53,12 @@ export default function PopularTweets(props) {
             });
           } else {
             console.log("before ", tweets);
-            let rendered_tweets = tweets.map((tweet) =>
-              renderTweet(tweet.id_str)
-            );
+            let rendered_tweets = tweets.map((tweet) => (
+              <Tweet tweetId={tweet.id_str} />
+            ));
             console.log("after ", rendered_tweets);
+
+            tweets.forEach((tweet) => console.log(tweet.id_str));
             setTweetsArr(rendered_tweets, () => setIsLoading(false));
           }
         },
@@ -59,28 +66,6 @@ export default function PopularTweets(props) {
           console.log("err=", error);
         }
       );
-    // }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const renderTweet = (tweetId) => {
-    return (
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <div style={{ width: 380 }}>
-          <TwitterTweetEmbed
-            key={tweetId}
-            onLoad={function noRefCheck() {}}
-            options={{
-              width: 380,
-              hideCard: false,
-              hideThread: false,
-            }}
-            placeholder={<LoadingCircle />}
-            tweetId={tweetId}
-          />
-        </div>
-      </div>
-    );
   };
 
   return (

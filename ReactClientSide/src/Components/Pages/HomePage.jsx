@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import Stock from "../Stock";
-import EHeader from "../EHeader";
+import Stock from "../Functional Components/Stock";
+import EHeader from "../Functional Components/EHeader";
 import { rapidApiKey } from "../Configs/apiUrlsKeys";
-import LoadingCircle from "../LoadingCircle";
+import LoadingCircle from "../Functional Components/LoadingCircle";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 

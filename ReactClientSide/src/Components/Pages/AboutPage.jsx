@@ -3,14 +3,20 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Button, Checkbox } from "@mui/material";
 import { Row, Col } from "react-bootstrap";
 import { FavoriteBorder, Favorite } from "@mui/icons-material";
-import { apiUrlFavorites, rapidApiKey } from "../Configs/apiUrlsKeys";
+import {
+  apiUrlFavorites,
+  rapidApiKey,
+  apiUrlFlask,
+} from "../Configs/apiUrlsKeys";
 import { navPaths } from "../Configs/navPaths";
 import { getLoggedUser } from "../Configs/getLoggedUser";
-import Stock from "../Stock";
-import StockAbout from "../StockAbout";
-import StockChat from "../StockChat";
-import Eheader from "../EHeader";
-import LoadingCircle from "../LoadingCircle";
+import Stock from "../Functional Components/Stock";
+import StockAbout from "../Functional Components/StockAbout";
+import StockChat from "../Functional Components/StockChat";
+import Eheader from "../Functional Components/EHeader";
+import Prediction from "../Functional Components/Prediction";
+import Tweet from "../Functional Components/Tweet";
+import LoadingCircle from "../Functional Components/LoadingCircle";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
@@ -22,6 +28,8 @@ export default function About() {
 
   const [favChecked, setFavChecked] = useState(false);
   const [stockData, setStockData] = useState(null);
+  //const [isPredHere, setIsPredHere] = useState(false);
+  const [flaskResponse, setFlaskResponse] = useState(null);
   const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
   const user = getLoggedUser();
@@ -32,6 +40,19 @@ export default function About() {
     favId: 0,
     userId: user.Id,
     ticker: ticker,
+  };
+
+  const fetchFlaskStockPrediction = (ticker) => {
+    // GET
+    fetch(apiUrlFlask + `/getPrediction?ticker=${ticker}`)
+      .then((res) => {
+        console.log("Flask!", res);
+        return res.json();
+      })
+      .then((res) => {
+        console.log("Flask!", res);
+        setFlaskResponse(res);
+      });
   };
 
   const getStockDetails = () => {
@@ -193,6 +214,42 @@ export default function About() {
           </Col>
         </Row>
         {isLoggedIn && renderLoggedUserFields()}
+        {predictionWithTweets()}
+      </div>
+    );
+  };
+
+  const predictionWithTweets = () => {
+    return (
+      <div>
+        <Prediction
+          isLoading={flaskResponse === null}
+          size={"200px"}
+          ticker={ticker}
+          dir={
+            flaskResponse && flaskResponse["prediction"] == 1 ? "up" : "down"
+          }
+        ></Prediction>
+
+        {flaskResponse &&
+          flaskResponse["tweets"].map((tweet) => (
+            <Tweet tweetId={tweet["tweet_id"]} />
+          ))}
+
+        <button
+          onClick={() =>
+            setFlaskResponse({
+              prediction: 1,
+              tweets: [
+                { tweet_id: "1516555826986508291" },
+                { tweet_id: "1516413583122472967" },
+                { tweet_id: "1516612115116789764" },
+              ],
+            })
+          }
+        >
+          Predict
+        </button>
       </div>
     );
   };
@@ -294,6 +351,7 @@ export default function About() {
     if (isLoggedIn) {
       IsFavStock();
     }
+    //fetchFlaskStockPrediction(ticker);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticker, data]);
 

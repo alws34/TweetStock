@@ -2,9 +2,9 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { Chat, ChatMessage } from "@progress/kendo-react-conversational-ui";
 import "@progress/kendo-theme-default/dist/all.css";
-import { RealTimeDB } from "./Configs/FirebaseConfig";
+import { RealTimeDB } from "../Configs/FirebaseConfig";
 import { ref, onValue, push } from "firebase/database";
-import { getLoggedUser } from "./Configs/getLoggedUser";
+import { getLoggedUser } from "../Configs/getLoggedUser";
 import Eheader from "./EHeader";
 
 const bot = {

@@ -1,6 +1,6 @@
 import "./App.css";
 import React, { useEffect } from "react";
-import PrimarySearchAppBar from "./Components/PrimarySearchAppBar";
+import PrimarySearchAppBar from "./Components/Functional Components/PrimarySearchAppBar";
 import HomePage from "./Components/Pages/HomePage";
 import About from "./Components/Pages/AboutPage";
 import SignUp from "./Components/Pages/SignUpPage";
@@ -12,31 +12,14 @@ import { Routes, Route } from "react-router-dom";
 import { getRememberMe } from "./Components/Configs/getLoggedUser";
 import ProfilePage from "./Components/Pages/ProfilePage";
 import { navPaths } from "./Components/Configs/navPaths";
-import { apiUrlFlask } from "./Components/Configs/apiUrlsKeys";
 
 function App() {
   useEffect(() => {
-    flaskCommunication();
     window.addEventListener("beforeunload", handleTabClosing);
     return () => {
       window.removeEventListener("beforeunload", handleTabClosing);
     };
   });
-
-  const flaskCommunication = () => {
-    let test = {
-      a: 1,
-      b: 2,
-    };
-    // GET
-    let ticker = "TSLA";
-    fetch(apiUrlFlask + `/getPrediction?ticker=${ticker}`)
-      .then((res) => {
-        console.log("Flask1!", res);
-        return res.json();
-      })
-      .then((res) => console.log("Flask!", res));
-  };
 
   const handleTabClosing = (event) => {
     event.preventDefault();

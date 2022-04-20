@@ -9,7 +9,7 @@ import {
   CardContent,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { navPaths } from "./Configs/navPaths";
+import { navPaths } from "../Configs/navPaths";
 
 export default function FavCard(props) {
   const navigate = useNavigate();
