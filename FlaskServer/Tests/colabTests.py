@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-# from matplotlib import inline
+#from matplotlib import inline
 import datetime as dt
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -13,8 +13,6 @@ from keras import models, layers
 from keras.datasets import mnist
 from tensorflow.keras.utils import to_categorical
 import csv
-import os
-import sys
 
 # Change Paths Here
 # availables: 'alon' , 'guy', 'hadar'
@@ -28,17 +26,10 @@ paths = {
             'Model_file_path': ''
             },
     'alon': {
-        'users_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\Self Collected\\",
-        'stocks_2019_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\StockMarketData\\",
-        'tweets_2019_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\TweetsAboutTopCompanies\\",
-        'from_the_web': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\\",
-        'Model_file_path': ''
-    },
-    'pi': {  # DOWNLOAD!!!! THE FILES DO NOT COPY AND PASTE THEM
-        'users_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\Self Collected\\",
-        'stocks_2019_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\StockMarketData\\",
-        'tweets_2019_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\TweetsAboutTopCompanies\\",
-        'from_the_web': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\\",
+        'users_path': "FlaskServer/Data/CSVs/From_The_Web/StockMarketData/",
+        'stocks_2019_path': "FlaskServer/Data/CSVs/From_The_Web/StockMarketData/",
+        'tweets_2019_path': "FlaskServer/Data/CSVs/From_The_Web/StockMarketData/",
+        'from_the_web': "FlaskServer/Data/CSVs/From_The_Web/StockMarketData/",
         'Model_file_path': ''
     },
     'hadar': {'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',
@@ -47,7 +38,6 @@ paths = {
               'from_the_web': "/content/drive/MyDrive/Final Project/Data/From the Web",
               'Model_file_path': ''
               }
-
 }
 
 
@@ -55,8 +45,9 @@ paths = {
 
 
 def clear_console(msg=''):
-    os.system('cls')
-    print(msg, 'Done at:', datetime.now().strftime('%d-%m-%Y at %H:%M:%S'))
+    # output.clear()
+    print(msg, 'Done at:', (datetime.now() +
+          timedelta(hours=2)).strftime('%d-%m-%Y at %H:%M:%S'))
 
 
 # During implementation - works with v1 but NOT with v2
@@ -115,7 +106,7 @@ def get_price_diff(stocks_df):
 
         price_diff = float(temp_stocks['Close'][i]) - \
             float(temp_stocks['Open'][i])
-        # temp_stocks['price_difference'][i] = price_diff
+        #temp_stocks['price_difference'][i] = price_diff
         temp_stocks['price_difference'][i] = 1 if price_diff >= 0 else 0
         # if (price_diff>=0): temp_stocks['price_difference'][i] = 1
         # else: temp_stocks['price_difference'][i] = 0
@@ -138,7 +129,7 @@ def init_users(users_df):
     def filter_users(df, follower_threshold):
         """
         -- 1. remove broken/bad eng score (user blocked public metrics)
-        -- 2. removes users with less than follower_threshold
+        -- 2. removes users with less than follower_threshold 
         """
         to_remove = []
         print("len before = " + str(len(df)))
@@ -162,7 +153,7 @@ def init_users(users_df):
     # IMPLEMENT
 
     def get_eng_score(users_df, include_followers=True, include_replies=True):
-        ''' gets users df and returns the df with the engagement score calculated.
+        ''' gets users df and returns the df with the engagement score calculated. 
             df should have the following columns:  '''
         df = users_df
         for i in range(len(df)):
@@ -234,7 +225,7 @@ def sort_dates(dates_series, date_format):
     sorted_dates = [datetime.strftime(date, date_format) for date in dates]
     return sorted_dates
 
-# not finished
+#not finished
 # def sort_df_by_dates(df, date_format):
 #     sorted_dates = sort_dates(
 #         dates_series=merged_df['Date'], date_format=date_format)
@@ -403,8 +394,6 @@ model_params = {
 
 
 def save_graph(history, path, name):
-
-    plt.clf()
     acc = history.history['accuracy']
     val_acc = history.history['val_accuracy']
     loss = history.history['loss']
@@ -414,11 +403,11 @@ def save_graph(history, path, name):
 
     plt.plot(epochs, acc, 'r', label='Training acc')
     plt.plot(epochs, val_acc, 'b', label='Validation acc')
-    plt.title(f'Training and validation accuracy')
+    plt.title('Training and validation accuracy')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig(path + name+'_graph.png')
+    plt.savefig(path + name + '_graph.png')
 
 
 def scale_data(df, target='price_difference', scaling='min_max'):
@@ -490,11 +479,11 @@ def Auto_Run_Model(model_params):
     scaled_dnn_df = scale_data(dnn_df)
     scaled_dnn_df = scaled_dnn_df.drop(columns=['Date'])
 
-    # train_data,validation_data,test_data = split_data(dnn_df,version=1)
+    #train_data,validation_data,test_data = split_data(dnn_df,version=1)
     train_data, validation_data, test_data = split_data(
         scaled_dnn_df, version=2)
 
-    # train_data.shape, test_data.shape
+    #train_data.shape, test_data.shape
 
     n_past = model_params['n_past']
     target = 'price_difference'
@@ -510,7 +499,7 @@ def Auto_Run_Model(model_params):
     actv_func = model_params['activation_all']
 
     network = models.Sequential()
-    # network.add(layers.Dense(128, activation=actv_func, input_shape=(train_seq.shape[2] * train_seq.shape[1],)))
+    #network.add(layers.Dense(128, activation=actv_func, input_shape=(train_seq.shape[2] * train_seq.shape[1],)))
     for units in model_params['layers']:
         network.add(layers.Dense(units, activation=actv_func, input_shape=(
             train_seq.shape[2] * train_seq.shape[1],)))
@@ -523,20 +512,16 @@ def Auto_Run_Model(model_params):
     network.compile(optimizer=model_params['optimizer'],
                     loss=model_params['loss_func'], metrics=['accuracy'])
 
-    # scaler = MinMaxScaler()
+    #scaler = MinMaxScaler()
     train_seq = train_seq.reshape(
         (len(train_seq), train_seq.shape[2] * train_seq.shape[1]))
-    # train_seq = scaler.fit_transform(train_seq)
+    #train_seq = scaler.fit_transform(train_seq)
     validation_seq = validation_seq.reshape(
         (len(validation_seq), validation_seq.shape[2] * validation_seq.shape[1]))
-    # validation_seq = scaler.fit_transform(validation_seq)
+    #validation_seq = scaler.fit_transform(validation_seq)
     test_seq = test_seq.reshape(
         (len(test_seq), test_seq.shape[2] * test_seq.shape[1]))
-    # test_seq = scaler.fit_transform(test_seq)
-
-    train_seq = tf.convert_to_tensor(train_seq, dtype=tf.float32)
-    validation_seq = tf.convert_to_tensor(validation_seq, dtype=tf.float32)
-    test_seq = tf.convert_to_tensor(test_seq, dtype=tf.float32)
+    #test_seq = scaler.fit_transform(test_seq)
 
     train_label = tf.convert_to_tensor(
         to_categorical(train_label), dtype=tf.float32)
@@ -545,27 +530,23 @@ def Auto_Run_Model(model_params):
     test_label = tf.convert_to_tensor(
         to_categorical(test_label), dtype=tf.float32)
 
-    try:
-        history = network.fit(train_seq, train_label, epochs=model_params['epochs'], batch_size=model_params['batch_size'], validation_data=(
-            validation_seq, validation_label))
-    except Exception:
-        return None, None, None
-
+    history = network.fit(train_seq, train_label, epochs=model_params['epochs'], batch_size=model_params['batch_size'], validation_data=(
+        validation_seq, validation_label))
     test_loss, test_acc = network.evaluate(test_seq, test_label)
-    clear_console(f'Acc = {test_acc}')
+    clear_console()
     return network, round(test_acc, 7), history
 
 
 def run_auto_test():
-    test_threshold = threshold
+    test_threshold = 0.6
     tickers = ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT']
     feature_sets = [features, features2]
     actv_funcs_all = ['relu', 'tanh', 'sigmoid']
-    actv_funcs_last = ['softmax', 'sigmoid']  # ,'relu'
+    actv_funcs_last = ['softmax', 'sigmoid']  # ,'relu']
     loss_funcs = ['binary_crossentropy', 'mean_squared_error']
-    optimizers = ['rmsprop', 'adam']
-    n_pasts = [1, 2, 3]
-    n_epochs = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    optimizers = ['adam', 'rmsprop']
+    n_pasts = [1, 2, 3, 4]
+    n_epochs = [5, 6, 7, 8, 9, 10, 11]
     layers = [[32], [32, 16], [16, 16], [32, 16, 8], [16, 8, 4], [8, 8]]
 
     n_model = 1
@@ -592,14 +573,13 @@ def run_auto_test():
                                             'epochs': n_epoch,
                                             'batch_size': 8
                                         }
-                                        model, test_Acc, history = Auto_Run_Model(
-                                            prms)
-                                        if test_Acc != None:
-                                            if float(test_Acc) > test_threshold:
-                                                model_name = f"{ticker}_acc_{round(test_Acc, 3)}_npast_{n_past}_epoch_{n_epoch}_opt_{optimizer}_num_{n_model}"
-                                                save_model(
-                                                    model, model_name, prms, history)
-                                                n_model += 1
+
+                                    model, test_Acc, history = Auto_Run_Model(
+                                        prms)
+                                    if float(test_Acc) > test_threshold:
+                                        (model, 'ticker_'+ticker+'_opt_'+optimizer+'_acc_'+str(
+                                            round(test_Acc, 3)) + '_TweetStock_model_#'+str(n_model), prms, history)
+                                        n_model += 1
 
 
 '''
@@ -607,23 +587,12 @@ after we finished training and testing the model- run this cell in order to save
 '''
 
 
-def savetimes(num, isstart):
-
-    if isstart:
-        mode = 'Started at: '
-    else:
-        mode = 'Ended at: '
-    now = datetime.now()
-    with open(f'D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Logs\\test{num}.txt', 'a+') as f:
-        f.write(f'TRY {num}\t{mode}{now}\n')
-
-
 def save_model(model, name, params, history):
+    # save model named 'model' if exists
+    old_path = '/content/drive/MyDrive/TweetStockNetworks/'
+    path = "FlaskServer/Data/Networks/1stTry/"
 
-    if not os.path.exists(path):
-        os.mkdir(path)
 
-    model.save(path + name + '.h5')
     save_graph(history, path, name)
 
     with open(path + name + '_params.csv', 'w') as f:
@@ -631,18 +600,10 @@ def save_model(model, name, params, history):
             f.write("%s,%s\n" % (key, params[key]))
 
 
-threshold = 0.55
-try_num = 2
-path = f"D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\{try_num}\\"
-
-
 def main():
     global merged_df
-    savetimes(try_num, True)
     merged_df = init_data(scale_and_multiply=False)
     run_auto_test()
-    savetimes(int(try_num), False)
 
 
-if __name__ == '__main__':
-    main()
+main()

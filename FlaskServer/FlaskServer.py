@@ -1,3 +1,4 @@
+
 import pandas as pd
 import numpy as np
 import datetime
@@ -25,12 +26,12 @@ from pathlib import Path
 # ----------------------------------------------------------------------------------------------- #
 # get the 'tweetstock_model.h5' file path here.
 MODEL_PATH = Path(
-    '/home/pi/FinalProject/FlaskServer/Data/Networks/acc_0.724_TweetStock_model_#2187.h5')
+    '/home/pi/FinalProject/FlaskServer/Data/Networks/1/ticker_AMZN_opt_rmsprop_acc_0.653_TweetStock_model_#18.h5')
 SERVER_PORT = 5000  # port which the server will run on.
 TWITTER_VERSION = 2  # twitter version.
 N_PAST = 1  # days on which the model was train to precict based on.
 MAX_TWEETS_RESULTS = 100  # max results for first tweets query.
-MIN_TWEET_STATS_SUM = 0   # default = 25
+MIN_TWEET_STATS_SUM = 25   # default = 25
 MIN_USER_FOLLOWERS = 100  # min user followers num to be included
 # ----------------------------------------------------------------------------------------------- #
 app = Flask(__name__)
@@ -192,6 +193,7 @@ def get_tweets(ticker, max_results=10, n_past=N_PAST, twitter_version=TWITTER_VE
                         'u_description': u_data['description'],
                         'u_n_followers': u_data['public_metrics']['followers_count']
                     })
+
             else:
                 #raise Exception(f"Couldn't Get Tweets!\nCode Returned from twitter:{temp_tweets.status_code}")
                 return None
@@ -283,7 +285,7 @@ def filter_users(tweets, threshold=MIN_USER_FOLLOWERS):
 def prep_data(df):
     print("Prepping model data")
     # 1 Select features
-    features = ['tweet_id', 'n_replies', 'n_retweets', 'n_likes',
+    features = ['n_replies', 'n_retweets', 'n_likes',
                 's_pos', 's_neg', 's_neu', 'u_engagement']
     df = df[features]
 
@@ -314,119 +316,140 @@ def get_pred(prepped_data):
 # debug
 
 
-def get_prediction_dummy():
+"""
+DUMMY
+"""
+
+
+# def get_prediction_dummy():
+#     result = {
+#         'tweet_id': [],
+#         'prediction': 0
+#     }
+
+#     ticker = "MSFT"
+#     # Step 1
+#     tweets = get_tweets('TSLA', max_results=MAX_TWEETS_RESULTS,
+#                         n_past=N_PAST, twitter_version=TWITTER_VERSION)
+#     if tweets == None:
+#         print("Couldnt get tweets @get_tweets")
+#         return
+#     # Step 2
+#     sent_tweets = get_sentiment(tweets)
+
+#     # Step 3
+#     print("before tweet filtering:", len(sent_tweets))
+#     filteredT_sent_tweets = filter_tweets(sent_tweets)  # , threshold=0)
+#     print("after tweet filtering:", len(filteredT_sent_tweets))
+
+#     # Step 4
+#     eng_filteredT_sent_tweets = get_users_engagement(filteredT_sent_tweets)
+
+#     # Step 5
+#     print("before user filtering:", len(eng_filteredT_sent_tweets))
+#     filteredU_eng_filteredT_sent_tweets = filter_users(
+#         eng_filteredT_sent_tweets, threshold=MIN_USER_FOLLOWERS)
+#     print("after user filtering:", len(filteredU_eng_filteredT_sent_tweets))
+
+#     for tweet in filteredU_eng_filteredT_sent_tweets:
+#         result['tweets'].append({
+#             'tweet_id': tweet['tweet_id'],
+#             'user_engagement': tweet['u_engagement'],
+#             'tweet_stats': {
+#                 'likes': tweet['n_likes'],
+#                 'replies': tweet['n_replies'],
+#                 'retweets': tweet['n_retweets'],
+#                 'sentiment': {
+#                     'pos': tweet['s_pos'],
+#                     'neg': tweet['s_neg'],
+#                     'neu': tweet['s_neu']
+#                 }
+#             },
+#         })
+
+#     # 6.0 Transform from dictionary to df for easier data handling
+#     df = dict_to_df(filteredU_eng_filteredT_sent_tweets)
+#     print(len(df))
+
+#     # for tweet_id,user_eng in zip(df['tweet_id'],df['u_engagement']):
+#     #     result['tweets'].append({
+#     #         'tweet_id': tweet_id,
+#     #         'user_engagement': user_eng
+#     #     })
+#     # filename="debug_pre_prepped_df"
+#     # path = Path("/home/pi/FinalProject/FlaskServer/Data/Debug/"+filename+".csv")
+#     # df.to_csv(path)
+
+#     # Step 6.1
+#     preped = prep_data(filteredU_eng_filteredT_sent_tweets)
+#     print('prepped', preped)
+
+#     result['prediction'] = get_pred(preped)
+
+#     return jsonify(result)
+
+
+"""
+END DUMMY
+"""
+
+
+def generate_result_json(data, prediction):
     result = {
-        'tweet_id': [],
+        'tweets': [],
         'prediction': 0
     }
-
-    ticker = "MSFT"
-    # Step 1
-    tweets = get_tweets('TSLA', max_results=MAX_TWEETS_RESULTS,
-                        n_past=N_PAST, twitter_version=TWITTER_VERSION)
-    if tweets == None:
-        print("Couldnt get tweets @get_tweets")
-        return
-    # Step 2
-    sent_tweets = get_sentiment(tweets)
-
-    # Step 3
-    print("before tweet filtering:", len(sent_tweets))
-    filteredT_sent_tweets = filter_tweets(sent_tweets, threshold=0)
-    print("after tweet filtering:", len(filteredT_sent_tweets))
-
-    # Step 4
-    eng_filteredT_sent_tweets = get_users_engagement(filteredT_sent_tweets)
-
-    # Step 5
-    print("before user filtering:", len(eng_filteredT_sent_tweets))
-    filteredU_eng_filteredT_sent_tweets = filter_users(
-        eng_filteredT_sent_tweets, threshold=MIN_USER_FOLLOWERS)
-    print("after user filtering:", len(filteredU_eng_filteredT_sent_tweets))
-
-    for tweet in filteredU_eng_filteredT_sent_tweets:
+    for tweet in data:
         result['tweets'].append({
             'tweet_id': tweet['tweet_id'],
-            'user_engagement': tweet['u_engagament'],
-            'sentiment': {
-                's_pos':tweet['s_pos'],
-                's_neg':tweet['s_neg'],
-                's_neu':tweet['s_neu']
-              }
+            'user_engagement': tweet['u_engagement'],
+            'tweet_stats': {
+                'likes': tweet['n_likes'],
+                'replies': tweet['n_replies'],
+                'retweets': tweet['n_retweets'],
+                'sentiment': {
+                    'pos': tweet['s_pos'],
+                    'neg': tweet['s_neg'],
+                    'neu': tweet['s_neu']
+                }
+            },
         })
-
-
-    # 6.0 Transform from dictionary to df for easier data handling
-    df = dict_to_df(filteredU_eng_filteredT_sent_tweets)
-    print(len(df))
-    
-    
-    # for tweet_id,user_eng in zip(df['tweet_id'],df['u_engagement']):
-    #     result['tweets'].append({
-    #         'tweet_id': tweet_id,
-    #         'user_engagement': user_eng
-    #     })
-        # filename="debug_pre_prepped_df"
-        # path = Path("/home/pi/FinalProject/FlaskServer/Data/Debug/"+filename+".csv")
-        # df.to_csv(path)
-    
-    
-    # Step 6.1
-    preped = prep_data(filteredU_eng_filteredT_sent_tweets)
-    print('prepped', preped)
-
-    result['prediction'] = get_pred(preped)
-
-    return jsonify(result)
+    result['prediction'] = prediction
+    return result
 
 
 @app.route('/getPrediction', methods=['GET'])  # GET
 def get_prediction():
     args = request.args.to_dict()
     ticker = args['ticker']
-    result = {
-        'tweets': [],
-        'prediction': 0
-    }
 
     # Step 1
-    tweets = get_tweets('TSLA', max_results=MAX_TWEETS_RESULTS,
+    tweets = get_tweets(ticker, max_results=MAX_TWEETS_RESULTS,
                         n_past=N_PAST, twitter_version=TWITTER_VERSION)
     if tweets == None:
         print("Couldnt get tweets @get_tweets")
         return
     # Step 2
-    sent_tweets = get_sentiment(tweets)
+    tweets = get_sentiment(tweets)
 
     # Step 3
-    filteredT_sent_tweets = filter_tweets(
-        sent_tweets, threshold=MIN_TWEET_STATS_SUM)
+    tweets = filter_tweets(
+        tweets, threshold=MIN_TWEET_STATS_SUM)
 
     # Step 4
-    eng_filteredT_sent_tweets = get_users_engagement(filteredT_sent_tweets)
+    tweets = get_users_engagement(tweets)
 
     # Step 5
-    filteredU_eng_filteredT_sent_tweets = filter_users(
-        eng_filteredT_sent_tweets, threshold=MIN_USER_FOLLOWERS)
-
-    for tweet in filteredU_eng_filteredT_sent_tweets:
-        result['tweets'].append({
-            'tweet_id': tweet['tweet_id'],
-            'user_engagement': tweet['u_engagament']
-        })
+    tweets = filter_users(tweets, threshold=MIN_USER_FOLLOWERS)
 
     # Step 6.0 Transform from dictionary to df for easier data handling
-    df = dict_to_df(filteredU_eng_filteredT_sent_tweets)
-
-    # for tweet_id,user_eng in zip(df['tweet_id'],df['u_engagement']):
-    #     result['tweets'].append({
-    #         'tweet_id': tweet_id,
-    #         'user_engagement': user_eng
-    #     })
+    df = dict_to_df(tweets)
 
     # Step 6.1
     preped = prep_data(df)
-    print('prepped', preped)
+    pred = get_pred(preped)
+    print('pred', pred)
+    result = generate_result_json(tweets, pred)
 
     result['prediction'] = get_pred(preped)
 
@@ -445,4 +468,4 @@ if __name__ == '__main__':
     # df = pd.read_csv("/home/pi/FinalProject/FlaskServer/Data/Debug/debug_pre_prepped_df.csv")
     # p = prep_data(df)
 
-    app.run(host='0.0.0.0', port=SERVER_PORT, debug=True)
+    app.run(host='0.0.0.0', port=SERVER_PORT, debug=True, use_reloader=False)

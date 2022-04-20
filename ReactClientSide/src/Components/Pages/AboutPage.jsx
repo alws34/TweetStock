@@ -44,6 +44,7 @@ export default function About() {
 
   const fetchFlaskStockPrediction = (ticker) => {
     // GET
+    console.log("FETCHING FROM FLASK", ticker);
     fetch(apiUrlFlask + `/getPrediction?ticker=${ticker}`)
       .then((res) => {
         console.log("Flask!", res);
@@ -232,9 +233,23 @@ export default function About() {
         ></Prediction>
 
         {flaskResponse &&
-          flaskResponse["tweets"].map((tweet) => (
-            <Tweet tweetId={tweet["tweet_id"]} />
-          ))}
+          flaskResponse["tweets"].map((tweet) => {
+            return (
+              <div>
+                <Tweet tweetId={tweet["tweet_id"]} />
+                <p>
+                  Likes {tweet["tweet_stats"]["likes"]}
+                  RTS {tweet["tweet_stats"]["retweets"]}
+                  Replies {tweet["tweet_stats"]["replies"]}
+                </p>
+                <p>
+                  Pos {tweet["sentiment"]["pos"]}
+                  Neu {tweet["sentiment"]["neu"]}
+                  Neg {tweet["sentiment"]["neg"]}
+                </p>
+              </div>
+            );
+          })}
 
         <button
           onClick={() =>
@@ -351,7 +366,7 @@ export default function About() {
     if (isLoggedIn) {
       IsFavStock();
     }
-    //fetchFlaskStockPrediction(ticker);
+    fetchFlaskStockPrediction(ticker);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticker, data]);
 
