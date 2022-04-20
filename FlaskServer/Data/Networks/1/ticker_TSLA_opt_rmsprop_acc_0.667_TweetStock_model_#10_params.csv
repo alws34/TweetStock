@@ -1,0 +1,12 @@
+layers,[8, 8]
+ticker,TSLA
+features,['Date', 'ticker_symbol', 'price_difference', 'Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes', 'Positivity', 'Negativity', 'Neutral', 'User_Engagement']
+activation_all,tanh
+activation_last,softmax
+num_of_layers,2
+loss_func,binary_crossentropy
+optimizer,rmsprop
+n_past,2
+output_dim,2
+epochs,10
+batch_size,8

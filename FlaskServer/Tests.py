@@ -540,7 +540,7 @@ def Auto_Run_Model(model_params):
     try:
         history = network.fit(train_seq, train_label, epochs=model_params['epochs'], batch_size=model_params['batch_size'], validation_data=(
             validation_seq, validation_label))
-    except Exception as err:
+    except Exception:
         return None, None, None
 
     test_loss, test_acc = network.evaluate(test_seq, test_label)
@@ -549,15 +549,15 @@ def Auto_Run_Model(model_params):
 
 
 def run_auto_test():
-    test_threshold = 0.65
+    test_threshold = threshold
     tickers = ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT']
     feature_sets = [features, features2]
     actv_funcs_all = ['relu', 'tanh', 'sigmoid']
-    actv_funcs_last = ['softmax', 'sigmoid']  # ,'relu']
+    actv_funcs_last = ['softmax', 'sigmoid']  # ,'relu'
     loss_funcs = ['binary_crossentropy', 'mean_squared_error']
-    optimizers = ['adam', 'rmsprop']
-    n_pasts = [1, 2, 3, 4]
-    n_epochs = [5, 6, 7, 8, 9, 10, 11]
+    optimizers = ['rmsprop', 'adam']
+    n_pasts = [1, 2, 3]
+    n_epochs = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     layers = [[32], [32, 16], [16, 16], [32, 16, 8], [16, 8, 4], [8, 8]]
 
     n_model = 1
@@ -584,13 +584,14 @@ def run_auto_test():
                                             'epochs': n_epoch,
                                             'batch_size': 8
                                         }
-
-                                    model, test_Acc, history = Auto_Run_Model(prms)
-                                    if test_Acc != None:                                
-                                        if float(test_Acc) > test_threshold:
-                                            save_model(model, 'ticker_'+ticker+'_opt_'+optimizer+'_acc_'+str(
-                                                round(test_Acc, 3)) + '_TweetStock_model_#'+str(n_model), prms, history)
-                                            n_model += 1
+                                        model, test_Acc, history = Auto_Run_Model(
+                                            prms)
+                                        if test_Acc != None:
+                                            if float(test_Acc) > test_threshold:
+                                                model_name = f"{ticker}_acc_{round(test_Acc, 3)}_npast_{n_past}_epoch_{n_epoch}_opt_{optimizer}_num_{n_model}"
+                                                save_model(
+                                                    model, model_name, prms, history)
+                                                n_model += 1
 
 
 '''
@@ -598,8 +599,21 @@ after we finished training and testing the model- run this cell in order to save
 '''
 
 
+def savetimes(num, isstart):
+
+    if isstart:
+        mode = 'Started at: '
+    else:
+        mode = 'Ended at: '
+    now = datetime.now()
+    with open(f'D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Logs\\test{num}.txt', 'a+') as f:
+        f.write(f'TRY {num}\t{mode}{now}\n')
+
+
 def save_model(model, name, params, history):
-    path = "D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\1\\"
+
+    if not os.path.exists(path):
+        os.mkdir(path)
 
     model.save(path + name + '.h5')
     save_graph(history, path, name)
@@ -609,10 +623,18 @@ def save_model(model, name, params, history):
             f.write("%s,%s\n" % (key, params[key]))
 
 
+threshold = 0.55
+try_num = 2
+path = f"D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\{try_num}\\"
+
+
 def main():
     global merged_df
+    savetimes(try_num, True)
     merged_df = init_data(scale_and_multiply=False)
     run_auto_test()
+    savetimes(int(try_num), False)
 
 
-main()
+if __name__ == '__main__':
+    main()
