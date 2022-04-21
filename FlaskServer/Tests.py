@@ -564,9 +564,9 @@ def run_auto_test():
     actv_funcs_last = ['softmax', 'sigmoid']  # ,'relu'
     loss_funcs = ['binary_crossentropy', 'mean_squared_error']
     optimizers = ['rmsprop', 'adam']
-    n_pasts = [1, 2, 3]
-    n_epochs = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-    layers = [[32], [32, 16], [16, 16], [32, 16, 8], [16, 8, 4], [8, 8]]
+    n_pasts = [1]  # , 2, 3]
+    n_epochs = [3, 4, 5, 6, 7]  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    layers = [[32], [32, 16], [16, 16], [16, 8], [16, 8, 4], [8, 8]]
 
     n_model = 1
     for ticker in tickers:
@@ -632,7 +632,7 @@ def save_model(model, name, params, history):
 
 
 threshold = 0.55
-try_num = 2
+try_num = 3
 path = f"D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\{try_num}\\"
 
 

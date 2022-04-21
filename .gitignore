@@ -337,3 +337,4 @@ desktop.ini
 download_tensorflow-2.8.0-cp39-none-linux_aarch64_numpy1221.sh
 FlaskServer/CONFIGS/commands.txt
 FlaskServer/Data/CSVs/From_The_Web
+FlaskServer/Data/Networks

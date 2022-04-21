@@ -25,9 +25,9 @@ from pathlib import Path
 
 # ----------------------------------------------------------------------------------------------- #
 # get the 'tweetstock_model.h5' file path here.
-MODEL_PATH = Path(
-    '/home/pi/FinalProject/FlaskServer/Data/Networks/1/ticker_AMZN_opt_rmsprop_acc_0.653_TweetStock_model_#18.h5')
-SERVER_PORT = 5000  # port which the server will run on.
+MODEL_PATH = Path(r'D:\GoogleDrive\Alon\לימודים\TweetStockApp\FlaskServer\Data\Networks\2\AMZN_acc_0.66_npast_3_epoch_2_opt_rmsprop_num_7775.h5')
+    #'/home/pi/FinalProject/FlaskServer/Data/Networks/1/ticker_AMZN_opt_rmsprop_acc_0.653_TweetStock_model_#18.h5')
+SERVER_PORT = 15938 #5000  # port which the server will run on.
 TWITTER_VERSION = 2  # twitter version.
 N_PAST = 1  # days on which the model was train to precict based on.
 MAX_TWEETS_RESULTS = 100  # max results for first tweets query.
