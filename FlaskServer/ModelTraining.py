@@ -196,9 +196,12 @@ def init_tweets(tweets_df):
     """
     print("----init_tweets----")
     print('len before', len(tweets_df))
+
     temp_tweets = tweets_df[tweets_df['comment_num'] +
                             tweets_df['retweet_num'] + tweets_df['like_num'] > 25]
     temp_tweets = temp_tweets[temp_tweets['Compound'] != 0]
+    temp_tweets = temp_tweets[temp_tweets['Neutral'] != 1]
+
     temp_tweets.reset_index(drop=True, inplace=True)
     print('len after', len(temp_tweets))
     print("\n\n")
@@ -416,7 +419,7 @@ def save_graph(history, path, name):
     plt.plot(epochs, val_acc, 'b', label='Validation acc')
     plt.title(f'Training and validation accuracy')
     plt.xlabel('Epochs')
-    plt.ylabel('Loss')
+    plt.ylabel('Acc')
     plt.legend()
     plt.savefig(path + name+'_graph.png')
 
