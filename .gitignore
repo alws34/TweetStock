@@ -335,6 +335,13 @@ ASALocalRun/
 desktop.ini
 .DS_Store
 download_tensorflow-2.8.0-cp39-none-linux_aarch64_numpy1221.sh
+/home/pi/FinalProject/download_tensorflow-2.8.0-cp39-none-linux_aarch64_numpy1221.sh
 FlaskServer/CONFIGS/commands.txt
 FlaskServer/Data/CSVs/From_The_Web
 FlaskServer/Data/Networks
+tensorflow-2.8.0-cp39-none-linux_aarch64.whl
+env/lib/python3.9/site-packages/grpc/_cython/cygrpc.cpython-39-aarch64-linux-gnu.so
+env/lib/python3.9/site-packages/tensorflow/lite/python/interpreter_wrapper/_pywrap_tensorflow_interpreter_wrapper.so
+env/lib/python3.9/site-packages/tensorflow/python/_pywrap_tensorflow_internal.so
+Tensorflow/*.whl
+env/*
