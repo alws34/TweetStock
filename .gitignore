@@ -345,3 +345,4 @@ env/lib/python3.9/site-packages/tensorflow/lite/python/interpreter_wrapper/_pywr
 env/lib/python3.9/site-packages/tensorflow/python/_pywrap_tensorflow_internal.so
 Tensorflow/*.whl
 env/*
+*.img
