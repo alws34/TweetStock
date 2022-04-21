@@ -568,7 +568,7 @@ def run_auto_test():
     loss_funcs = ['binary_crossentropy', 'mean_squared_error']
     optimizers = ['rmsprop', 'adam']
     n_pasts = [1]  # , 2, 3]
-    n_epochs = [3, 5, 7, 10, 15, 20]  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    n_epochs = [4, 7, 10, 15, 20]  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     layers = [[32], [32, 16], [16, 16], [16, 8], [16, 8, 4], [8, 8]]
 
     n_model = 1
