@@ -4,10 +4,14 @@
 # print(f"{m.get_prediction('TSLA')}")
 
 import pandas as pd
+import numpy as np
+test1 = range(1,21)
+test2=range(1,21)
 
-df = pd.DataFrame({'test': [1, 2, 3], 'test1': [0, 2, 3]})
-
-df = df[df['test'] != 1]
-df = df[df['test1'] != 3]
-
+testing_size = 5
+validation_size = 5
+df = pd.DataFrame({'test': test1, 'test1': test2})
 print(df)
+train, val, test = np.split(df.sample(frac=1, random_state=42), [int(len(df)-testing_size-validation_size), int(len(df)-testing_size)])
+print(len(train), len(val), len(test))
+print(train,'\n', val,'\n', test)
