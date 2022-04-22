@@ -2,7 +2,7 @@
 from flask import Flask, jsonify, request, Response
 from flask_restful import Api
 from flask_cors import CORS
-import TweetStockModel
+from TweetStockModel import TweetStockModel as tsm
 import time
 import os
 # ----------------------------------------------------------------------------------------------- #
@@ -30,14 +30,14 @@ def get_prediction():
     elif os.name == 'posix':
         delimiter = '/'
 
-    #'features': 1 --> ['Tweet_Comments', 'Tweet_Retweets','Tweet_Likes', 'Positivity', 'Negativity', 'Neutral']
-    #'features': 2 --> ['Tweet_Sentiment','Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
+    # 'features': 1 --> ['Tweet_Comments', 'Tweet_Retweets','Tweet_Likes', 'Positivity', 'Negativity', 'Neutral']
+    # 'features': 2 --> ['Tweet_Sentiment','Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
     models = {
-        'AAPL':{
+        'AAPL': {
             'path': f'FlaskServer{delimiter}SelectedModels{delimiter}AAPL{delimiter}AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
             'features': 1
-        } ,
-        'AMZN':{
+        },
+        'AMZN': {
             'path': f'FlaskServer{delimiter}SelectedModels{delimiter}AMZN{delimiter}AMZN_acc_0.673_npast_1_epoch_7_opt_rmsprop_num_1396.h5',
             'features': 1
         },
@@ -59,20 +59,22 @@ def get_prediction():
         }
     }
 
-    args = request.args.to_dict()
-    ticker = args['ticker'].upper()
-
+    #args = request.args.to_dict()
+    #ticker = args['ticker'].upper()
+    ticker = 'TSLA'
     if ticker not in models:
         return Response('{"msg": "Model Not Found"}', status=204, mimetype='application/json')
         # return '{"msg": "Model Not Found"}', 201
 
-    model = TweetStockModel(model_path=models[ticker]['path'],model_ticker=ticker, model_features=models[ticker]['features'])
+    model = tsm(
+        model_path=models[ticker]['path'], model_ticker=ticker, features_version=models[ticker]['features'])
 
     return jsonify(model.get_prediction())
 
 
 # ----------------------------------------------------------------------------------------------- #
 if __name__ == '__main__':
+    get_prediction()
     app.run(host='0.0.0.0', port=SERVER_PORT, debug=True, use_reloader=False)
 
 # while True:

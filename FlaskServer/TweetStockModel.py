@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import datetime
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 import sklearn
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import tensorflow as tf
@@ -22,16 +22,17 @@ MIN_USER_FOLLOWERS = 100  # min user followers num to be included
 # static id for each TweetStockModel obj (concurrent api requests)
 
 
-
 class TweetStockModel:
     def __init__(self, model_path, model_ticker, features_version, id=0):
         self.id = id
         self.ticker = model_ticker
         self.features_version = features_version
         if features_version == 1:
-            self.feature_set = ['n_replies', 'n_retweets', 'n_likes','s_pos', 's_neg', 's_neu', 'u_engagement']
+            self.feature_set = ['n_replies', 'n_retweets',
+                                'n_likes', 's_pos', 's_neg', 's_neu', 'u_engagement']
         elif features_version == 2:
-            self.feature_set = ['n_replies', 'n_retweets', 'n_likes','s_compound', 'u_engagement']
+            self.feature_set = ['n_replies', 'n_retweets',
+                                'n_likes', 's_compound', 'u_engagement']
 
         self.model_path = Path(model_path)
         self.model = load_model(model_path)
@@ -59,17 +60,17 @@ class TweetStockModel:
             auth.set_access_token(access_token, access_token_secret)
             return tweepy.API(auth)
 
-    def get_n_past_date(self, num_of_days=2):  # N_PAST):
-        today = datetime.datetime.now()
-        if num_of_days > 0:
-            num_of_days *= -1
-        if num_of_days != 0:
-            # remove 1 less day for taking TODAY into account (in oppose to the model training)
-            num_of_days += 1
-        delta = datetime.timedelta(num_of_days)
-        date = today + delta
+    def get_n_past_date(self, days_to_subtract=1, hours_to_subtract=2):  # N_PAST)
+        if days_to_subtract < 0:
+            days_to_subtract *= -1
+        days_to_subtract -= 1
+        now = dt.utcnow()
+        midnight = dt.combine(now, dt.min.time())
 
-        return date.isoformat('T')+'Z'
+        start_date = midnight - timedelta(days=days_to_subtract)
+        end_date = now - timedelta(hours=hours_to_subtract)
+
+        return start_date.isoformat('T')+'Z', end_date.isoformat('T')+'Z'
 
     def dict_to_df(self, data):
         try:
@@ -110,8 +111,8 @@ class TweetStockModel:
         }
 
         sql_Ticker_and_Pred_Table_DF = pd.DataFrame({
-            'ticker': self.ticker,
-            'prediction': prediction
+            'ticker': [self.ticker],
+            'prediction': [prediction]
         })
 
         sql_Ticker_Stats_Table_DICT = {
@@ -123,35 +124,39 @@ class TweetStockModel:
             'tweet_retweets': [],
         }
         if self.features_version == 1:
-            sql_Ticker_Stats_Table_DICT['sentiment_pos'], sql_Ticker_Stats_Table_DICT['sentiment_neu'], sql_Ticker_Stats_Table_DICT['sentiment_neg'] = [], [], []
+            sql_Ticker_Stats_Table_DICT['sentiment_pos'], sql_Ticker_Stats_Table_DICT[
+                'sentiment_neu'], sql_Ticker_Stats_Table_DICT['sentiment_neg'] = [], [], []
         elif self.features_version == 2:
             sql_Ticker_Stats_Table_DICT['sentiment'] = []
 
         sql_Ticker_Stats_Table_DF = pd.DataFrame(sql_Ticker_Stats_Table_DICT)
-        
+
         for tweet in data:
             temp_sql_Ticker_Stats_Table_DICT = {
-            'ticker': self.ticker,
-            'tweet_id': tweet['tweet_id'],
-            'user_engagement': tweet['u_engagement'],
-            'tweet_likes': tweet['n_likes'],
-            'tweet_replies': tweet['n_replies'],
-            'tweet_retweets': tweet['n_retweets'],
+                'ticker': self.ticker,
+                'tweet_id': tweet['tweet_id'],
+                'user_engagement': tweet['u_engagement'],
+                'tweet_likes': tweet['n_likes'],
+                'tweet_replies': tweet['n_replies'],
+                'tweet_retweets': tweet['n_retweets'],
             }
 
             if self.features_version == 1:
                 sentiment = {
-                        'pos': tweet['s_pos'],
-                        'neg': tweet['s_neg'],
-                        'neu': tweet['s_neu']
-                    }
-                sql_Ticker_Stats_Table_DICT['sentiment_pos'], sql_Ticker_Stats_Table_DICT['sentiment_neu'], sql_Ticker_Stats_Table_DICT['sentiment_neg'] = \
-                     tweet['s_pos'], tweet['s_neu'], tweet['s_neg']
+                    'pos': tweet['s_pos'],
+                    'neg': tweet['s_neg'],
+                    'neu': tweet['s_neu']
+                }
+
+                temp_sql_Ticker_Stats_Table_DICT['sentiment_pos'], temp_sql_Ticker_Stats_Table_DICT[
+                    'sentiment_neu'], temp_sql_Ticker_Stats_Table_DICT['sentiment_neg'] = tweet['s_pos'], tweet['s_neu'], tweet['s_neg']
+
             elif self.features_version == 2:
                 sentiment = tweet['s_compound']
-                sql_Ticker_Stats_Table_DICT['sentiment'] = tweet['s_compound']
+                temp_sql_Ticker_Stats_Table_DICT['sentiment'] = sentiment
 
-            sql_Ticker_Stats_Table_DF = sql_Ticker_Stats_Table_DF.append(sql_Ticker_Stats_Table_DICT)
+            sql_Ticker_Stats_Table_DF = sql_Ticker_Stats_Table_DF.append(
+                temp_sql_Ticker_Stats_Table_DICT, ignore_index=True)
 
             client_result['tweets'].append({
                 'tweet_id': tweet['tweet_id'],
@@ -163,6 +168,8 @@ class TweetStockModel:
                     'sentiment': sentiment
                 },
             })
+        print(client_result, sql_Ticker_and_Pred_Table_DF,
+              sql_Ticker_Stats_Table_DF)
         return client_result, sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -196,9 +203,11 @@ class TweetStockModel:
                     'u_n_followers': user['n_followers']
                 })
         elif twitter_version == 2:
+            start_date, end_date = self.get_n_past_date()
             prms = {
                 'tweet.fields': 'public_metrics,author_id,created_at',
-                'start_time': self.get_n_past_date(),
+                'start_time': start_date,
+                'end_time': end_date,
                 'query': ticker,
                 'max_results': max_results,
                 # 'user.fields':'public_metrics,description,username',
@@ -252,9 +261,18 @@ class TweetStockModel:
     # Step 3
     def filter_tweets(self, tweets, threshold=MIN_TWEET_STATS_SUM):
         print("Filtering Tweets")
+        tweets_to_remove = []
+        print("len before", len(tweets))
         for tweet in tweets:
-            if tweet['n_retweets'] + tweet['n_likes'] + tweet['n_replies'] < threshold or tweet['s_compound'] == 0:
-                tweets.remove(tweet)
+            if tweet['s_compound'] == 0.0 or tweet['s_neu'] == 1.0 or tweet['n_retweets'] + tweet['n_likes'] + tweet['n_replies'] < threshold:
+                tweets_to_remove.append(tweet)
+
+        for tweet in tweets_to_remove:
+            tweets.remove(tweet)
+
+        print("len after", len(tweets))
+        for tweet in tweets:
+            print(tweet['s_neu'])
         return tweets
 
     # Step 4
@@ -308,16 +326,21 @@ class TweetStockModel:
     # Step 5
     def filter_users(self, tweets, threshold=MIN_USER_FOLLOWERS):
         print("Filtering users")
+        tweets_to_remove = []
         for tweet in tweets:
             if tweet['u_n_followers'] < threshold or tweet['u_engagement'] == 0:
-                tweets.remove(tweet)
+                tweets_to_remove.append(tweet)
+
+        for tweet in tweets_to_remove:
+            tweets.remove(tweet)
+
         return tweets
 
     # Step 6
     def prep_data(self, df):
         print("Prepping model data")
         # 1 Select features
-        df = df[self.features]
+        df = df[self.feature_set]
 
         # 2 Get df mean
         #print('before mean', df, len(df), df.shape)
@@ -372,8 +395,9 @@ class TweetStockModel:
 
         pred = self.get_pred(preped)
         print('pred', pred)
-        result = self.generate_result_obj(tweets, pred)
+        client_result, sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = self.generate_result_obj(
+            tweets, pred)
 
-        result['prediction'] = self.get_pred(preped)
+        #client_result['prediction'] = self.get_pred(preped)
 
-        return result
+        return client_result, sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF
