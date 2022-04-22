@@ -22,9 +22,17 @@ MIN_USER_FOLLOWERS = 100  # min user followers num to be included
 # static id for each TweetStockModel obj (concurrent api requests)
 
 
+
 class TweetStockModel:
-    def __init__(self, model_path, id=0):
+    def __init__(self, model_path, model_ticker, features_version, id=0):
         self.id = id
+        self.ticker = model_ticker
+        self.features_version = features_version
+        if features_version == 1:
+            self.feature_set = ['n_replies', 'n_retweets', 'n_likes','s_pos', 's_neg', 's_neu', 'u_engagement']
+        elif features_version == 2:
+            self.feature_set = ['n_replies', 'n_retweets', 'n_likes','s_compound', 'u_engagement']
+
         self.model_path = Path(model_path)
         self.model = load_model(model_path)
         #self.save_path = Path(save_path)
@@ -95,28 +103,68 @@ class TweetStockModel:
     def create_sequence(self, dataset):
         return np.array(dataset)
 
-    def generate_result_json(self, data, prediction):
-        result = {
+    def generate_result_obj(self, data, prediction):
+        client_result = {
             'tweets': [],
-            'prediction': 0
+            'prediction': prediction
         }
+
+        sql_Ticker_and_Pred_Table_DF = pd.DataFrame({
+            'ticker': self.ticker,
+            'prediction': prediction
+        })
+
+        sql_Ticker_Stats_Table_DICT = {
+            'ticker': [],
+            'tweet_id': [],
+            'user_engagement': [],
+            'tweet_likes': [],
+            'tweet_replies': [],
+            'tweet_retweets': [],
+        }
+        if self.features_version == 1:
+            sql_Ticker_Stats_Table_DICT['sentiment_pos'], sql_Ticker_Stats_Table_DICT['sentiment_neu'], sql_Ticker_Stats_Table_DICT['sentiment_neg'] = [], [], []
+        elif self.features_version == 2:
+            sql_Ticker_Stats_Table_DICT['sentiment'] = []
+
+        sql_Ticker_Stats_Table_DF = pd.DataFrame(sql_Ticker_Stats_Table_DICT)
+        
         for tweet in data:
-            result['tweets'].append({
+            temp_sql_Ticker_Stats_Table_DICT = {
+            'ticker': self.ticker,
+            'tweet_id': tweet['tweet_id'],
+            'user_engagement': tweet['u_engagement'],
+            'tweet_likes': tweet['n_likes'],
+            'tweet_replies': tweet['n_replies'],
+            'tweet_retweets': tweet['n_retweets'],
+            }
+
+            if self.features_version == 1:
+                sentiment = {
+                        'pos': tweet['s_pos'],
+                        'neg': tweet['s_neg'],
+                        'neu': tweet['s_neu']
+                    }
+                sql_Ticker_Stats_Table_DICT['sentiment_pos'], sql_Ticker_Stats_Table_DICT['sentiment_neu'], sql_Ticker_Stats_Table_DICT['sentiment_neg'] = \
+                     tweet['s_pos'], tweet['s_neu'], tweet['s_neg']
+            elif self.features_version == 2:
+                sentiment = tweet['s_compound']
+                sql_Ticker_Stats_Table_DICT['sentiment'] = tweet['s_compound']
+
+            sql_Ticker_Stats_Table_DF = sql_Ticker_Stats_Table_DF.append(sql_Ticker_Stats_Table_DICT)
+
+            client_result['tweets'].append({
                 'tweet_id': tweet['tweet_id'],
                 'user_engagement': tweet['u_engagement'],
                 'tweet_stats': {
                     'likes': tweet['n_likes'],
                     'replies': tweet['n_replies'],
                     'retweets': tweet['n_retweets'],
-                    'sentiment': {
-                        'pos': tweet['s_pos'],
-                        'neg': tweet['s_neg'],
-                        'neu': tweet['s_neu']
-                    }
+                    'sentiment': sentiment
                 },
             })
-        result['prediction'] = prediction
-        return result
+        return client_result, sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF
+
 # -------------------------------------------------------------------------------------------------------------- #
 
     # Step 1
@@ -269,9 +317,7 @@ class TweetStockModel:
     def prep_data(self, df):
         print("Prepping model data")
         # 1 Select features
-        features = ['n_replies', 'n_retweets', 'n_likes',
-                    's_pos', 's_neg', 's_neu', 'u_engagement']
-        df = df[features]
+        df = df[self.features]
 
         # 2 Get df mean
         #print('before mean', df, len(df), df.shape)
@@ -298,9 +344,9 @@ class TweetStockModel:
 
     # Pred Function
 
-    def get_prediction(self, ticker):
+    def get_prediction(self):
         # Step 1
-        tweets = self.get_tweets(ticker, max_results=MAX_TWEETS_RESULTS,
+        tweets = self.get_tweets(self.ticker, max_results=MAX_TWEETS_RESULTS,
                                  n_past=N_PAST, twitter_version=TWITTER_VERSION)
         if tweets == None:
             print("Couldnt get tweets @get_tweets")
@@ -323,9 +369,10 @@ class TweetStockModel:
 
         # Step 6.1
         preped = self.prep_data(df)
+
         pred = self.get_pred(preped)
         print('pred', pred)
-        result = self.generate_result_json(tweets, pred)
+        result = self.generate_result_obj(tweets, pred)
 
         result['prediction'] = self.get_pred(preped)
 

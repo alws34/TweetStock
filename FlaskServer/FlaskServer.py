@@ -30,13 +30,33 @@ def get_prediction():
     elif os.name == 'posix':
         delimiter = '/'
 
+    #'features': 1 --> ['Tweet_Comments', 'Tweet_Retweets','Tweet_Likes', 'Positivity', 'Negativity', 'Neutral']
+    #'features': 2 --> ['Tweet_Sentiment','Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
     models = {
-        'AAPL': f'FlaskServer{delimiter}SelectedModels{delimiter}AAPL{delimiter}AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
-        'AMZN': f'FlaskServer{delimiter}SelectedModels{delimiter}AMZN{delimiter}AMZN_acc_0.673_npast_1_epoch_7_opt_rmsprop_num_1396.h5',
-        'GOOG': f'FlaskServer{delimiter}SelectedModels{delimiter}GOOG{delimiter}GOOG_acc_0.612_npast_1_epoch_10_opt_adam_num_2283.h5',
-        'GOOGL': f'FlaskServer{delimiter}SelectedModels{delimiter}GOOGL{delimiter}GOOGL_acc_1.0_npast_1_epoch_4_opt_adam_num_3147.h5',
-        'MSFT': f'FlaskServer{delimiter}SelectedModels{delimiter}MSFT{delimiter}MSFT_acc_0.612_npast_1_epoch_4_opt_adam_num_4359.h5',
-        'TSLA': f'FlaskServer{delimiter}SelectedModels{delimiter}TSLA{delimiter}TSLA_acc_0.633_npast_1_epoch_4_opt_adam_num_804.h5'
+        'AAPL':{
+            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}AAPL{delimiter}AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
+            'features': 1
+        } ,
+        'AMZN':{
+            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}AMZN{delimiter}AMZN_acc_0.673_npast_1_epoch_7_opt_rmsprop_num_1396.h5',
+            'features': 1
+        },
+        'GOOG': {
+            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}GOOG{delimiter}GOOG_acc_0.612_npast_1_epoch_10_opt_adam_num_2283.h5',
+            'features': 1
+        },
+        'GOOGL': {
+            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}GOOGL{delimiter}GOOGL_acc_1.0_npast_1_epoch_4_opt_adam_num_3147.h5',
+            'features': 1
+        },
+        'MSFT': {
+            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}MSFT{delimiter}MSFT_acc_0.612_npast_1_epoch_4_opt_adam_num_4359.h5',
+            'features': 2
+        },
+        'TSLA': {
+            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}TSLA{delimiter}TSLA_acc_0.633_npast_1_epoch_4_opt_adam_num_804.h5',
+            'features': 1
+        }
     }
 
     args = request.args.to_dict()
@@ -46,12 +66,9 @@ def get_prediction():
         return Response('{"msg": "Model Not Found"}', status=204, mimetype='application/json')
         # return '{"msg": "Model Not Found"}', 201
 
-    path = models[ticker]
+    model = TweetStockModel(model_path=models[ticker]['path'],model_ticker=ticker, model_features=models[ticker]['features'])
 
-    model = TweetStockModel(path)
-
-    res = model.get_prediction(ticker)
-    return jsonify(res)
+    return jsonify(model.get_prediction())
 
 
 # ----------------------------------------------------------------------------------------------- #
