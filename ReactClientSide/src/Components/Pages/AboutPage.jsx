@@ -22,6 +22,7 @@ import "reactjs-popup/dist/index.css";
 import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import "../Styles/PopupChat.css";
 import Sticky from "react-sticky-el";
+import PredTable from "../Functional Components/PredTable";
 
 export default function About() {
   const navigate = useNavigate();
@@ -223,34 +224,51 @@ export default function About() {
   const predictionWithTweets = () => {
     return (
       <div>
-        <Prediction
-          isLoading={flaskResponse === null}
-          size={"200px"}
-          ticker={ticker}
-          dir={
-            flaskResponse && flaskResponse["prediction"] == 1 ? "up" : "down"
-          }
-        ></Prediction>
-
-        {flaskResponse &&
-          flaskResponse["tweets"].map((tweet) => {
-            return (
-              <div>
-                <Tweet tweetId={tweet["tweet_id"]} />
-                <p>
-                  Likes {tweet["tweet_stats"]["likes"]}
-                  RTS {tweet["tweet_stats"]["retweets"]}
-                  Replies {tweet["tweet_stats"]["replies"]}
-                </p>
-                <p>
-                  Pos {tweet["sentiment"]["pos"]}
-                  Neu {tweet["sentiment"]["neu"]}
-                  Neg {tweet["sentiment"]["neg"]}
-                </p>
-              </div>
-            );
-          })}
-
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Prediction
+            isLoading={flaskResponse === null}
+            size={"200px"}
+            ticker={ticker}
+            dir={
+              flaskResponse && flaskResponse["prediction"] == 1 ? "up" : "down"
+            }
+          ></Prediction>
+        </div>
+        <div>
+          {flaskResponse &&
+            flaskResponse["tweets"].map((tweet) => {
+              return (
+                <div
+                  style={{
+                    maxWidth: "800px",
+                    marginLeft: "auto",
+                    marginRight: "auto",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div style={{ margin: 0 }}>
+                      <Tweet tweetId={tweet["tweet_id"]} />
+                    </div>
+                    <div style={{ margin: 0 }}>
+                      <PredTable predResult={flaskResponse}></PredTable>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
         <button
           onClick={() =>
             setFlaskResponse({

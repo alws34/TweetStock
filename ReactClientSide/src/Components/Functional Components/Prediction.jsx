@@ -76,7 +76,15 @@ export default function Prediction(props) {
   //useEffect(setIsLoading(props.dir === null ? true : false), []);
 
   return (
-    <div style={{ height: props.size, width: props.size }}>
+    <div
+      style={{
+        dsplay: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: props.size,
+        width: props.size,
+      }}
+    >
       <div>
         {props.isLoading ? (
           <Loading height={"100%"} width={"100%"} speed={0.6} />
