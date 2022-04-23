@@ -34,27 +34,27 @@ def get_prediction():
     # 'features': 2 --> ['Tweet_Sentiment','Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
     models = {
         'AAPL': {
-            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}AAPL{delimiter}AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
+            'path': f'SelectedModels{delimiter}AAPL{delimiter}AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
             'features': 1
         },
         'AMZN': {
-            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}AMZN{delimiter}AMZN_acc_0.673_npast_1_epoch_7_opt_rmsprop_num_1396.h5',
+            'path': f'SelectedModels{delimiter}AMZN{delimiter}AMZN_acc_0.673_npast_1_epoch_7_opt_rmsprop_num_1396.h5',
             'features': 1
         },
         'GOOG': {
-            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}GOOG{delimiter}GOOG_acc_0.612_npast_1_epoch_10_opt_adam_num_2283.h5',
+            'path': f'SelectedModels{delimiter}GOOG{delimiter}GOOG_acc_0.612_npast_1_epoch_10_opt_adam_num_2283.h5',
             'features': 1
         },
         'GOOGL': {
-            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}GOOGL{delimiter}GOOGL_acc_1.0_npast_1_epoch_4_opt_adam_num_3147.h5',
+            'path': f'SelectedModels{delimiter}GOOGL{delimiter}GOOGL_acc_1.0_npast_1_epoch_4_opt_adam_num_3147.h5',
             'features': 1
         },
         'MSFT': {
-            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}MSFT{delimiter}MSFT_acc_0.612_npast_1_epoch_4_opt_adam_num_4359.h5',
+            'path': f'SelectedModels{delimiter}MSFT{delimiter}MSFT_acc_0.612_npast_1_epoch_4_opt_adam_num_4359.h5',
             'features': 2
         },
         'TSLA': {
-            'path': f'FlaskServer{delimiter}SelectedModels{delimiter}TSLA{delimiter}TSLA_acc_0.633_npast_1_epoch_4_opt_adam_num_804.h5',
+            'path': f'SelectedModels{delimiter}TSLA{delimiter}TSLA_acc_0.633_npast_1_epoch_4_opt_adam_num_804.h5',
             'features': 1
         }
     }
@@ -68,13 +68,13 @@ def get_prediction():
 
     model = tsm(
         model_path=models[ticker]['path'], model_ticker=ticker, features_version=models[ticker]['features'])
-
-    return jsonify(model.get_prediction())
+    client_result, sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
+    return jsonify(client_result)
 
 
 # ----------------------------------------------------------------------------------------------- #
 if __name__ == '__main__':
-    get_prediction()
+    #get_npm stprediction()
     app.run(host='0.0.0.0', port=SERVER_PORT, debug=True, use_reloader=False)
 
 # while True:

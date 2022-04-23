@@ -262,7 +262,7 @@ export default function About() {
                       <Tweet tweetId={tweet["tweet_id"]} />
                     </div>
                     <div style={{ margin: 0 }}>
-                      <PredTable predResult={flaskResponse}></PredTable>
+                      <PredTable tweet={tweet}></PredTable>
                     </div>
                   </div>
                 </div>
