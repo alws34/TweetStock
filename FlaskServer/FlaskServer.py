@@ -59,9 +59,9 @@ def get_prediction():
         }
     }
 
-    #args = request.args.to_dict()
-    #ticker = args['ticker'].upper()
-    ticker = 'TSLA'
+    args = request.args.to_dict()
+    ticker = args['ticker'].upper()
+    #ticker = 'TSLA'
     if ticker not in models:
         return Response('{"msg": "Model Not Found"}', status=204, mimetype='application/json')
         # return '{"msg": "Model Not Found"}', 201
