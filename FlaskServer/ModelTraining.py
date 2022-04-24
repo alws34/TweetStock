@@ -433,10 +433,8 @@ def scale_data(df, target='price_difference', scaling='min_max'):
         to_append[target] = date[1][target].iloc[0]
         for feature in scaled_df.columns:
             if feature != 'Date' and feature != target:
-                if (scaling == 'min_max'):
-                    scaler = MinMaxScaler()
-                elif (scaling == 'standard'):
-                    scaler = StandardScaler()
+                if scaling == 'min_max': scaler = MinMaxScaler()
+                elif scaling == 'standard': scaler = StandardScaler()
                 f = date[1][feature]
                 scaled_feature = scaler.fit_transform(
                     np.array(f).reshape(-1, 1))
