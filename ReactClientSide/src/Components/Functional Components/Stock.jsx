@@ -24,6 +24,8 @@ export default function Stock(props) {
     "": "",
   };
 
+  const [isStockValid, setIsStockValid] = useState(true);
+
   const chart = {
     options: {
       chart: {
@@ -31,7 +33,7 @@ export default function Stock(props) {
         height: 350,
       },
       title: {
-        text: `$${props.stock_ticker} Graph`,
+        text: `$${props.stock_ticker.toUpperCase()} Graph`,
         align: "left",
       },
       xaxis: {
@@ -51,6 +53,13 @@ export default function Stock(props) {
     return response.json();
   }
 
+  const getStockValidity = (stock) => {
+    return (
+      stock.meta.instrumentType === "CRYPTOCURRENCY" ||
+      props.stock_ticker === ":entitySlug"
+    );
+  };
+
   useEffect(() => {
     let timeoutId;
     async function getLatestPrice() {
@@ -58,12 +67,19 @@ export default function Stock(props) {
         const data = await getStocks();
         //console.log("stock.jsx", data);
         const stock = data.chart.result[0];
+        if (getStockValidity(stock)) {
+          setIsStockValid(false);
+        }
+        console.log(stock);
         setPrevPrice(price);
         setPrice(stock.meta.regularMarketPrice.toFixed(2));
+        const hours = 3;
+        const hours_in_ms = hours * 60 * 60 * 1000;
         setPriceTime(new Date(stock.meta.regularMarketTime * 1000));
         const quote = stock.indicators.quote[0];
+
         const prices = stock.timestamp.map((timestamp, index) => ({
-          x: new Date(timestamp * 1000),
+          x: new Date(timestamp * 1000 + hours_in_ms),
           y: [
             quote.open[index],
             quote.high[index],
@@ -111,26 +127,36 @@ export default function Stock(props) {
   };
 
   return (
-    <div style={{ marginTop: "10px" }}>
-      <div style={{ textAlign: "center" }}>
-        {!props.isAbout && renderStockButton()}
-      </div>
-      <div
-        style={{ textAlign: "center" }}
-        className={["price", direction].join(" ")}
-      >
-        {price}$ {directionEmojis[direction]}
-      </div>
-      <div style={{ textAlign: "center" }}>
-        {priceTime && priceTime.toLocaleTimeString()}
-      </div>
-      <Chart
-        options={chart.options}
-        series={series}
-        type="candlestick"
-        width="100%"
-        height={320}
-      />
+    <div>
+      {isStockValid ? (
+        <div style={{ marginTop: "10px" }}>
+          <div style={{ textAlign: "center" }}>
+            {!props.isAbout && renderStockButton()}
+          </div>
+          <div
+            style={{ textAlign: "center" }}
+            className={["price", direction].join(" ")}
+          >
+            {price}$ {directionEmojis[direction]}
+          </div>
+          <div style={{ textAlign: "center" }}>
+            {priceTime &&
+              priceTime.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+          </div>
+          <Chart
+            options={chart.options}
+            series={series}
+            type="candlestick"
+            width="100%"
+            height={320}
+          />
+        </div>
+      ) : (
+        ""
+      )}
     </div>
   );
 }

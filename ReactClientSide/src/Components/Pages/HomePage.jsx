@@ -47,9 +47,13 @@ export default function HomePage() {
     <div>
       <EHeader text="Trending Stocks" />
       {trendingStocks ? (
-        trendingStocks.map((stock) => (
-          <Stock stock_name={stock.symbol} stock_ticker={stock.symbol} />
-        ))
+        trendingStocks.map((stock) =>
+          stock.symbol === ":entitySlug" ? (
+            ""
+          ) : (
+            <Stock stock_name={stock.symbol} stock_ticker={stock.symbol} />
+          )
+        )
       ) : (
         <LoadingCircle />
       )}
