@@ -231,7 +231,7 @@ class TweetStockModel:
 
             try:
                 temp_tweets = self.twitter.request(
-                    resource='tweets/search/all', params=prms)
+                    resource='tweets/search/recent', params=prms)
 
                 if temp_tweets.status_code == 200:
                     for tweet in temp_tweets:
