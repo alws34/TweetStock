@@ -41,7 +41,6 @@ class TweetStockModel:
         self.twitter = self.connect_to_twitter()
         pd.set_option('display.max_columns', None)
 
-    
     def get_model_path(self):
         return self.model_path
 
@@ -98,17 +97,19 @@ class TweetStockModel:
         else:
             return df.groupby(by='date').mean().reset_index()
 
-    def scale_df(self,df, n_past=N_PAST, scaling='min_max'):
-        if scaling=='min_max': scaler=MinMaxScaler()
-        elif scaling=='standard': scaler=StandardScaler()
+    def get_scale_and_mean(self, df, n_past=N_PAST, scaling='min_max'):
+        if scaling == 'min_max':
+            scaler = MinMaxScaler()
+        elif scaling == 'standard':
+            scaler = StandardScaler()
         if n_past == 1:
             to_append = {}
-            for col in df:
+            for col in df.columns:
                 to_append[col] = scaler.fit_transform(
-                    np.array(df[col]).reshape(-1, 1))
+                    np.array(df[col]).reshape(-1, 1)).mean()
             return pd.DataFrame(columns=df.columns).append(to_append, ignore_index=True)
-        else: return None
-            
+        else:
+            return None
 
     def scale_seq(self, seq):
         scaler = MinMaxScaler()
@@ -230,7 +231,7 @@ class TweetStockModel:
 
             try:
                 temp_tweets = self.twitter.request(
-                    resource='tweets/search/recent', params=prms)
+                    resource='tweets/search/all', params=prms)
 
                 if temp_tweets.status_code == 200:
                     for tweet in temp_tweets:
@@ -357,8 +358,8 @@ class TweetStockModel:
 
         # 2 Get df mean
         #print('before mean', df, len(df), df.shape)
-        df = self.scale_df(df)
-        df = self.get_df_mean(df)
+        df = self.get_scale_and_mean(df)
+        #df = self.get_df_mean(df)
         #print('after mean', df, len(df), df.shape)
 
         # 3 Create sequence from df
@@ -413,6 +414,3 @@ class TweetStockModel:
             tweets, pred)
 
         return client_result, sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF
-
-
-
