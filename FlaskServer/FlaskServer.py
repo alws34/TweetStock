@@ -1,4 +1,5 @@
 
+from ipaddress import ip_address
 from flask import Flask, jsonify, request, Response
 from flask_restful import Api
 from flask_cors import CORS
@@ -60,7 +61,8 @@ def get_prediction():
             'features': 1
         }
     }
-
+    ip = request.remote_addr
+    print(f'New Connection From: {ip}')
     args = request.args.to_dict()
     ticker = args['ticker'].upper()
     #ticker = 'TSLA'
@@ -69,7 +71,7 @@ def get_prediction():
         # return '{"msg": "Model Not Found"}', 201
 
     model = tsm(
-        model_path=models[ticker]['path'], model_ticker=ticker, features_version=models[ticker]['features'])
+        model_path=models[ticker]['path'], model_ticker=ticker, features_version=models[ticker]['features'], ip =ip )
     client_result, sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
     return jsonify(client_result)
 

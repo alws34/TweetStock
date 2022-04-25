@@ -233,7 +233,7 @@ export default function About() {
         >
           <Prediction
             isLoading={flaskResponse === null}
-            size={"200px"}
+            size={"400px"}
             ticker={ticker}
             dir={
               flaskResponse && flaskResponse["prediction"] == 1 ? "up" : "down"
@@ -269,7 +269,7 @@ export default function About() {
               );
             })}
         </div>
-        <button
+        {/* <button
           onClick={() =>
             setFlaskResponse({
               prediction: 1,
@@ -282,7 +282,7 @@ export default function About() {
           }
         >
           Predict
-        </button>
+        </button> */}
       </div>
     );
   };

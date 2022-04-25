@@ -23,10 +23,11 @@ MIN_USER_FOLLOWERS = 100  # min user followers num to be included
 
 
 class TweetStockModel:
-    def __init__(self, model_path, model_ticker, features_version, id=0):
+    def __init__(self, model_path, model_ticker, features_version, ip='No_IP', id=0):
         self.id = id
         self.ticker = model_ticker
         self.features_version = features_version
+        self.ip = ip
         if features_version == 1:
             self.feature_set = ['n_replies', 'n_retweets',
                                 'n_likes', 's_pos', 's_neg', 's_neu', 'u_engagement']
@@ -182,15 +183,15 @@ class TweetStockModel:
                     'sentiment': sentiment
                 },
             })
-        print(client_result, sql_Ticker_and_Pred_Table_DF,
-              sql_Ticker_Stats_Table_DF)
+        # print(client_result, sql_Ticker_and_Pred_Table_DF,
+        #       sql_Ticker_Stats_Table_DF)
         return client_result, sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF
 
 # -------------------------------------------------------------------------------------------------------------- #
 
     # Step 1
     def get_tweets(self, ticker, max_results=MAX_TWEETS_RESULTS, n_past=N_PAST, twitter_version=TWITTER_VERSION):
-        print("Getting Tweets")
+        print(f"Getting Tweets of {self.ticker} for {self.ip} ")
         if '$' in ticker:
             ticker = ticker.replace('$', '')
 
@@ -265,7 +266,7 @@ class TweetStockModel:
 
     # Step 2
     def get_sentiment(self, tweets):
-        print("Getting Sentiment")
+        print(f"Getting Sentiment of {self.ticker} for {self.ip}")
         for tweet in tweets:
             s = self.sentiment_analyzer.polarity_scores(tweet['text'])
             tweet['s_neg'], tweet['s_neu'], tweet['s_pos'], tweet['s_compound'] = s['neg'], s['neu'], s['pos'], s['compound']
@@ -274,9 +275,9 @@ class TweetStockModel:
 
     # Step 3
     def filter_tweets(self, tweets, threshold=MIN_TWEET_STATS_SUM):
-        print("Filtering Tweets")
+        print(f"Filtering Tweets of {self.ticker} for {self.ip}")
         tweets_to_remove = []
-        print("len before", len(tweets))
+        #print("len before", len(tweets))
         for tweet in tweets:
             if tweet['s_compound'] == 0.0 or tweet['s_neu'] == 1.0 or tweet['n_retweets'] + tweet['n_likes'] + tweet['n_replies'] < threshold:
                 tweets_to_remove.append(tweet)
@@ -284,14 +285,14 @@ class TweetStockModel:
         for tweet in tweets_to_remove:
             tweets.remove(tweet)
 
-        print("len after", len(tweets))
-        for tweet in tweets:
-            print(tweet['s_neu'])
+        #print("len after", len(tweets))
+        # for tweet in tweets:
+        #     print(tweet['s_neu'])
         return tweets
 
     # Step 4
     def get_users_engagement(self, tweets, max_tweets_results=MAX_USER_TWEETS_RESULT, twitter_version=TWITTER_VERSION):
-        print("Getting user engagement")
+        print(f"Getting user engagement of {self.ticker} for {self.ip}")
         if twitter_version == 1:
             pass
         elif twitter_version == 2:
@@ -339,7 +340,7 @@ class TweetStockModel:
 
     # Step 5
     def filter_users(self, tweets, threshold=MIN_USER_FOLLOWERS):
-        print("Filtering users")
+        print(f"Filtering users of {self.ticker} for {self.ip}")
         tweets_to_remove = []
         for tweet in tweets:
             if tweet['u_n_followers'] < threshold or tweet['u_engagement'] == 0:
@@ -352,7 +353,7 @@ class TweetStockModel:
 
     # Step 6
     def prep_data(self, df):
-        print("Prepping model data")
+        print(f"Prepping model data of {self.ticker} for {self.ip}")
         # 1 Select features
         df = df[self.feature_set]
 
@@ -364,7 +365,7 @@ class TweetStockModel:
 
         # 3 Create sequence from df
         test_seq = self.create_sequence(df)
-        print('\n\n', test_seq, test_seq.shape)
+        #print('\n\n', test_seq, test_seq.shape)
 
         # 4 Scale data
         test_seq = test_seq.reshape(
@@ -409,7 +410,8 @@ class TweetStockModel:
         preped = self.prep_data(df)
 
         pred = self.get_pred(preped)
-        print('pred', pred)
+        print(
+            f"The Final Prediction for {self.ticker} as pair of {self.ip}'s Request is: {pred}")
         client_result, sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = self.generate_result_obj(
             tweets, pred)
 
