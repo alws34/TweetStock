@@ -3,7 +3,7 @@ import { Box } from "@mui/material";
 import { Row, Col } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-export default function StockAbout(props) {
+export default function StockDetails(props) {
   function Item(props) {
     const { sx, ...other } = props;
     return (
@@ -35,42 +35,43 @@ export default function StockAbout(props) {
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div xs={8} md={7}>
               <Item>
-                <u>Name:</u> {props.name}
+                <u>Name:</u> {props.stockData.displayName}
               </Item>
             </div>
             <div xs={8} md={7}>
               <Item>
-                <u>Full Name:</u> {props.fullName}
+                <u>Full Name:</u> {props.stockData.fullExchangeName}
               </Item>
             </div>
             <div xs={4} md={5}>
               <Item>
-                <u>Symbol:</u> {props.symbol}
+                <u>Symbol:</u> {props.stockData.symbol}
               </Item>
             </div>
             <div xs={4}>
               <Item>
-                <u>Open:</u> {props.openPrice}
+                <u>Open:</u> {props.stockData.regularMarketOpen}
               </Item>
             </div>
             <div xs={4}>
               <Item>
-                <u>Close:</u> {props.closePrice}
+                <u>Close:</u> {props.stockData.regularMarketPrice}
               </Item>
             </div>
             <div xs={4}>
               <Item>
-                <u>High:</u> {props.highPrice}
+                <u>High:</u> {props.stockData.regularMarketDayHigh}
               </Item>
             </div>
             <div xs={6}>
               <Item>
-                <u>Volume:</u> {props.volume}
+                <u>Volume:</u> {props.stockData.regularMarketVolume}
               </Item>
             </div>
             <div xs={6}>
               <Item>
-                <u>Average Volume:</u> {props.avgVolume}
+                <u>Average Volume:</u>
+                {props.stockData.averageDailyVolume3Month}
               </Item>
             </div>
           </div>
@@ -79,44 +80,52 @@ export default function StockAbout(props) {
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div xs={8} md={7}>
               <Item>
-                <u>Region:</u> {props.region}
+                <u>Region:</u> {props.stockData.region}
               </Item>
             </div>
             <div xs={4} md={5}>
               <Item>
-                <u>Currency:</u> {props.currency}
+                <u>Currency:</u> {props.stockData.financialCurrency}
               </Item>
             </div>
             <div xs={6}>
               <Item>
-                <u>Change Range:</u> {props.changeRange}
+                <u>Change Range:</u> {props.stockData.regularMarketDayRange}
               </Item>
             </div>
             <div xs={6}>
               <Item>
-                <u>52 Week Range:</u> {props.week52Range}
+                <u>52 Week Range:</u> {props.stockData.fiftyTwoWeekRange}
               </Item>
             </div>
             <div xs={6}>
               <Item>
-                <u>Bid:</u> {props.bid}
+                <u>Bid:</u> {props.stockData.bid}
               </Item>
             </div>
             <div xs={6}>
               <Item>
-                <u>Ask:</u> {props.ask}
+                <u>Ask:</u> {props.stockData.ask}
               </Item>
             </div>
             <div xs={6}>
               <Item>
-                <u>Market Cap:</u> {props.marketCap}
+                <u>Market Cap:</u> {props.stockData.marketCap}
               </Item>
             </div>
             <div xs={6}>
               <Item>
-                <u>ESP:</u> {props.esp}
+                <u>ESP:</u> {props.stockData.epsTrailingTwelveMonths}
               </Item>
             </div>
+          </div>
+          <div xs={6}>
+            <Item>
+              <u>Price Now:</u>{" "}
+              {props.stockData.postMarketPrice
+                ? props.stockData.postMarketPrice
+                : ""}
+            </Item>
           </div>
         </Col>
       </Row>

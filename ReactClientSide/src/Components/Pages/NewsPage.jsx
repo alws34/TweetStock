@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import NewsCard from "../Functional Components/NewsCard";
-import EHeader from "../Functional Components/EHeader";
+import EHeader from "../Functional Components/PageHeader";
 import TextField from "@mui/material/TextField";
 import SearchIcon from "@mui/icons-material/Search";
 import Swal from "sweetalert2";

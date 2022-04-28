@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { styled, alpha } from "@mui/material/styles";
-import Logo from "./Logo";
+import Logo from "./TweetStockLogo";
 import {
   AppBar,
   Box,
@@ -15,20 +15,13 @@ import {
   MenuItem,
   Menu,
   Avatar,
-  // Badge,
-  // AccountCircle,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-// import MailIcon from "@mui/icons-material/Mail";
-// import NotificationsIcon from "@mui/icons-material/Notifications";
-// import MoreIcon from "@mui/icons-material/MoreVert";
-//import  from AccountCircle "@mui/icons-material/AccountCircle";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { getLoggedUser } from "../Configs/getLoggedUser";
-// import { useStateWithCallbackLazy } from "use-state-with-callback";
 import { rapidApiKey } from "../Configs/apiUrlsKeys";
 import "../Styles/NavBarStyle.css";
 import { navPaths } from "../Configs/navPaths";
@@ -71,9 +64,6 @@ const navs = navPaths;
 // new
 export default function PrimarySearchAppBar() {
   const navigate = useNavigate();
-
-  //const [user, setUser] = useStateWithCallbackLazy(null);
-  //const [isLoggedIn, setIsLoggedIn] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState(null);
   const [anchorElNav, setAnchorElNav] = useState(null);

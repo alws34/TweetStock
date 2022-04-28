@@ -1,10 +1,10 @@
-.Eheader * {
+.PageHeader * {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
 }
 
-.Eheader > html,
+.PageHeader > html,
 body {
   font-family: "Fira Code", monospace;
   width: 100%;
@@ -12,14 +12,14 @@ body {
   font-size: 20px;
 }
 
-.Eheader main {
+.PageHeader main {
   display: flex;
   height: 100%;
   align-items: center;
   justify-content: center;
 }
 
-.Eheader p {
+.PageHeader p {
   cursor: pointer;
   position: relative;
   display: inline-block;
@@ -35,11 +35,11 @@ body {
   /* color: #fff; */
 }
 
-.Eheader span {
+.PageHeader span {
   position: relative;
 }
 
-.Eheader span:before {
+.PageHeader span:before {
   content: "";
   position: absolute;
   left: 0;
@@ -51,10 +51,10 @@ body {
   border-radius: 3px;
 }
 
-.Eheader p:hover {
+.PageHeader p:hover {
   background-position: 0px 10px;
 }
 
-.Eheader span:hover:before {
+.PageHeader span:hover:before {
   transform: translateY(10px);
 }

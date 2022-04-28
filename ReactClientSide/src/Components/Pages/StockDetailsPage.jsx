@@ -10,10 +10,10 @@ import {
 } from "../Configs/apiUrlsKeys";
 import { navPaths } from "../Configs/navPaths";
 import { getLoggedUser } from "../Configs/getLoggedUser";
-import Stock from "../Functional Components/Stock";
-import StockAbout from "../Functional Components/StockAbout";
+import StockChart from "../Functional Components/StockChart";
+import StockDetails from "../Functional Components/StockDetails";
 import StockChat from "../Functional Components/StockChat";
-import Eheader from "../Functional Components/EHeader";
+import PageHeader from "../Functional Components/PageHeader";
 import Prediction from "../Functional Components/Prediction";
 import Tweet from "../Functional Components/Tweet";
 import LoadingCircle from "../Functional Components/LoadingCircle";
@@ -22,7 +22,7 @@ import "reactjs-popup/dist/index.css";
 import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import "../Styles/PopupChat.css";
 import Sticky from "react-sticky-el";
-import PredTable from "../Functional Components/PredTable";
+import PredTable from "../Functional Components/PredictionTable";
 
 export default function About() {
   const navigate = useNavigate();
@@ -172,28 +172,7 @@ export default function About() {
   };
 
   const renderStockAbout = () => {
-    return (
-      <StockAbout
-        name={stockData.displayName}
-        fullName={stockData.fullExchangeName}
-        symbol={stockData.symbol}
-        source={stockData.quoteSourceName}
-        region={stockData.region}
-        currency={stockData.financialCurrency}
-        priceNow={stockData.postMarketPrice}
-        openPrice={stockData.regularMarketOpen}
-        closePrice={stockData.regularMarketPrice}
-        highPrice={stockData.regularMarketDayHigh}
-        changeRange={stockData.regularMarketDayRange}
-        bid={stockData.bid}
-        ask={stockData.ask}
-        week52Range={stockData.fiftyTwoWeekRange}
-        volume={stockData.regularMarketVolume}
-        avgVolume={stockData.averageDailyVolume3Month}
-        marketCap={stockData.marketCap}
-        esp={stockData.epsTrailingTwelveMonths}
-      />
-    );
+    return <StockDetails stockData={stockData} />;
   };
 
   const renderStockAboutPage = () => {
@@ -201,7 +180,7 @@ export default function About() {
       <div>
         <Row xs={1} md={2}>
           <Col style={{ flexGrow: 0, marginTop: 30 }}>
-            <Stock
+            <StockChart
               stock_name={stockData.displayName}
               stock_ticker={ticker}
               isAbout={true}
@@ -390,7 +369,7 @@ export default function About() {
 
   return (
     <div className="container-fluid">
-      <Eheader text={`$${ticker.toUpperCase()} Details`} />
+      <PageHeader text={`$${ticker.toUpperCase()} Details`} />
       {stockData === undefined || stockData === null ? (
         <LoadingCircle />
       ) : (

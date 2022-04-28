@@ -13,13 +13,14 @@ import { navPaths } from "../Configs/navPaths";
 
 export default function FavCard(props) {
   const navigate = useNavigate();
-  console.log(props.name)
+  console.log(props.name);
   let name = props.name;
   if (props.name && props.name.includes(".com")) {
     name = props.name.slice(0, -4);
   }
+  let stockImageSrc = `https://logo.clearbit.com/${name}.com?size=80&greyscale=false`;
   const getPriceNow = () => {
-    if (props.priceNow && props.priceNow != 0) {
+    if (props.priceNow && props.priceNow !== 0) {
       return `Price Now: ${props.priceNow}\n`;
     }
     return "";
@@ -31,8 +32,8 @@ export default function FavCard(props) {
         <CardMedia
           component="img"
           height="200"
-          image={`https://logo.clearbit.com/${name}.com?size=80&greyscale=false`}
-          alt="green iguana"
+          image={stockImageSrc}
+          alt="No image was found..."
         />
         <CardContent>
           <Typography
@@ -41,7 +42,7 @@ export default function FavCard(props) {
             variant="h5"
             component="div"
           >
-            {name}
+            {props.name}
           </Typography>
           <Typography
             style={{ whiteSpace: "pre-wrap" }}

@@ -8,7 +8,7 @@ const round = (number) => {
   return number ? +number.toFixed(2) : null;
 };
 
-export default function Stock(props) {
+export default function StockChart(props) {
   const navigate = useNavigate();
   const [series, setSeries] = useState([
     {
@@ -65,12 +65,10 @@ export default function Stock(props) {
     async function getLatestPrice() {
       try {
         const data = await getStocks();
-        //console.log("stock.jsx", data);
         const stock = data.chart.result[0];
         if (getStockValidity(stock)) {
           setIsStockValid(false);
         }
-        console.log(stock);
         setPrevPrice(price);
         setPrice(stock.meta.regularMarketPrice.toFixed(2));
         const hours = 3;

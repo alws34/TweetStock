@@ -5,7 +5,7 @@ import "@progress/kendo-theme-default/dist/all.css";
 import { RealTimeDB } from "../Configs/FirebaseConfig";
 import { ref, onValue, push } from "firebase/database";
 import { getLoggedUser } from "../Configs/getLoggedUser";
-import Eheader from "./EHeader";
+import PageHeader from "./PageHeader";
 
 const bot = {
   id: 0,
@@ -76,7 +76,7 @@ export default function ChatStock(props) {
 
   return (
     <div style={{ margin: 10 }}>
-      <Eheader text={`$${ticker} Chat`} />
+      <PageHeader text={`$${ticker} Chat`} />
       <Chat
         user={user}
         messages={messages} //GETMessages

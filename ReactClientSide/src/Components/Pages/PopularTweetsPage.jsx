@@ -3,7 +3,7 @@ import { useStateWithCallbackLazy } from "use-state-with-callback";
 import { useLocation, useNavigate } from "react-router-dom";
 import { apiUrlTwitter, apiUrlFlask } from "../Configs/apiUrlsKeys";
 import LoadingCircle from "../Functional Components/LoadingCircle";
-import Eheader from "../Functional Components/EHeader";
+import PageHeader from "../Functional Components/PageHeader";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Prediction from "../Functional Components/Prediction";
@@ -70,7 +70,7 @@ export default function PopularTweets(props) {
 
   return (
     <div>
-      <Eheader text={`$${ticker.toUpperCase()} Tweets`} />
+      <PageHeader text={`$${ticker.toUpperCase()} Tweets`} />
       {isLoading ? <LoadingCircle /> : tweetsArr}
     </div>
   );

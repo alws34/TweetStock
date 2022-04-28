@@ -3,9 +3,11 @@ import "../Styles/HeaderStyle.css";
 
 export default function EHeader(props) {
   return (
-    <div className="Eheader">
+    <div className="PageHeader">
       <main>
-        <span><p>{props.text}</p></span>
+        <span>
+          <p>{props.text}</p>
+        </span>
       </main>
     </div>
   );

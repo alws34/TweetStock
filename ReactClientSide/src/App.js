@@ -1,8 +1,8 @@
 import "./App.css";
 import React, { useEffect } from "react";
-import PrimarySearchAppBar from "./Components/Functional Components/PrimarySearchAppBar";
+import NavBar from "./Components/Functional Components/NavBar";
 import HomePage from "./Components/Pages/HomePage";
-import About from "./Components/Pages/AboutPage";
+import StockDetailsPage from "./Components/Pages/StockDetailsPage";
 import SignUp from "./Components/Pages/SignUpPage";
 import SignIn from "./Components/Pages/SignInPage";
 import NewsPage from "./Components/Pages/NewsPage";
@@ -31,10 +31,10 @@ function App() {
 
   return (
     <div>
-      <PrimarySearchAppBar />
+      <NavBar />
       <Routes>
         <Route path={navPaths["home"]} element={<HomePage />} />
-        <Route path={navPaths["about"]} element={<About />} />
+        <Route path={navPaths["about"]} element={<StockDetailsPage />} />
         <Route path={navPaths["news"]} element={<NewsPage />} />
         <Route path={navPaths["favorite stocks"]} element={<FavStocksPage />} />
         <Route path={navPaths["popular tweets"]} element={<PopularTweets />} />

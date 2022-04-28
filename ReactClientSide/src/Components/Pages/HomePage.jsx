@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Stock from "../Functional Components/Stock";
-import EHeader from "../Functional Components/EHeader";
+import StockChart from "../Functional Components/StockChart";
+import EHeader from "../Functional Components/PageHeader";
 import { rapidApiKey } from "../Configs/apiUrlsKeys";
 import LoadingCircle from "../Functional Components/LoadingCircle";
 import Swal from "sweetalert2";
@@ -51,7 +51,7 @@ export default function HomePage() {
           stock.symbol === ":entitySlug" ? (
             ""
           ) : (
-            <Stock stock_name={stock.symbol} stock_ticker={stock.symbol} />
+            <StockChart stock_name={stock.symbol} stock_ticker={stock.symbol} />
           )
         )
       ) : (

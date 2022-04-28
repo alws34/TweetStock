@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import FavCard from "../Functional Components/FavCard";
-import EHeader from "../Functional Components/EHeader";
+import FavCard from "../Functional Components/FavoriteStockCard";
+import EHeader from "../Functional Components/PageHeader";
 // import { Container, Row, Col } from 'react-bootstrap';
 import "../Styles/FavCardsStyle.css";
 import { apiUrlFavorites, rapidApiKey } from "../Configs/apiUrlsKeys";
@@ -11,13 +11,13 @@ import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
 
 export default function FavStocksPage() {
-  const [stockData, setStockData] = useState([]);
+  const [stocksDataArr, setStocksDataArr] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const [favStocks, setFavStocks] = useState(null);
+  const [noFavoriteStocks, setNoFavoriteStocks] = useState(false);
   const user = getLoggedUser();
-  //DELETE Fav stock from DB:
 
-  const getFavStocks = () => {
+  const fetchFavoriteStocks = () => {
+    setStocksDataArr([]);
     // Fetch the favorite stocks from DB - for the current user
     fetch(apiUrlFavorites + `/?userId=${user.Id}`, {
       method: "GET",
@@ -26,16 +26,17 @@ export default function FavStocksPage() {
       }),
     })
       .then((res) => {
-        console.log("res=", res);
+        //console.log("res=", res);
         return res.json();
       })
       .then(
-        (result) => {
-          console.log("fetch favorite stocks arr= ", result);
-          setStockData([]);
-          let favStocksNames = result;
-          // setFavStocks(favStocksNames);
-          favStocksNames.forEach((x) => fetchData(x.toLowerCase()));
+        (favTickers) => {
+          console.log("fetch favorite stocks arr= ", favTickers);
+          if (favTickers.length === 0) setNoFavoriteStocks(true);
+
+          favTickers.forEach((ticker) =>
+            fetchStockDataByTicker(ticker.toLowerCase())
+          );
           setIsLoading(false);
         },
         (error) => {
@@ -44,7 +45,7 @@ export default function FavStocksPage() {
       );
   };
 
-  const fetchData = (ticker) => {
+  const fetchStockDataByTicker = (ticker) => {
     fetch(
       `https://stock-data-yahoo-finance-alternative.p.rapidapi.com/v6/finance/quote?symbols=${ticker}%2CETH-USD`,
       {
@@ -56,15 +57,12 @@ export default function FavStocksPage() {
         },
       }
     )
-      .then((res) => {
-        console.log("res=", res);
-        return res.json();
-      })
+      .then((res) => res.json())
       .then(
         (result) => {
           console.log("fetch apiStock= ", result.quoteResponse.result);
-          let s = result.quoteResponse.result[0];
-          setStockData((oldArr) => [...oldArr, s]);
+          let newStockData = result.quoteResponse.result[0];
+          setStocksDataArr((oldArr) => [...oldArr, newStockData]);
         },
         (error) => {
           console.log("err post=", error);
@@ -72,9 +70,10 @@ export default function FavStocksPage() {
       );
   };
 
+  //DELETE Fav stock from DB:
   const deleteFav = (ticker) => {
     console.log(ticker);
-    setStockData((prevData) =>
+    setStocksDataArr((prevData) =>
       prevData.filter((stock) => stock.symbol !== ticker)
     );
     fetch(apiUrlFavorites + `/?userId=${user.Id}&ticker=${ticker}`, {
@@ -87,12 +86,14 @@ export default function FavStocksPage() {
       (res) => {
         console.log("res=", res);
         if (!res.ok) {
-          getFavStocks();
+          fetchFavoriteStocks();
           MySwal.fire({
             icon: "error",
             title: "Oops...",
             text: "Something went wrong",
           });
+        } else {
+          if (stocksDataArr.length === 0) setNoFavoriteStocks(true);
         }
       },
       (error) => {
@@ -102,40 +103,39 @@ export default function FavStocksPage() {
   };
 
   const renderFavorites = () => {
-    let rendered =
-      stockData.length === 0 ? (
-        <div style={{ textAlign: "center" }}>
-          <h3>
-            <br />
-            No favorite stocks
-            <br />
-          </h3>
-          <h5>can be added by searching stocks</h5>
-        </div>
-      ) : (
-        <div className="favCards">
-          {stockData.map((s) => (
-            <FavCard
-              key={s.symbol}
-              style={{ marginLeft: "5" }}
-              name={s.displayName}
-              symbol={s.symbol}
-              priceNow={s.postMarketPrice}
-              currency={s.currency}
-              openPrice={s.regularMarketOpen}
-              closePrice={s.regularMarketPrice}
-              prediction={0}
-              deleteFav={deleteFav}
-            />
-          ))}
-        </div>
-      );
+    let rendered = noFavoriteStocks ? (
+      <div style={{ textAlign: "center" }}>
+        <h3>
+          <br />
+          No favorite stocks
+          <br />
+        </h3>
+        <h5>can be added by searching stocks</h5>
+      </div>
+    ) : (
+      <div className="favCards">
+        {stocksDataArr.map((s) => (
+          <FavCard
+            key={s.symbol}
+            style={{ marginLeft: "5" }}
+            name={s.displayName}
+            symbol={s.symbol}
+            priceNow={s.postMarketPrice}
+            currency={s.currency}
+            openPrice={s.regularMarketOpen}
+            closePrice={s.regularMarketPrice}
+            prediction={0}
+            deleteFav={deleteFav}
+          />
+        ))}
+      </div>
+    );
 
     return rendered;
   };
 
   useEffect(() => {
-    getFavStocks();
+    fetchFavoriteStocks();
   }, []);
 
   return (

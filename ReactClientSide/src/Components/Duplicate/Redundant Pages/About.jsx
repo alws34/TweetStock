@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 //import { useNavigate } from "react-router-dom";
-import Stock from "./Stock";
+import StockChart from "../../Functional Components/StockChart";
 import { Button } from "@mui/material";
 import StockAbout from "./StockAbout";
 import { Row, Col } from "react-bootstrap";
@@ -26,12 +26,7 @@ export default function About() {
         },
       }
     )
-      .then((res) => {
-        // console.log('res=', res);
-        // console.log('res.status', res.status);
-        // console.log('res.ok', res.ok);
-        return res.json();
-      })
+      .then((res) => res.json())
       .then(
         (result) => {
           console.log("fetch apiStock= ", result.quoteResponse.result[0]);
@@ -86,7 +81,7 @@ export default function About() {
           </div>
         </Col>
         <Col style={{ flexGrow: 0 }}>
-          <Stock stock_name="Tesla" stock_ticker="TSLA" />
+          <StockChart stock_name="Tesla" stock_ticker="TSLA" />
         </Col>
       </Row>
     </div>
