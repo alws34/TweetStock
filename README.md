@@ -47,7 +47,7 @@ To achieve that, we developed an app that includes:<br>
 <img src="https://img.icons8.com/color/344/twitter.png" title="TwitterAPI" **alt="TwitterAPI" width="40" height="40"/>
 <img src="https://play-lh.googleusercontent.com/K4eJEI8ogLQO2MkjUKgxC8FNWL4I5etsbFw2OXwQJ9Uch4DGkW1gEdoQk_k-cmtD4F4" title="YahooFinanceAPI" **alt="Yahoo Finance API" width="40" height="40"/>
 <img src="https://img.icons8.com/color/452/numpy.png" title="Numpy" **alt="Numpy" width="40" height="40"/>
-<img src="https://pandas.pydata.org/static/img/pandas_white.svg" title="Pandas" **alt="Pandas" width="40" height="40"/>
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Pandas_logo.svg/300px-Pandas_logo.svg.png" title="Pandas" **alt="Pandas" width="40" height="40"/>
 <img src="https://img.icons8.com/color/344/tensorflow.png" title="TensorFlow" **alt="TensorFlow" width="40" height="40"/>
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Scikit_learn_logo_small.svg/1200px-Scikit_learn_logo_small.svg.png" title="SkLearn"**alt="SkLearn" width="40" height="40"/> 
 <img src="https://img.icons8.com/ios/452/flask.png" title="Flask" **alt="Flask" width="40" height="40"/>
