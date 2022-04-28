@@ -13,8 +13,9 @@ import { navPaths } from "../Configs/navPaths";
 
 export default function FavCard(props) {
   const navigate = useNavigate();
+  console.log(props.name)
   let name = props.name;
-  if (props.name.includes(".com")) {
+  if (props.name && props.name.includes(".com")) {
     name = props.name.slice(0, -4);
   }
   const getPriceNow = () => {
