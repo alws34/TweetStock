@@ -6,7 +6,7 @@ import StockDetailsPage from "./Components/Pages/StockDetailsPage";
 import SignUp from "./Components/Pages/SignUpPage";
 import SignIn from "./Components/Pages/SignInPage";
 import NewsPage from "./Components/Pages/NewsPage";
-import FavStocksPage from "./Components/Pages/FavStocksPage";
+import FavoriteStocksPage from "./Components/Pages/FavoriteStocksPage";
 import PopularTweets from "./Components/Pages/PopularTweetsPage";
 import { Routes, Route } from "react-router-dom";
 import { getRememberMe } from "./Components/Configs/getLoggedUser";
@@ -36,7 +36,10 @@ function App() {
         <Route path={navPaths["home"]} element={<HomePage />} />
         <Route path={navPaths["about"]} element={<StockDetailsPage />} />
         <Route path={navPaths["news"]} element={<NewsPage />} />
-        <Route path={navPaths["favorite stocks"]} element={<FavStocksPage />} />
+        <Route
+          path={navPaths["favorite stocks"]}
+          element={<FavoriteStocksPage />}
+        />
         <Route path={navPaths["popular tweets"]} element={<PopularTweets />} />
         <Route path={navPaths["sign up"]} element={<SignUp />} />
         <Route path={navPaths["sign in"]} element={<SignIn />} />

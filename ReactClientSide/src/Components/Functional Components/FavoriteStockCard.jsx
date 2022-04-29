@@ -11,7 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { navPaths } from "../Configs/navPaths";
 
-export default function FavCard(props) {
+export default function FavoriteStockCard(props) {
   const navigate = useNavigate();
   console.log(props.name);
   let name = props.name;

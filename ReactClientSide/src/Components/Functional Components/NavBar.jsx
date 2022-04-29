@@ -28,46 +28,11 @@ import { navPaths } from "../Configs/navPaths";
 
 const MySwal = withReactContent(Swal);
 
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: theme.spacing(3),
-    width: "auto",
-  },
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
-    },
-  },
-}));
-
 // keys must be lower case
 const navs = navPaths;
 
-// new
-export default function PrimarySearchAppBar() {
+export default function NavBar() {
   const navigate = useNavigate();
-
-  const [searchQuery, setSearchQuery] = useState(null);
-  const [anchorElNav, setAnchorElNav] = useState(null);
-  const [anchorElUser, setAnchorElUser] = useState(null);
 
   let u = getLoggedUser();
   let isLoggedIn = u.Id ? true : false;
@@ -78,12 +43,16 @@ export default function PrimarySearchAppBar() {
     ? ["Home", "News", "Favorite Stocks"]
     : ["Home", "News"];
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const searchStock = () => {
-    const apiUrlStocks = `https://stock-data-yahoo-finance-alternative.p.rapidapi.com/v6/finance/quote?symbols=${searchQuery}%2CETH-USD`;
+  const fetchStock = (ticker) => {
+    const apiUrlStocks = `https://stock-data-yahoo-finance-alternative.p.rapidapi.com/v6/finance/quote?symbols=${ticker}%2CETH-USD`;
+    const displayErrorMsg = (text, footer) => {
+      return MySwal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: text,
+        footer: footer,
+      });
+    };
     fetch(apiUrlStocks, {
       method: "GET",
       headers: {
@@ -106,7 +75,7 @@ export default function PrimarySearchAppBar() {
             if (s.displayName) {
               navigate(navs["about"], {
                 state: {
-                  ticker: searchQuery,
+                  ticker: ticker,
                   data: s,
                 },
               });
@@ -127,77 +96,44 @@ export default function PrimarySearchAppBar() {
         }
       );
   };
-
-  const displayErrorMsg = (text, footer) => {
-    return MySwal.fire({
-      icon: "error",
-      title: "Oops...",
-      text: text,
-      footer: footer,
-    });
-  };
-
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = (page) => {
-    try {
-      navigate(navs[page.toLowerCase()]);
-    } catch (error) {
-      console.log(error);
-    }
-    setAnchorElNav(null);
-  };
-
-  const logOut = () => {
-    localStorage.clear(); // makes the user a guest
-    navigate(navs["logout"]);
-    return MySwal.fire({
-      position: "center",
-      icon: "success",
-      title: "Successfuly logged out",
-      showConfirmButton: false,
-      timer: 800,
-    });
-  };
-
-  const handleCloseUserMenu = (setting) => {
-    setAnchorElUser(null);
-    //if (typeof setting != "string") return;
-    if (setting === "Logout") {
-      MySwal.fire({
-        title: "Are you sure?",
-        showDenyButton: false,
-        showCancelButton: true,
-        confirmButtonText: "Yes",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          logOut();
-        }
-      });
-    } else {
-      try {
-        navigate(navs[setting.toLowerCase()]);
-      } catch (error) {
-        return;
-      }
-    }
-  };
-
-  const capitalizeFirstLetter = (text) => {
-    return text && text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-  };
-
-  const renderSearch = () => {
+  // Search Bar
+  const SearchBar = (props) => {
+    const [searchQuery, setSearchQuery] = useState(null);
+    const handleSearchChange = (e) => {
+      setSearchQuery(e.target.value);
+    };
+    const Search = styled("div")(({ theme }) => ({
+      position: "relative",
+      borderRadius: theme.shape.borderRadius,
+      backgroundColor: alpha(theme.palette.common.white, 0.15),
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.common.white, 0.25),
+      },
+      marginRight: theme.spacing(2),
+      marginLeft: 0,
+      width: "100%",
+      [theme.breakpoints.up("sm")]: {
+        marginLeft: theme.spacing(3),
+        width: "auto",
+      },
+    }));
+    const StyledInputBase = styled(InputBase)(({ theme }) => ({
+      color: "inherit",
+      "& .MuiInputBase-input": {
+        padding: theme.spacing(1, 1, 1, 0),
+        // vertical padding + font size from searchIcon
+        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+        transition: theme.transitions.create("width"),
+        width: "100%",
+        [theme.breakpoints.up("md")]: {
+          width: "20ch",
+        },
+      },
+    }));
     return (
       <Search sx={{ paddingLeft: 0.5, marginLeft: 2 }}>
         <SearchIcon
-          onClick={searchStock}
+          onClick={() => props.onSubmit(searchQuery)}
           onMouseEnter={(e) => {
             e.target.style.background = "rgb(255, 255, 255, 0.5)";
             e.target.style.borderRadius = "5px";
@@ -214,13 +150,53 @@ export default function PrimarySearchAppBar() {
           style={{ width: "80%", paddingLeft: 1 }}
           sx={{ input: { paddingLeft: 0 } }}
           onChange={handleSearchChange}
-          onKeyPress={(e) => e.key === "Enter" && searchStock()}
+          onKeyPress={(e) => e.key === "Enter" && props.onSubmit(searchQuery)}
         />
       </Search>
     );
   };
-
-  const renderSettings = () => {
+  // Setting menu
+  const SettingsMenu = () => {
+    const [anchorElUser, setAnchorElUser] = useState(null);
+    const capitalizeFirstLetter = (text) => {
+      return text && text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    };
+    const logOut = () => {
+      localStorage.clear(); // makes the user a guest
+      navigate(navs["logout"]);
+      return MySwal.fire({
+        position: "center",
+        icon: "success",
+        title: "Successfuly logged out",
+        showConfirmButton: false,
+        timer: 800,
+      });
+    };
+    const handleCloseUserMenu = (setting) => {
+      setAnchorElUser(null);
+      //if (typeof setting != "string") return;
+      if (setting === "Logout") {
+        MySwal.fire({
+          title: "Are you sure?",
+          showDenyButton: false,
+          showCancelButton: true,
+          confirmButtonText: "Yes",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            logOut();
+          }
+        });
+      } else {
+        try {
+          navigate(navs[setting.toLowerCase()]);
+        } catch (error) {
+          return;
+        }
+      }
+    };
+    const handleOpenUserMenu = (event) => {
+      setAnchorElUser(event.currentTarget);
+    };
     return (
       <Box sx={{ flexGrow: 0 }}>
         <div
@@ -268,8 +244,20 @@ export default function PrimarySearchAppBar() {
       </Box>
     );
   };
-
-  const renderHamburgerNav = () => {
+  // Nav Items
+  const [anchorElNav, setAnchorElNav] = useState(null);
+  const handleOpenNavMenu = (event) => {
+    setAnchorElNav(event.currentTarget);
+  };
+  const handleCloseNavMenu = (page) => {
+    try {
+      navigate(navs[page.toLowerCase()]);
+    } catch (error) {
+      console.log(error);
+    }
+    setAnchorElNav(null);
+  };
+  const HamburgerNav = () => {
     return (
       <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
         <IconButton
@@ -310,7 +298,7 @@ export default function PrimarySearchAppBar() {
       </Box>
     );
   };
-  const renderOpenNav = () => {
+  const SprededNav = () => {
     return (
       <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
         {pages.map((page) => (
@@ -325,8 +313,8 @@ export default function PrimarySearchAppBar() {
       </Box>
     );
   };
-
-  const renderLogo = () => {
+  // Logo
+  const TweetStockLogo = () => {
     return (
       <Typography
         variant="h6"
@@ -343,15 +331,13 @@ export default function PrimarySearchAppBar() {
     <AppBar position="static">
       <Container maxWidth="xxl">
         <Toolbar disableGutters>
-          {renderLogo()}
+          <TweetStockLogo />
 
-          {renderHamburgerNav()}
+          <HamburgerNav />
+          <SprededNav />
+          <SearchBar onSubmit={fetchStock} />
 
-          {renderOpenNav()}
-
-          {renderSearch()}
-
-          {renderSettings()}
+          <SettingsMenu />
         </Toolbar>
       </Container>
     </AppBar>

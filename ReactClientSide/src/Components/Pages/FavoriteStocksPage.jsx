@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
 
-export default function FavStocksPage() {
+export default function FavoriteStocksPage() {
   const [stocksDataArr, setStocksDataArr] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [noFavoriteStocks, setNoFavoriteStocks] = useState(false);

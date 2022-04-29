@@ -29,7 +29,6 @@ export default function About() {
 
   const [favChecked, setFavChecked] = useState(false);
   const [stockData, setStockData] = useState(null);
-  //const [isPredHere, setIsPredHere] = useState(false);
   const [flaskResponse, setFlaskResponse] = useState(null);
   const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
@@ -57,7 +56,7 @@ export default function About() {
       });
   };
 
-  const getStockDetails = () => {
+  const fetchStockDetails = () => {
     fetch(
       `https://stock-data-yahoo-finance-alternative.p.rapidapi.com/v6/finance/quote?symbols=${ticker}%2CETH-USD`,
       {
@@ -85,7 +84,7 @@ export default function About() {
       );
   };
 
-  const IsFavStock = () => {
+  const isFavStock = () => {
     // let userId = JSON.parse(localStorage.getItem("user")).Id;
     // Fetch the favorite stocks from DB - for the current user
     fetch(apiUrlFavorites + `/?userId=${user.Id}`, {
@@ -95,7 +94,6 @@ export default function About() {
       }),
     })
       .then((res) => {
-        console.log("res=", res);
         return res.json();
       })
       .then(
@@ -171,36 +169,7 @@ export default function About() {
     }
   };
 
-  const renderStockAbout = () => {
-    return <StockDetails stockData={stockData} />;
-  };
-
-  const renderStockAboutPage = () => {
-    return (
-      <div>
-        <Row xs={1} md={2}>
-          <Col style={{ flexGrow: 0, marginTop: 30 }}>
-            <StockChart
-              stock_name={stockData.displayName}
-              stock_ticker={ticker}
-              isAbout={true}
-            />
-          </Col>
-          <Col
-            xs={1}
-            md={2}
-            style={{ width: "50%", flexGrow: 1, marginTop: 20 }}
-          >
-            <div>{renderStockAbout()}</div>
-          </Col>
-        </Row>
-        {isLoggedIn && renderLoggedUserFields()}
-        {predictionWithTweets()}
-      </div>
-    );
-  };
-
-  const predictionWithTweets = () => {
+  const PredictionWithTweets = () => {
     return (
       <div>
         <div
@@ -266,7 +235,7 @@ export default function About() {
     );
   };
 
-  const renderLoggedUserFields = () => {
+  const LoggedUserFields = () => {
     //console.clear();
     //console.log("renderLogged");
     return (
@@ -302,12 +271,12 @@ export default function About() {
             </div>
           </Col>
         </Row>
-        {renderPopUpChat()}
+        <PopUpChat />
       </div>
     );
   };
 
-  const renderPopUpChat = () => {
+  const PopUpChat = () => {
     return (
       <Sticky mode="bottom">
         <div
@@ -349,19 +318,41 @@ export default function About() {
     );
   };
 
-  useEffect(() => {
-    //console.clear();
-    console.log("use effect", ticker);
+  const RenderStockDetailsPage = () => {
+    return (
+      <div>
+        <Row xs={1} md={2}>
+          <Col style={{ flexGrow: 0, marginTop: 30 }}>
+            <StockChart
+              stock_name={stockData.displayName}
+              stock_ticker={ticker}
+              isAbout={true}
+            />
+          </Col>
+          <Col
+            xs={1}
+            md={2}
+            style={{ width: "50%", flexGrow: 1, marginTop: 20 }}
+          >
+            <div>
+              <StockDetails stockData={stockData} />
+            </div>
+          </Col>
+        </Row>
+        {isLoggedIn && <LoggedUserFields />}
+        <PredictionWithTweets />
+      </div>
+    );
+  };
 
-    if (!data) {
-      getStockDetails();
-      console.log("getting data");
-    } else {
-      setStockData(data);
-    }
+  useEffect(() => {
+    console.clear();
+    console.log("use effect", ticker);
+    data ? setStockData(data) : fetchStockDetails();
+
     console.log("is logged", isLoggedIn);
     if (isLoggedIn) {
-      IsFavStock();
+      isFavStock();
     }
     fetchFlaskStockPrediction(ticker);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -373,7 +364,7 @@ export default function About() {
       {stockData === undefined || stockData === null ? (
         <LoadingCircle />
       ) : (
-        renderStockAboutPage()
+        <RenderStockDetailsPage />
       )}
     </div>
   );
