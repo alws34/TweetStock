@@ -24,7 +24,7 @@ import "../Styles/PopupChat.css";
 import Sticky from "react-sticky-el";
 import PredTable from "../Functional Components/PredictionTable";
 
-export default function About() {
+export default function StockDetailsPage() {
   const navigate = useNavigate();
 
   const [favChecked, setFavChecked] = useState(false);
