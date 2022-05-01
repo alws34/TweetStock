@@ -425,6 +425,8 @@ def save_graph(history, path, name):
 
 
 def scale_data(df, target='price_difference', scaling='min_max'):
+    def is_sentiment_feature(feature):
+        return feature != "Tweet_Sentiment" and feature != "Positivity" and feature != "Neutral" and feature != "Negativity"
     scaled_df = pd.DataFrame(columns=df.columns)
     df = df.groupby(by=['Date'])
     for date in df:
@@ -435,7 +437,7 @@ def scale_data(df, target='price_difference', scaling='min_max'):
             if feature != 'Date' and feature != target:
                 if scaling == 'min_max': scaler = MinMaxScaler()
                 elif scaling == 'standard': scaler = StandardScaler()
-                f = date[1][feature]
+                f = feature == date[1][feature] * date[1]["Tweet_Sentiment"] if not is_sentiment_feature(feature) else date[1][feature] 
                 scaled_feature = scaler.fit_transform(
                     np.array(f).reshape(-1, 1))
                 to_append[feature] = scaled_feature.mean()
@@ -560,7 +562,7 @@ def Auto_Run_Model(model_params):
 def run_auto_test():
     test_threshold = threshold
     tickers = ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT']
-    feature_sets = [features, features2]
+    feature_sets = [features]#, features2]
     actv_funcs_all = ['relu', 'tanh', 'sigmoid']
     actv_funcs_last = ['softmax', 'sigmoid']  # ,'relu'
     loss_funcs = ['binary_crossentropy', 'mean_squared_error']

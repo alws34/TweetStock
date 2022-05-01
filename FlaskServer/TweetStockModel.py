@@ -12,14 +12,12 @@ import tweepy  # tweeter API
 from pathlib import Path
 import math
 
-TWITTER_VERSION = 2  # twitter version.
-N_PAST = 1  # days on which the model was train to precict based on.
-MAX_TWEETS_RESULTS = 100  # max results for first tweets query.
-MAX_USER_TWEETS_RESULT = 100  # max results for use engagement tweets
-MIN_TWEET_STATS_SUM = 25   # min tweet filtering sum of stats
-MIN_USER_FOLLOWERS = 100  # min user followers num to be included
-
-# static id for each TweetStockModel obj (concurrent api requests)
+TWITTER_VERSION = 2             # twitter version.
+N_PAST = 1                      # days on which the model was train to precict based on.
+MAX_TWEETS_RESULTS = 100        # max results for first tweets query.
+MAX_USER_TWEETS_RESULT = 100    # max results for use engagement tweets
+MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
+MIN_USER_FOLLOWERS = 100        # min user followers num to be included
 
 
 class TweetStockModel:
@@ -73,7 +71,8 @@ class TweetStockModel:
 
         return start_date.isoformat('T')+'Z', end_date.isoformat('T')+'Z'
 
-    def dict_to_df(self, data):
+    def twitter_dict_res_to_df(self, data):
+        #print(data)
         try:
             keys = data[0].keys()
             temp = {}
@@ -82,19 +81,18 @@ class TweetStockModel:
                 for d in data:
                     temp[key].append(d[key])
         except Exception as err:
-            print('dict_to_df()', err)
+            print('twitter_dict_res_to_df()', err)
             return None
         # print(temp)
         return pd.DataFrame.from_dict(temp)
 
-    def get_df_mean(self, df, n_past=N_PAST):
+    def get_df_mean_old(self, df, n_past=N_PAST): #replaced by get_scale_and_mean
         if n_past == 1:
-            to_append = {}
+            df_dict = {}
             for col in df:
-                to_append[col] = df[col].mean()
-            new_df = pd.DataFrame(columns=df.columns).append(
-                to_append, ignore_index=True)
-            return new_df
+                df_dict[col] = []
+                df_dict[col].append(df[col].mean())
+            return pd.DataFrame.from_dict(df_dict)
         else:
             return df.groupby(by='date').mean().reset_index()
 
@@ -104,11 +102,13 @@ class TweetStockModel:
         elif scaling == 'standard':
             scaler = StandardScaler()
         if n_past == 1:
-            to_append = {}
+            df_dict = {}
             for col in df.columns:
-                to_append[col] = scaler.fit_transform(
-                    np.array(df[col]).reshape(-1, 1)).mean()
-            return pd.DataFrame(columns=df.columns).append(to_append, ignore_index=True)
+                df_dict[col] = []
+                f = df[col] * df["s_compound"] if col != "s_compound" else df[col] 
+                df_dict[col].append(scaler.fit_transform(
+                    np.array(f).reshape(-1, 1)).mean())
+            return pd.DataFrame.from_dict(df_dict)
         else:
             return None
 
@@ -293,7 +293,6 @@ class TweetStockModel:
         # 2 Get df mean
         #print('before mean', df, len(df), df.shape)
         df = self.get_scale_and_mean(df)
-        #df = self.get_df_mean(df)
         #print('after mean', df, len(df), df.shape)
 
         # 3 Create sequence from df
@@ -314,99 +313,119 @@ class TweetStockModel:
         result = 1 if pred[0][1] >= pred[0][0] else -1
         return result
 
-    # Step 7
-    def generate_result_obj(self, tweets_data, prepared_data, prediction):
-        print("generate_result_obj()","\n",prepared_data)
-
-        sql_Ticker_and_Pred_Table_DF = pd.DataFrame({
-            'ticker': [self.ticker],
-            'prediction': [prediction]
-        })
-
-        sql_Ticker_Stats_Table_DICT = {
+    # Step 7.0
+    def get_stats_table_sql_result_old(self, tweets_dict):
+        # init dict
+        res_dict = {
             'ticker': [],
             'tweet_id': [],
             'user_engagement': [],
             'tweet_likes': [],
             'tweet_replies': [],
             'tweet_retweets': [],
+            'sentiment_pos': [],
+            'sentiment_neu': [],
+            'sentiment_neg': [],
+            'sentiment_compound': []
         }
-        if self.features_version == 1:
-            sql_Ticker_Stats_Table_DICT['sentiment_pos'], sql_Ticker_Stats_Table_DICT[
-                'sentiment_neu'], sql_Ticker_Stats_Table_DICT['sentiment_neg'] = [], [], []
-        elif self.features_version == 2:
-            sql_Ticker_Stats_Table_DICT['sentiment'] = []
 
-        sql_Ticker_Stats_Table_DF = pd.DataFrame(sql_Ticker_Stats_Table_DICT)
-
-        for tweet in tweets_data:
-            temp_sql_Ticker_Stats_Table_DICT = {
-                'ticker': self.ticker,
-                'tweet_id': tweet['tweet_id'],
-                'user_engagement': tweet['u_engagement'],
-                'tweet_likes': tweet['n_likes'],
-                'tweet_replies': tweet['n_replies'],
-                'tweet_retweets': tweet['n_retweets'],
-            }
-
+        # push values
+        for tweet in tweets_dict:
+            res_dict['ticker'].append(self.ticker)
+            res_dict['tweet_id'].append(tweet['tweet_id'])
+            res_dict['user_engagement'].append(tweet['u_engagement'])
+            res_dict['tweet_likes'].append(tweet['n_likes'])
+            res_dict['tweet_replies'].append(tweet['n_replies'])
+            res_dict['tweet_retweets'].append(tweet['n_retweets'])
             if self.features_version == 1:
-                sentiment = {
-                    'pos': tweet['s_pos'],
-                    'neg': tweet['s_neg'],
-                    'neu': tweet['s_neu']
-                }
-
-                temp_sql_Ticker_Stats_Table_DICT['sentiment_pos'], temp_sql_Ticker_Stats_Table_DICT[
-                    'sentiment_neu'], temp_sql_Ticker_Stats_Table_DICT['sentiment_neg'] = tweet['s_pos'], tweet['s_neu'], tweet['s_neg']
-
+                res_dict['sentiment_pos'].append(tweet['s_pos'])
+                res_dict['sentiment_neu'].append(tweet['s_neu'])
+                res_dict['sentiment_neg'].append(tweet['s_neg'])
+                res_dict['sentiment_compound'].append(None)
             elif self.features_version == 2:
-                sentiment = tweet['s_compound']
-                temp_sql_Ticker_Stats_Table_DICT['sentiment'] = sentiment
-
-            sql_Ticker_Stats_Table_DF = sql_Ticker_Stats_Table_DF.append(
-                temp_sql_Ticker_Stats_Table_DICT, ignore_index=True)
-
-        return sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF
-
+                res_dict['sentiment_pos'].append(None)
+                res_dict['sentiment_neu'].append(None)
+                res_dict['sentiment_neg'].append(None)
+                res_dict['sentiment_compound'].append(tweet['s_compound'])
+        return pd.DataFrame.from_dict(res_dict)
+    def get_stats_table_sql_result(self, tweets_df):
+        features = ['tweet_id', 'u_engagement', 'n_likes', 'n_replies', 'n_retweets', 's_pos', 's_neu', 's_neg', 's_compound']
+        renames = {
+            'u_engagement' : 'user_engagement',
+            'n_likes': 'tweet_likes',
+            'n_replies': 'tweet_replies',
+            'n_retweets': 'tweet_retweets',
+            's_pos': 'sentiment_pos',
+            's_neu':'sentiment_neut',
+            's_neg':'sentiment_neg',
+            's_compound':'sentiment_compound'
+        }
+        return tweets_df[features].rename(columns=renames)
+    # Step 7.1
+    def get_pred_table_sql_result(self, prepared_df, prediction):
+        # init dict
+        res_dict = {}
+        # push values
+        res_dict['ticker'] = [self.ticker for i in range(len(prepared_df))]
+        res_dict['prediction'] = [prediction for i in range(len(prepared_df))]
+        for col in prepared_df:
+            res_dict[col] = []
+            for val in prepared_df[col]:
+                res_dict[col].append(val)
+        return pd.DataFrame.from_dict(res_dict)
+    
     # Pred Function
-
     def get_prediction(self):
         # Step 1
         tweets = self.get_tweets(self.ticker, max_results=MAX_TWEETS_RESULTS,
                                  n_past=N_PAST, twitter_version=TWITTER_VERSION)
         if tweets == None:
-            print("Couldnt get tweets @get_tweets")
+            print("Couldnt get tweets @get_tweets()")
             return
         # Step 2
         tweets = self.get_sentiment(tweets)
-
+        if tweets == None:
+            print("Couldnt get sentiment @get_sentiment()")
+            return
         # Step 3
         tweets = self.filter_tweets(
             tweets, threshold=MIN_TWEET_STATS_SUM)
-
+        if len(tweets) == 0:
+            print("Filtered all tweets @filter_tweets()")
+            return
         # Step 4
         tweets = self.get_users_engagement(tweets)
-
+        if tweets == None:
+            print("Couldnt get use engagement @get_user_engagement()")
+            return
         # Step 5
         tweets = self.filter_users(tweets, threshold=MIN_USER_FOLLOWERS)
+        if len(tweets) == 0:
+            print("Filtered all users @filter_users()")
+            return
 
         # Step 6.0 Transform from dictionary to df for easier data handling
-        df = self.dict_to_df(tweets)
-
+        tweets_df = self.twitter_dict_res_to_df(tweets)
+        if tweets_df == None:
+            print("Couldnt convert twitter res dict to df @twitter_dict_res_to_df()")
+            return
+        sql_Ticker_Stats_Table_DF = self.get_stats_table_sql_result(tweets_df=tweets_df)
         # Step 6.1
-        preped_model, preped_df = self.prep_data(df)
+        preped_for_model, preped_df = self.prep_data(tweets_df)
+        # Step 6.2
+        pred = self.get_pred(preped_for_model)
+        sql_Ticker_and_Pred_Table_DF = self.get_pred_table_sql_result(prepared_df=preped_df, prediction=pred)
 
-        pred = self.get_pred(preped_model)
-        # print(
-        #     f"The Final Prediction for {self.ticker} as pair of {self.ip}'s Request is: {pred}")
-        sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = self.generate_result_obj(
-            tweets_data=tweets, preared_data=preped_df, prediction=pred)
 
+        print("pred","\n",sql_Ticker_and_Pred_Table_DF)
+        print("tweets","\n",sql_Ticker_Stats_Table_DF)
         return sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF
 
 
-# if __name__ == "__main__":
-#     model = TweetStockModel(
-#     model_path=f'./SelectedModels/AAPL/AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
-#     model_ticker="AAPL",
-#     features_version=1)
+if __name__ == "__main__":
+    model = TweetStockModel(
+    model_path=f'/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
+    model_ticker="AAPL",
+    features_version=1)
+    sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
+
