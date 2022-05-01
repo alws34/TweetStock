@@ -1,7 +1,7 @@
 import React from "react";
 import "../Styles/HeaderStyle.css";
 
-export default function EHeader(props) {
+export default function PageHeader(props) {
   return (
     <div className="PageHeader">
       <main>

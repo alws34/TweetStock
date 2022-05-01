@@ -102,7 +102,7 @@ export default function FavoriteStocksPage() {
     );
   };
 
-  const renderFavorites = () => {
+  const Favorites = () => {
     let rendered = noFavoriteStocks ? (
       <div style={{ textAlign: "center" }}>
         <h3>
@@ -141,7 +141,7 @@ export default function FavoriteStocksPage() {
   return (
     <div>
       <EHeader text={"Favorite Stocks"} />
-      {isLoading ? <LoadingCirle /> : renderFavorites()}
+      {isLoading ? <LoadingCirle /> : <Favorites />}
     </div>
   );
 }
