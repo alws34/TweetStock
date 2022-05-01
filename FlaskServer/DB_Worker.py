@@ -65,7 +65,7 @@ def update_db(models=MODELS):
         # Run the model
         model = tsm(
             model_path=models[ticker]['path'], model_ticker=ticker, features_version=models[ticker]['features'])
-        client_result, sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
+        sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
         # Update result
         result['pred_df'].append(
             sql_Ticker_and_Pred_Table_DF, ignore_index=True)
@@ -125,12 +125,3 @@ def is_valid_day():
 # ----------------------------------------------------------------------------------------------- #
 if __name__ == '__main__':
     Main()
-
-    #     # get_npm stprediction()
-    #     app.run(host='0.0.0.0', port=SERVER_PORT, debug=True, use_reloader=False)
-
-    # while True:
-    #     now = datetime.now()
-    #     if now.hour % 4 == 0 :
-    #         runscraper()
-    #     time.sleep(3600)

@@ -43,7 +43,7 @@ function App() {
         <Route path={navPaths["popular tweets"]} element={<PopularTweets />} />
         <Route path={navPaths["sign up"]} element={<SignUp />} />
         <Route path={navPaths["sign in"]} element={<SignIn />} />
-        <Route path={navPaths["profile"]} element={<ProfilePage />} />{" "}
+        <Route path={navPaths["profile"]} element={<ProfilePage />} />
       </Routes>
     </div>
   );
