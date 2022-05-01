@@ -19,7 +19,7 @@ To achieve that, we developed an app that includes:<br>
 
 <!--About This Project -->
 
-### :hammer_and_wrench: Languages, Tools, Technologies & Enviroments used in this project :
+### :hammer_and_wrench: Languages, Tools, Technologies & Environments used in this project :
 
 <div>
   <img src="https://img.icons8.com/color/30/c-sharp-logo.png" title="C#" **alt="C#" width="40" height="40"/>
