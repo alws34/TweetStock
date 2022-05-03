@@ -36,7 +36,6 @@ export default function NavBar() {
 
   let u = getLoggedUser();
   let isLoggedIn = u.Id ? true : false;
-  console.log(u);
 
   const settings = isLoggedIn ? ["Profile", "Logout"] : ["Sign In", "Sign Up"];
   const pages = isLoggedIn
@@ -96,65 +95,7 @@ export default function NavBar() {
         }
       );
   };
-  // Search Bar
-  const SearchBar = (props) => {
-    const [searchQuery, setSearchQuery] = useState(null);
-    const handleSearchChange = (e) => {
-      setSearchQuery(e.target.value);
-    };
-    const Search = styled("div")(({ theme }) => ({
-      position: "relative",
-      borderRadius: theme.shape.borderRadius,
-      backgroundColor: alpha(theme.palette.common.white, 0.15),
-      "&:hover": {
-        backgroundColor: alpha(theme.palette.common.white, 0.25),
-      },
-      marginRight: theme.spacing(2),
-      marginLeft: 0,
-      width: "100%",
-      [theme.breakpoints.up("sm")]: {
-        marginLeft: theme.spacing(3),
-        width: "auto",
-      },
-    }));
-    const StyledInputBase = styled(InputBase)(({ theme }) => ({
-      color: "inherit",
-      "& .MuiInputBase-input": {
-        padding: theme.spacing(1, 1, 1, 0),
-        // vertical padding + font size from searchIcon
-        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-        transition: theme.transitions.create("width"),
-        width: "100%",
-        [theme.breakpoints.up("md")]: {
-          width: "20ch",
-        },
-      },
-    }));
-    return (
-      <Search sx={{ paddingLeft: 0.5, marginLeft: 2 }}>
-        <SearchIcon
-          onClick={() => props.onSubmit(searchQuery)}
-          onMouseEnter={(e) => {
-            e.target.style.background = "rgb(255, 255, 255, 0.5)";
-            e.target.style.borderRadius = "5px";
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = "none";
-          }}
-        />
-        <StyledInputBase
-          id="navSearch"
-          placeholder="Search Stock…"
-          inputProps={{ "aria-label": "search" }}
-          input={{ paddingLeft: 0 }}
-          style={{ width: "80%", paddingLeft: 1 }}
-          sx={{ input: { paddingLeft: 0 } }}
-          onChange={handleSearchChange}
-          onKeyPress={(e) => e.key === "Enter" && props.onSubmit(searchQuery)}
-        />
-      </Search>
-    );
-  };
+
   // Setting menu
   const SettingsMenu = () => {
     const [anchorElUser, setAnchorElUser] = useState(null);
@@ -313,6 +254,68 @@ export default function NavBar() {
       </Box>
     );
   };
+  // Search Bar
+  const Search = styled("div")(({ theme }) => ({
+    position: "relative",
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.common.white, 0.25),
+    },
+    marginRight: theme.spacing(2),
+    marginLeft: 0,
+    width: "100%",
+    [theme.breakpoints.up("sm")]: {
+      marginLeft: theme.spacing(3),
+      width: "auto",
+    },
+  }));
+  const StyledInputBase = styled(InputBase)(({ theme }) => ({
+    color: "inherit",
+    "& .MuiInputBase-input": {
+      padding: theme.spacing(1, 1, 1, 0),
+      // vertical padding + font size from searchIcon
+      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+      transition: theme.transitions.create("width"),
+      width: "100%",
+      [theme.breakpoints.up("md")]: {
+        width: "20ch",
+      },
+    },
+  }));
+  const SearchBar = (props) => {
+    console.log("test");
+
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const inputHandler = (e) => {
+      setSearchQuery(e.target.value.toUpperCase());
+    };
+    return (
+      <Search sx={{ paddingLeft: 0.5, marginLeft: 2 }}>
+        <SearchIcon
+          onClick={() => props.onSubmit(searchQuery)}
+          onMouseEnter={(e) => {
+            e.target.style.background = "rgb(255, 255, 255, 0.5)";
+            e.target.style.borderRadius = "5px";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = "none";
+          }}
+        />
+        <StyledInputBase
+          id="navSearch"
+          placeholder="Search Stock…"
+          inputProps={{ "aria-label": "search" }}
+          input={{ paddingLeft: 0 }}
+          style={{ width: "80%", paddingLeft: 1 }}
+          sx={{ input: { paddingLeft: 0 } }}
+          onChange={inputHandler}
+          onKeyPress={(e) => e.key === "Enter" && props.onSubmit(searchQuery)}
+        />
+      </Search>
+    );
+  };
   // Logo
   const TweetStockLogo = () => {
     return (
@@ -335,7 +338,7 @@ export default function NavBar() {
 
           <HamburgerNav />
           <SprededNav />
-          <SearchBar onSubmit={fetchStock} />
+          <SearchBar onSubmit={(searchQuery) => fetchStock(searchQuery)} />
 
           <SettingsMenu />
         </Toolbar>
