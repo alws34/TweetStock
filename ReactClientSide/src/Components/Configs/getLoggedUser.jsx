@@ -20,6 +20,11 @@ export const getLoggedUser = () => {
   return logged_user;
 };
 
+export const isLoggedUser = () => {
+  let u = getLoggedUser();
+  return u.Id != null;
+};
+
 export const getRememberMe = () => {
   return (
     localStorage["TweetStock"] &&
@@ -28,7 +33,7 @@ export const getRememberMe = () => {
 };
 
 export const saveUserLocalStorage = (user, remember_me) => {
-  console.log(user)
+  console.log(user);
   localStorage.setItem(
     "TweetStock",
     JSON.stringify({

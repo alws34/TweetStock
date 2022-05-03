@@ -9,7 +9,7 @@ import {
   apiUrlFlask,
 } from "../Configs/apiUrlsKeys";
 import { navPaths } from "../Configs/navPaths";
-import { getLoggedUser } from "../Configs/getLoggedUser";
+import { getLoggedUser, isLoggedUser } from "../Configs/getLoggedUser";
 import StockChart from "../Functional Components/StockChart";
 import StockDetails from "../Functional Components/StockDetails";
 import StockChat from "../Functional Components/StockChat";
@@ -32,8 +32,8 @@ export default function StockDetailsPage() {
   const [flaskResponse, setFlaskResponse] = useState(null);
   const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
+  const isLoggedIn = isLoggedUser();
   const user = getLoggedUser();
-  const isLoggedIn = user.Id ? true : false;
   let ticker = useLocation().state.ticker;
   let data = useLocation().state.data;
   const fav = {

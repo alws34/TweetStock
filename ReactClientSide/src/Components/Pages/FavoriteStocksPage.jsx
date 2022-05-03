@@ -4,7 +4,7 @@ import EHeader from "../Functional Components/PageHeader";
 // import { Container, Row, Col } from 'react-bootstrap';
 import "../Styles/FavCardsStyle.css";
 import { apiUrlFavorites, rapidApiKey } from "../Configs/apiUrlsKeys";
-import { getLoggedUser } from "../Configs/getLoggedUser";
+import { getLoggedUser, isLoggedUser } from "../Configs/getLoggedUser";
 import LoadingCirle from "../Functional Components/LoadingCircle";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -14,6 +14,7 @@ export default function FavoriteStocksPage() {
   const [stocksDataArr, setStocksDataArr] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [noFavoriteStocks, setNoFavoriteStocks] = useState(false);
+
   const user = getLoggedUser();
 
   const fetchFavoriteStocks = () => {
@@ -135,6 +136,9 @@ export default function FavoriteStocksPage() {
   };
 
   useEffect(() => {
+    if (!isLoggedUser()) {
+      return <h1> No logged used user to fetch stocks to... </h1>;
+    }
     fetchFavoriteStocks();
   }, []);
 
