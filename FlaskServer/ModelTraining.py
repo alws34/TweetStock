@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 # from matplotlib import inline
 import datetime as dt
+from gc import collect
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -28,10 +29,10 @@ paths = {
             'Model_file_path': ''
             },
     'alon': {
-        'users_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\Self Collected\\",
-        'stocks_2019_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\StockMarketData\\",
-        'tweets_2019_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\TweetsAboutTopCompanies\\",
-        'from_the_web': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\\",
+        'users_path': "D:\Google Drive\Alon\לימודים\Final Project\Data\Self Collected\\",
+        'stocks_2019_path': "D:\Google Drive\Alon\לימודים\Final Project\Data\From the Web\StockMarketData\\",
+        'tweets_2019_path': "D:\Google Drive\Alon\לימודים\Final Project\Data\From the Web\TweetsAboutTopCompanies\\",
+        'from_the_web': "D:\Google Drive\Alon\לימודים\Final Project\Data\From the Web\\",
         'Model_file_path': ''
     },
     'pi': {  # DOWNLOAD!!!! THE FILES DO NOT COPY AND PASTE THEM
@@ -424,25 +425,65 @@ def save_graph(history, path, name):
     plt.savefig(path + name+'_graph.png')
 
 
-def scale_data(df, target='price_difference', scaling='min_max'):
+def scale_data_old(df, target='price_difference', scaling='min_max'):  # Replaced by scale_data()
+    def is_scalable_feature(feature):
+        return feature != 'Date' and feature != target
+
     def is_sentiment_feature(feature):
-        return feature != "Tweet_Sentiment" and feature != "Positivity" and feature != "Neutral" and feature != "Negativity"
+        return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
     scaled_df = pd.DataFrame(columns=df.columns)
     df = df.groupby(by=['Date'])
+
     for date in df:
         to_append = {}
         to_append['Date'] = date[0]
         to_append[target] = date[1][target].iloc[0]
         for feature in scaled_df.columns:
-            if feature != 'Date' and feature != target:
-                if scaling == 'min_max': scaler = MinMaxScaler()
-                elif scaling == 'standard': scaler = StandardScaler()
-                f = feature == date[1][feature] * date[1]["Tweet_Sentiment"] if not is_sentiment_feature(feature) else date[1][feature] 
-                scaled_feature = scaler.fit_transform(
-                    np.array(f).reshape(-1, 1))
-                to_append[feature] = scaled_feature.mean()
+            if is_scalable_feature(feature):
+                if scaling == 'min_max':
+                    scaler = MinMaxScaler()
+                elif scaling == 'standard':
+                    scaler = StandardScaler()
+
+                to_append = date[1][feature] * date[1]["Tweet_Sentiment"] if not is_sentiment_feature(
+                    feature) else date[1][feature]
+
+                to_append[feature] = scaler.fit_transform(
+                    np.array(to_append).reshape(-1, 1)).mean()
+
         scaled_df = scaled_df.append(to_append, ignore_index=True)
     return scaled_df
+
+
+def scale_data(df, target='price_difference', scaling='min_max'):
+    def is_scalable_feature(feature):
+        return feature != 'Date' and feature != target
+
+    def is_sentiment_feature(feature):
+        return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
+    columns = df.columns
+    df = df.groupby(by=['Date'])
+    dates_dict = {}
+    for col in columns:
+        dates_dict[col] = []
+
+    for date in df:
+        dates_dict['Date'].append(date[0])
+        dates_dict[target].append(date[1][target].iloc[0])
+        for col in columns:
+            if is_scalable_feature(col):
+                if scaling == 'min_max':
+                    scaler = MinMaxScaler()
+                elif scaling == 'standard':
+                    scaler = StandardScaler()
+
+                to_append = date[1][col] * date[1]["Tweet_Sentiment"] if not is_sentiment_feature(
+                    col) else date[1][col]
+                print("@TweetStockModel/scale_df()/to_append=", to_append)
+                dates_dict[col].append(scaler.fit_transform(
+                    np.array(to_append).reshape(-1, 1)).mean())
+
+    return pd.DataFrame.from_dict(dates_dict)
 
 
 def split_data(dnn_df, version=1):
@@ -562,7 +603,7 @@ def Auto_Run_Model(model_params):
 def run_auto_test():
     test_threshold = threshold
     tickers = ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT']
-    feature_sets = [features]#, features2]
+    feature_sets = [features]  # , features2]
     actv_funcs_all = ['relu', 'tanh', 'sigmoid']
     actv_funcs_last = ['softmax', 'sigmoid']  # ,'relu'
     loss_funcs = ['binary_crossentropy', 'mean_squared_error']
@@ -611,13 +652,12 @@ after we finished training and testing the model- run this cell in order to save
 
 
 def savetimes(num, isstart):
-
     if isstart:
         mode = 'Started at: '
     else:
         mode = 'Ended at: '
     now = datetime.now()
-    with open(f'D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Logs\\test{num}.txt', 'a+') as f:
+    with open(f'Logs\\test{num}.txt', 'a+') as f:
         f.write(f'TRY {num}\t{mode}{now}\n')
 
 
@@ -635,16 +675,16 @@ def save_model(model, name, params, history):
 
 
 threshold = 0.55
-try_num = 3
+try_num = 5
 path = f"D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\{try_num}\\"
 
 
 def main():
     global merged_df
-    savetimes(try_num, True)
+    #savetimes(try_num, True)
     merged_df = init_data(scale_and_multiply=False)
     run_auto_test()
-    savetimes(int(try_num), False)
+    #savetimes(int(try_num), False)
 
 
 if __name__ == '__main__':
