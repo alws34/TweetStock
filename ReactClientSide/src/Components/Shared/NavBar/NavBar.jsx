@@ -1,7 +1,10 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
-import { styled, alpha } from "@mui/material/styles";
-import Logo from "./TweetStockLogo";
+import { useState } from "react";
+import "./NavBarStyle.css";
+import Logo from "../Logo/TweetStockLogo";
+import { getLoggedUser } from "../../Configs/getLoggedUser";
+import { rapidApiKey } from "../../Configs/apiUrlsKeys";
+import { navPaths } from "../../Configs/navPaths";
 import {
   AppBar,
   Box,
@@ -16,15 +19,12 @@ import {
   Menu,
   Avatar,
 } from "@mui/material";
+import { styled, alpha } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { getLoggedUser } from "../Configs/getLoggedUser";
-import { rapidApiKey } from "../Configs/apiUrlsKeys";
-import "../Styles/NavBarStyle.css";
-import { navPaths } from "../Configs/navPaths";
 
 const MySwal = withReactContent(Swal);
 

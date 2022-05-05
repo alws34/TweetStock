@@ -2,7 +2,7 @@ import { React, useEffect, useState, useMemo } from "react";
 import Chart from "react-apexcharts";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { navPaths } from "../Configs/navPaths";
+import { navPaths } from "../../Configs/navPaths";
 
 const round = (number) => {
   return number ? +number.toFixed(2) : null;
@@ -101,6 +101,7 @@ export default function StockChart(props) {
     return () => {
       clearTimeout(timeoutId);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.stock_ticker]);
 
   const direction = useMemo(

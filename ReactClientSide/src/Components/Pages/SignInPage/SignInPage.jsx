@@ -1,4 +1,9 @@
 import * as React from "react";
+import { useState } from "react";
+import Copyright from "../../Shared/UserDetails/Copyright";
+import { apiUrlUsers } from "../../Configs/apiUrlsKeys";
+import { saveUserLocalStorage } from "../../Configs/getLoggedUser";
+import { navPaths } from "../../Configs/navPaths";
 import {
   Avatar,
   Button,
@@ -14,15 +19,9 @@ import {
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
-import { apiUrlUsers } from "../Configs/apiUrlsKeys";
-import { saveUserLocalStorage } from "../Configs/getLoggedUser";
-import { navPaths } from "../Configs/navPaths";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import Copyright from "../Functional Components/Copyright";
-
 
 const MySwal = withReactContent(Swal);
 

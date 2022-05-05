@@ -1,4 +1,5 @@
 import * as React from "react";
+import { navPaths } from "../../../Configs/navPaths";
 import {
   Button,
   Card,
@@ -9,7 +10,6 @@ import {
   CardContent,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { navPaths } from "../Configs/navPaths";
 
 export default function FavoriteStockCard(props) {
   const navigate = useNavigate();

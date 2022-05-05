@@ -1,16 +1,16 @@
 import "./App.css";
 import React, { useEffect } from "react";
-import NavBar from "./Components/Functional Components/NavBar";
-import HomePage from "./Components/Pages/HomePage";
-import StockDetailsPage from "./Components/Pages/StockDetailsPage";
-import SignUp from "./Components/Pages/SignUpPage";
-import SignIn from "./Components/Pages/SignInPage";
-import NewsPage from "./Components/Pages/NewsPage";
-import FavoriteStocksPage from "./Components/Pages/FavoriteStocksPage";
-import PopularTweets from "./Components/Pages/PopularTweetsPage";
+import NavBar from "./Components/Shared/NavBar/NavBar";
+import HomePage from "./Components/Pages/HomePage/HomePage";
+import StockDetailsPage from "./Components/Pages/StockDetailsPage/StockDetailsPage";
+import SignUp from "./Components/Pages/SignUpPage/SignUpPage";
+import SignIn from "./Components/Pages/SignInPage/SignInPage";
+import NewsPage from "./Components/Pages/NewsPage/NewsPage";
+import FavoriteStocksPage from "./Components/Pages/FavoriteStocksPage/FavoriteStocksPage";
+import PopularTweets from "./Components/Pages/PopularTweetsPage/PopularTweetsPage";
 import { Routes, Route } from "react-router-dom";
 import { getRememberMe } from "./Components/Configs/getLoggedUser";
-import ProfilePage from "./Components/Pages/ProfilePage";
+import ProfilePage from "./Components/Pages/ProfilePage/ProfilePage";
 import { navPaths } from "./Components/Configs/navPaths";
 
 function App() {

@@ -1,4 +1,13 @@
-import * as React from "react";
+import { React, useState } from "react";
+import Copyright from "../../Shared/UserDetails/Copyright";
+import Camera from "../../Shared/Camera/Camera";
+import { apiUrlUsers } from "../../Configs/apiUrlsKeys";
+import { navPaths } from "../../Configs/navPaths";
+import {
+  getLoggedUser,
+  getRememberMe,
+  saveUserLocalStorage,
+} from "../../Configs/getLoggedUser";
 import {
   Avatar,
   Button,
@@ -8,101 +17,123 @@ import {
   Box,
   Typography,
   Container,
-  Link,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useState } from "react";
-import { apiUrlUsers } from "../Configs/apiUrlsKeys";
-//import { getRememberMe, saveUserLocalStorage } from "../Configs/getLoggedUser";
-import { navPaths } from "../Configs/navPaths";
-import CountrySelect from "../Functional Components/CountrySelect";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import Camera from "../Functional Components/Camera";
-import Copyright from "../Functional Components/Copyright";
+
+//import CountrySelect from "../Functional Components/CountrySelect";
 
 const MySwal = withReactContent(Swal);
 
 const default_profile_img =
   "https://www.pngkit.com/png/full/126-1262807_instagram-default-profile-picture-png.png";
+
 const theme = createTheme();
 
-
-export default function SignUp() {
+export default function ProfilePage() {
   const navigate = useNavigate();
-  let user = {};
-  const [img, setImg] = useState(null);
-  const [country, setCountry] = useState(null);
+  let user = getLoggedUser();
+  const [img, setImg] = useState(user.Picture);
+  const [country, setCountry] = useState(user.Address);
 
   const getCountry = (countryProp) => {
     setCountry(countryProp);
     console.log(country);
   };
 
-  const postUser = (user) => {
+  const updateUser = () => {
     fetch(apiUrlUsers, {
-      method: "POST",
+      method: "PUT",
       body: JSON.stringify(user),
       headers: new Headers({
-        "Content-type": "application/json; charset=UTF-8", //very important to add the 'charset=UTF-8'!!!!
+        "Content-type": "application/json; charset=UTF-8",
         Accept: "application/json; charset=UTF-8",
       }),
     })
       .then((res) => {
         console.log("res=", res);
-        return res.json();
+        return res.ok;
       })
       .then(
         (result) => {
-          console.log("fetch POST= ", result);
-          if (result === -1) {
+          console.log("fetch PUT= ", result);
+          if (!result) {
             MySwal.fire({
               icon: "error",
               title: "Oops...",
-              text: "Email adress already taken",
-              footer: "please try another one",
+              text: "Failed to update profile",
             });
           } else {
-            signUpSuccess();
+            updateSuccess(user);
             MySwal.fire({
               position: "center",
               icon: "success",
-              title: "Succesfuly signed up",
+              title: "Profile Updated Saved!",
               showConfirmButton: false,
               timer: 800,
             });
           }
         },
         (error) => {
-          console.log("err post user=", error);
+          console.log("Error updating profile: ", error);
         }
       );
   };
 
-  const signUpSuccess = () => {
-    navigate(navPaths["sign in"], {
-      state: { email: user.Email, pass: user.Password },
-    });
+  const updateSuccess = (updated_user) => {
+    let passWasUpdated = updated_user.Password !== "-1";
+    if (passWasUpdated) {
+      //console.log(updated_user);
+      localStorage.clear();
+      navigate(navPaths["sign in"]);
+    } else {
+      updated_user.Password = null;
+      saveUserLocalStorage(updated_user, getRememberMe());
+      navigate(navPaths["home"]);
+    }
   };
 
   //Submit
   const handleSubmit = (event) => {
     event.preventDefault();
+    let updated_user = {};
+
     const data = new FormData(event.currentTarget);
-    user = {
-      FirstName: data.get("firstName"),
-      LastName: data.get("lastName"),
-      Email: data.get("email"),
-      Password: data.get("password"),
-      Address: country,
+
+    let pass = data.get("password").length != 0 ? data.get("password") : "-1";
+    console.log("pass", pass);
+    updated_user = {
+      Id: user.Id,
+      FirstName:
+        data.get("firstName").length != 0
+          ? data.get("firstName")
+          : user.FirstName,
+      LastName:
+        data.get("lastName").length != 0 ? data.get("lastName") : user.LastName,
+      Email: user.Email,
+      Password: pass,
+      // address: country,
       Picture: img ? img : default_profile_img,
     };
+    user = updated_user;
 
-    console.log("handle submit", user);
-
-    postUser(user);
+    Swal.fire({
+      title: "Do you want to save the changes?",
+      showDenyButton: true,
+      showCancelButton: true,
+      confirmButtonText: "Save",
+      denyButtonText: `Don't save`,
+    }).then((result) => {
+      /* Read more about isConfirmed, isDenied below */
+      if (result.isConfirmed) {
+        updateUser();
+      } else if (result.isDenied) {
+        Swal.fire("Changes are not saved", "", "info");
+      }
+    });
   };
 
   return (
@@ -121,7 +152,7 @@ export default function SignUp() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h4">
-            Sign up
+            {`${user.FirstName} ${user.LastName}'s Profile`}
           </Typography>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
@@ -129,10 +160,10 @@ export default function SignUp() {
                 <TextField
                   autoComplete="given-name"
                   name="firstName"
-                  required
                   fullWidth
                   id="firstName"
-                  label="First Name"
+                  defaultValue={user.FirstName}
+                  label="firstName"
                   autoFocus
                   inputProps={{
                     minlength: 2,
@@ -142,10 +173,10 @@ export default function SignUp() {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  required
                   fullWidth
                   id="lastName"
-                  label="Last Name"
+                  defaultValue={user.LastName}
+                  label="lastName"
                   name="lastName"
                   autoComplete="family-name"
                   inputProps={{
@@ -156,23 +187,22 @@ export default function SignUp() {
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  required
                   fullWidth
                   id="email"
-                  label="Email Address"
+                  defaultValue={user.Email}
+                  label="email"
                   name="email"
                   autoComplete="email"
                   inputProps={{
-                    pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
+                    readOnly: true,
                   }}
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
-                  required
                   fullWidth
                   name="password"
-                  label="Password"
+                  label="password"
                   type="password"
                   id="password"
                   autoComplete="new-password"
@@ -181,9 +211,9 @@ export default function SignUp() {
                   }}
                 />
               </Grid>
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                 <CountrySelect id="country" sendToForm={getCountry} />
-              </Grid>
+              </Grid> */}
               <Grid item xs={12}>
                 <Camera img={img} setParentImg={setImg} />
                 <br />
@@ -195,15 +225,23 @@ export default function SignUp() {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign Up
+              Update Profile
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
                 <Button
-                  onClick={() => navigate(navPaths["sign in"])}
-                  //variant="body2"
+                  onClick={() => navigate(navPaths["home"])}
+                  variant="body2"
                 >
-                  <Link>Already have an account? Sign in </Link>
+                  <p
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    Back to Home
+                  </p>
                 </Button>
               </Grid>
             </Grid>

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
+import LoadingCircle from "../../Shared/LoadingCircle";
+import PageHeader from "../../Shared/PageHeader/PageHeader";
+import Tweet from "../../Shared/Tweet";
+//import Prediction from "../../Shared/Stock/Prediction";
+import { apiUrlTwitter } from "../../Configs/apiUrlsKeys";
 import { useStateWithCallbackLazy } from "use-state-with-callback";
 import { useLocation, useNavigate } from "react-router-dom";
-import { apiUrlTwitter, apiUrlFlask } from "../Configs/apiUrlsKeys";
-import LoadingCircle from "../Functional Components/LoadingCircle";
-import PageHeader from "../Functional Components/PageHeader";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import Prediction from "../Functional Components/Prediction";
-import Tweet from "../Functional Components/Tweet";
 
 export default function PopularTweets(props) {
   const MySwal = withReactContent(Swal);

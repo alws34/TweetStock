@@ -1,11 +1,10 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { getLoggedUser } from "../../../../Configs/getLoggedUser";
+import PageHeader from "../../../../Shared/PageHeader/PageHeader";
+import { RealTimeDB } from "../../../../Configs/FirebaseConfig";
 import { Chat, ChatMessage } from "@progress/kendo-react-conversational-ui";
 import "@progress/kendo-theme-default/dist/all.css";
-import { RealTimeDB } from "../Configs/FirebaseConfig";
 import { ref, onValue, push } from "firebase/database";
-import { getLoggedUser } from "../Configs/getLoggedUser";
-import PageHeader from "./PageHeader";
 
 const bot = {
   id: 0,
@@ -66,6 +65,7 @@ export default function StockChat(props) {
   const capitalizeFirstLetter = (text) =>
     text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(attachMsgListener, [ticker]);
 
   let u = getLoggedUser();

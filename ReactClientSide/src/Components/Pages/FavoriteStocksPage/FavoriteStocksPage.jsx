@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import FavCard from "../Functional Components/FavoriteStockCard";
-import EHeader from "../Functional Components/PageHeader";
-// import { Container, Row, Col } from 'react-bootstrap';
-import "../Styles/FavCardsStyle.css";
-import { apiUrlFavorites, rapidApiKey } from "../Configs/apiUrlsKeys";
-import { getLoggedUser, isLoggedUser } from "../Configs/getLoggedUser";
-import LoadingCirle from "../Functional Components/LoadingCircle";
+//import "./Components/FavoriteStockCard";
+import FavCard from "./Components/FavoriteStockCard";
+import PageHeader from "../../Shared/PageHeader/PageHeader";
+import LoadingCirle from "../../Shared/LoadingCircle";
+import { apiUrlFavorites, rapidApiKey } from "../../Configs/apiUrlsKeys";
+import { getLoggedUser, isLoggedUser } from "../../Configs/getLoggedUser";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
@@ -140,11 +139,12 @@ export default function FavoriteStocksPage() {
       return <h1> No logged used user to fetch stocks to... </h1>;
     }
     fetchFavoriteStocks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div>
-      <EHeader text={"Favorite Stocks"} />
+      <PageHeader text={"Favorite Stocks"} />
       {isLoading ? <LoadingCirle /> : <Favorites />}
     </div>
   );

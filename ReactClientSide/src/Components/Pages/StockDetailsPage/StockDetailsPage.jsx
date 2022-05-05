@@ -1,28 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Button, Checkbox } from "@mui/material";
-import { Row, Col } from "react-bootstrap";
-import { FavoriteBorder, Favorite } from "@mui/icons-material";
+import StockDetails from "./Components/StockDetails";
+import StockChart from "../../Shared/Stock/StockChart";
+import StockChat from "./Components/StockChat/StockChat";
+import PageHeader from "../../Shared/PageHeader/PageHeader";
+import Tweet from "../../Shared/Tweet";
+import PredTable from "./Components/PredictionStatsTable/PredictionTable";
+import Prediction from "../../Shared/Prediction/Prediction";
+import LoadingCircle from "../../Shared/LoadingCircle";
 import {
   apiUrlFavorites,
   rapidApiKey,
   apiUrlFlask,
-} from "../Configs/apiUrlsKeys";
-import { navPaths } from "../Configs/navPaths";
-import { getLoggedUser, isLoggedUser } from "../Configs/getLoggedUser";
-import StockChart from "../Functional Components/StockChart";
-import StockDetails from "../Functional Components/StockDetails";
-import StockChat from "../Functional Components/StockChat";
-import PageHeader from "../Functional Components/PageHeader";
-import Prediction from "../Functional Components/Prediction";
-import Tweet from "../Functional Components/Tweet";
-import LoadingCircle from "../Functional Components/LoadingCircle";
+} from "../../Configs/apiUrlsKeys";
+import { navPaths } from "../../Configs/navPaths";
+import { getLoggedUser, isLoggedUser } from "../../Configs/getLoggedUser";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button, Checkbox } from "@mui/material";
+import { Row, Col } from "react-bootstrap";
+import { FavoriteBorder, Favorite } from "@mui/icons-material";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
-import "../Styles/PopupChat.css";
+import "./Components/StockChat/PopupChat.css";
 import Sticky from "react-sticky-el";
-import PredTable from "../Functional Components/PredictionTable";
 
 export default function StockDetailsPage() {
   const navigate = useNavigate();
@@ -184,7 +184,7 @@ export default function StockDetailsPage() {
             size={"400px"}
             ticker={ticker}
             dir={
-              flaskResponse && flaskResponse["prediction"] == 1 ? "up" : "down"
+              flaskResponse && flaskResponse["prediction"] === 1 ? "up" : "down"
             }
           ></Prediction>
         </div>

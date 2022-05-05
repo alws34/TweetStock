@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Lottie from "react-lottie";
 import MovingComponent from "react-moving-text";
-import upChart from "../Images/up_chart_v1.json";
-import downChart from "../Images/down_chart_v1.json";
-import hat_ph from "../Images/pred_ph_hat.json";
+import upChart from "./Images/up_chart_v1.json";
+import downChart from "./Images/down_chart_v1.json";
+import hat_ph from "./Images/pred_ph_hat.json";
 
 export default function Prediction(props) {
   //const [isLoading, setIsLoading] = useState(props.dir === null ? true : false);
