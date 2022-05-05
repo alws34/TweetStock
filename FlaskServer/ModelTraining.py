@@ -29,10 +29,10 @@ paths = {
             'Model_file_path': ''
             },
     'alon': {
-        'users_path': "D:\Google Drive\Alon\לימודים\Final Project\Data\Self Collected\\",
-        'stocks_2019_path': "D:\Google Drive\Alon\לימודים\Final Project\Data\From the Web\StockMarketData\\",
-        'tweets_2019_path': "D:\Google Drive\Alon\לימודים\Final Project\Data\From the Web\TweetsAboutTopCompanies\\",
-        'from_the_web': "D:\Google Drive\Alon\לימודים\Final Project\Data\From the Web\\",
+        'users_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\Self Collected\\",
+        'stocks_2019_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\StockMarketData\\",
+        'tweets_2019_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\TweetsAboutTopCompanies\\",
+        'from_the_web': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\\",
         'Model_file_path': ''
     },
     'pi': {  # DOWNLOAD!!!! THE FILES DO NOT COPY AND PASTE THEM
