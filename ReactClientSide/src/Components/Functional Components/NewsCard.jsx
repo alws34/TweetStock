@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 
-export default function New(props) {
+export default function NewsCard(props) {
   return (
     <div>
       <Box

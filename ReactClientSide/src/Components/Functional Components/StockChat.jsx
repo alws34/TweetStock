@@ -20,7 +20,7 @@ const initialMessages = [
   },
 ];
 
-export default function ChatStock(props) {
+export default function StockChat(props) {
   let ticker = props.ticker;
   try {
     ticker = ticker.toUpperCase();

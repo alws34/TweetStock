@@ -14,13 +14,14 @@ import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useState } from "react";
 import { apiUrlUsers } from "../Configs/apiUrlsKeys";
-import { getRememberMe, saveUserLocalStorage } from "../Configs/getLoggedUser";
+//import { getRememberMe, saveUserLocalStorage } from "../Configs/getLoggedUser";
 import { navPaths } from "../Configs/navPaths";
 import CountrySelect from "../Functional Components/CountrySelect";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Camera from "../Functional Components/Camera";
+import Copyright from "../Functional Components/Copyright";
 
 const MySwal = withReactContent(Swal);
 
@@ -28,19 +29,6 @@ const default_profile_img =
   "https://www.pngkit.com/png/full/126-1262807_instagram-default-profile-picture-png.png";
 const theme = createTheme();
 
-const Copyright = (props) => {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "} TweetStock {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-};
 
 export default function SignUp() {
   const navigate = useNavigate();

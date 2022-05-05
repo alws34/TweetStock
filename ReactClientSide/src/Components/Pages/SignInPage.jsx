@@ -14,27 +14,15 @@ import {
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { apiUrlUsers } from "../Configs/apiUrlsKeys";
 import { saveUserLocalStorage } from "../Configs/getLoggedUser";
 import { navPaths } from "../Configs/navPaths";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import Copyright from "../Functional Components/Copyright";
 
-const Copyright = (props) => {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "} TweetStock {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-};
 
 const MySwal = withReactContent(Swal);
 

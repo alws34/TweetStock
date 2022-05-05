@@ -1,4 +1,4 @@
-import { React, useRef, useState, useEffect } from "react";
+import { React, useState } from "react";
 import {
   Avatar,
   Button,
@@ -9,8 +9,8 @@ import {
   Typography,
   Container,
 } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
-import { createTheme, ThemeProvider, styled } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { apiUrlUsers } from "../Configs/apiUrlsKeys";
 import { navPaths } from "../Configs/navPaths";
 import {
@@ -22,7 +22,8 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Camera from "../Functional Components/Camera";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import CountrySelect from "../Functional Components/CountrySelect";
+import Copyright from "../Functional Components/Copyright";
+//import CountrySelect from "../Functional Components/CountrySelect";
 
 const MySwal = withReactContent(Swal);
 
@@ -30,20 +31,6 @@ const default_profile_img =
   "https://www.pngkit.com/png/full/126-1262807_instagram-default-profile-picture-png.png";
 
 const theme = createTheme();
-
-const Copyright = (props) => {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "} TweetStock {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-};
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -55,7 +42,8 @@ export default function ProfilePage() {
     setCountry(countryProp);
     console.log(country);
   };
-  const UpdateUser = () => {
+
+  const updateUser = () => {
     fetch(apiUrlUsers, {
       method: "PUT",
       body: JSON.stringify(user),
@@ -140,7 +128,7 @@ export default function ProfilePage() {
     }).then((result) => {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
-        UpdateUser();
+        updateUser();
       } else if (result.isDenied) {
         Swal.fire("Changes are not saved", "", "info");
       }
