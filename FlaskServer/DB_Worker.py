@@ -10,7 +10,7 @@ from sqlalchemy import create_engine
 # ----------------------------------------------------------------------------------------------- #
 if os.name == 'nt':
     delimiter = '\\'
-    prefix = ''
+    prefix = f'{os.getcwd()}\\FlaskServer\\'
 elif os.name == 'posix':
     delimiter = '/'
     prefix = '/home/pi/FinalProject/FlaskServer/'
@@ -47,13 +47,16 @@ def Main():
     # 'features': 1 --> ['Tweet_Comments', 'Tweet_Retweets','Tweet_Likes', 'Positivity', 'Negativity', 'Neutral']
     # 'features': 2 --> ['Tweet_Sentiment','Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
 
-    while True:
-        if (is_valid_day()):
-            update_db()
-            time.sleep(3 * 60 * 60)  # sleep 3 hours
-        else:
-            print("invalid day")
-            continue
+    # while True:
+    update_db()
+    # if (is_valid_day()):
+
+    #     update_db()
+    #     time.sleep(3 * 60 * 60)  # sleep 3 hours
+    # else:
+    #     print("invalid day")
+    #     time.sleep(60 * 60 * 24)
+    #     continue
 
 
 def update_db(models=MODELS):
@@ -61,11 +64,14 @@ def update_db(models=MODELS):
         'pred_df': pd.DataFrame(),
         'tweets_df': pd.DataFrame()
     }
-    for ticker in model.keys():
+    for ticker in models.keys():
         # Run the model
         model = tsm(
             model_path=models[ticker]['path'], model_ticker=ticker, features_version=models[ticker]['features'])
         sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
+        if sql_Ticker_and_Pred_Table_DF.empty and sql_Ticker_Stats_Table_DF.empty:
+            print("Error Getting data from model!\nSQL DB won't update")
+            break
         # Update result
         result['pred_df'].append(
             sql_Ticker_and_Pred_Table_DF, ignore_index=True)
@@ -110,8 +116,11 @@ def is_valid_day():
 
     nyse = mcal.get_calendar('NYSE')
 
-    schedule = nyse.schedule(
-        start_date=today, end_date=today)
+    try:
+        schedule = nyse.schedule(
+            start_date=today, end_date=today)
+    except Exception as e:
+        return False
 
     timestamp = pd.Timestamp(
         f'{today} {time}', tz='Israel').tz_convert('America/New_York')  # convert israel time to NY time
