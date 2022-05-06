@@ -48,12 +48,26 @@ def Main():
     # 'features': 2 --> ['Tweet_Sentiment','Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
 
     while True:
-        if (is_valid_day()):
-            update_db()
-            time.sleep(3 * 60 * 60)  # sleep 3 hours
-        else:
-            print("invalid day")
-            continue
+        update_db()
+        # if (is_valid_day()):
+        #     update_db()
+        #     time.sleep(3 * 60 * 60)  # sleep 3 hours
+        # else:
+        #     print("invalid day")
+        #     continue
+
+
+def GetDateTime():
+    return dt.now()
+
+
+def GetDateTimeStringify(format="%d_%m_%Y_%H"):
+    return GetDateTime().strftime(format)
+
+
+def write_to_log(msg):
+    with open(f'LOG_{GetDateTimeStringify()}', 'a+', encoding='utf-8') as f:
+        f.write(msg)
 
 
 def update_db(models=MODELS):
@@ -61,7 +75,7 @@ def update_db(models=MODELS):
         'pred_df': pd.DataFrame(),
         'tweets_df': pd.DataFrame()
     }
-    for ticker in model.keys():
+    for ticker in models.keys():
         # Run the model
         model = tsm(
             model_path=models[ticker]['path'], model_ticker=ticker, features_version=models[ticker]['features'])
@@ -102,8 +116,7 @@ def is_valid_day():
     This method converts israel's time to NY time, 
     and checks if the current date and time is during stock excange open hours (NYSE & NASDAQ)
     '''
-    current_time = dt.now()
-
+    current_time = GetDateTime()
     year, month, day, hour, minute = current_time.year, current_time.month, current_time.day, current_time.hour, current_time.minute
     today, time = f'{year}-{month}-{day}', f'{hour}:{minute}'
     start_of_year, end_of_year = f'{year}-01-01', f'{year}-12-31'
@@ -117,8 +130,12 @@ def is_valid_day():
         f'{today} {time}', tz='Israel').tz_convert('America/New_York')  # convert israel time to NY time
 
     if not schedule.empty:
-        if nyse.open_at_time(schedule, timestamp):
-            return True
+        try:
+            if nyse.open_at_time(schedule, timestamp):
+                return True
+        except ValueError as ve:
+            write_to_log(f'nyse.open_at_time says:\n{ve}')
+            return False
     return False
 
 
