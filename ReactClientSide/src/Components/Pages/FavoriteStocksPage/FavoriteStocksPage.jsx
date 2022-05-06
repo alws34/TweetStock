@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
-//import "./Components/FavoriteStockCard";
-import FavCard from "./Components/FavoriteStockCard";
+import "./FavoriteStocksPageStyles.css";
+import {
+  NoFavoriteStocksContainer,
+  FavoriteStocksContainer,
+} from "./Components/FavoriteStocksContainers";
 import PageHeader from "../../Shared/PageHeader/PageHeader";
 import LoadingCirle from "../../Shared/LoadingCircle";
 import { apiUrlFavorites, rapidApiKey } from "../../Configs/apiUrlsKeys";
@@ -11,8 +14,8 @@ const MySwal = withReactContent(Swal);
 
 export default function FavoriteStocksPage() {
   const [stocksDataArr, setStocksDataArr] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [noFavoriteStocks, setNoFavoriteStocks] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const user = getLoggedUser();
 
@@ -32,7 +35,7 @@ export default function FavoriteStocksPage() {
       .then(
         (favTickers) => {
           console.log("fetch favorite stocks arr= ", favTickers);
-          if (favTickers.length === 0) setNoFavoriteStocks(true);
+          setNoFavoriteStocks(favTickers.length === 0);
 
           favTickers.forEach((ticker) =>
             fetchStockDataByTicker(ticker.toLowerCase())
@@ -71,7 +74,7 @@ export default function FavoriteStocksPage() {
   };
 
   //DELETE Fav stock from DB:
-  const deleteFav = (ticker) => {
+  const deleteFavoriteStock = (ticker) => {
     console.log(ticker);
     setStocksDataArr((prevData) =>
       prevData.filter((stock) => stock.symbol !== ticker)
@@ -93,45 +96,13 @@ export default function FavoriteStocksPage() {
             text: "Something went wrong",
           });
         } else {
-          if (stocksDataArr.length === 0) setNoFavoriteStocks(true);
+          setNoFavoriteStocks(stocksDataArr.length === 0);
         }
       },
       (error) => {
         console.log("err delete=", error);
       }
     );
-  };
-
-  const Favorites = () => {
-    let rendered = noFavoriteStocks ? (
-      <div style={{ textAlign: "center" }}>
-        <h3>
-          <br />
-          No favorite stocks
-          <br />
-        </h3>
-        <h5>can be added by searching stocks</h5>
-      </div>
-    ) : (
-      <div className="favCards">
-        {stocksDataArr.map((s) => (
-          <FavCard
-            key={s.symbol}
-            style={{ marginLeft: "5" }}
-            name={s.displayName}
-            symbol={s.symbol}
-            priceNow={s.postMarketPrice}
-            currency={s.currency}
-            openPrice={s.regularMarketOpen}
-            closePrice={s.regularMarketPrice}
-            prediction={0}
-            deleteFav={deleteFav}
-          />
-        ))}
-      </div>
-    );
-
-    return rendered;
   };
 
   useEffect(() => {
@@ -145,7 +116,16 @@ export default function FavoriteStocksPage() {
   return (
     <div>
       <PageHeader text={"Favorite Stocks"} />
-      {isLoading ? <LoadingCirle /> : <Favorites />}
+      {isLoading ? (
+        <LoadingCirle />
+      ) : noFavoriteStocks ? (
+        <NoFavoriteStocksContainer />
+      ) : (
+        <FavoriteStocksContainer
+          stocksData={stocksDataArr}
+          deleteFavoriteStock={deleteFavoriteStock}
+        />
+      )}
     </div>
   );
 }

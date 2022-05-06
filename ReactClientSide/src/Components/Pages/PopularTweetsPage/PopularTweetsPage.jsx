@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import LoadingCircle from "../../Shared/LoadingCircle";
 import PageHeader from "../../Shared/PageHeader/PageHeader";
-import Tweet from "../../Shared/Tweet";
+import TweetsContainer from "../../Shared/Tweet/TweetsContainer";
 //import Prediction from "../../Shared/Stock/Prediction";
 import { apiUrlTwitter } from "../../Configs/apiUrlsKeys";
 import { useStateWithCallbackLazy } from "use-state-with-callback";
@@ -52,14 +52,7 @@ export default function PopularTweets(props) {
               navigate(-1);
             });
           } else {
-            console.log("before ", tweets);
-            let rendered_tweets = tweets.map((tweet) => (
-              <Tweet tweetId={tweet.id_str} />
-            ));
-            console.log("after ", rendered_tweets);
-
-            tweets.forEach((tweet) => console.log(tweet.id_str));
-            setTweetsArr(rendered_tweets, () => setIsLoading(false));
+            setTweetsArr(tweets, () => setIsLoading(false));
           }
         },
         (error) => {
@@ -71,7 +64,7 @@ export default function PopularTweets(props) {
   return (
     <div>
       <PageHeader text={`$${ticker.toUpperCase()} Tweets`} />
-      {isLoading ? <LoadingCircle /> : tweetsArr}
+      {isLoading ? <LoadingCircle /> : <TweetsContainer tweets={tweetsArr} />}
     </div>
   );
 }

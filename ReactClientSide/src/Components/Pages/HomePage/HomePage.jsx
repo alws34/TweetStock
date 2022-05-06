@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import StockChart from "../../Shared/Stock/StockChart";
-import EHeader from "../../Shared/PageHeader/PageHeader";
+import TrendingStocksContainer from "./Components/TrendingStocksContainer";
+import PageHeader from "../../Shared/PageHeader/PageHeader";
 import LoadingCircle from "../../Shared/LoadingCircle";
 import { rapidApiKey } from "../../Configs/apiUrlsKeys";
 import Swal from "sweetalert2";
@@ -42,18 +42,15 @@ export default function HomePage() {
         }
       );
   };
+
   useEffect(getTrendingStocks, []);
+
   return (
-    <div>
-      <EHeader text="Trending Stocks" />
+    <div className="HomePage">
+      <PageHeader text="Trending Stocks" />
+
       {trendingStocks ? (
-        trendingStocks.map((stock) =>
-          stock.symbol === ":entitySlug" ? (
-            ""
-          ) : (
-            <StockChart stock_name={stock.symbol} stock_ticker={stock.symbol} />
-          )
-        )
+        <TrendingStocksContainer trendingStocks={trendingStocks} />
       ) : (
         <LoadingCircle />
       )}

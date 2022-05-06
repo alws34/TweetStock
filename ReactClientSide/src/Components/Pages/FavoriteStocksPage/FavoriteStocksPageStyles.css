@@ -1,0 +1,36 @@
+.favoriteStocksCardsContainer {
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(200px, auto));
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.noFavoriteStocksContainer {
+  text-align: center;
+}
+
+.favoriteStockCard {
+  max-width: 200px;
+  margin: 1px;
+  margin-left: 5px;
+}
+
+.favoriteStockCard .cardImage {
+  height: 200px;
+  width: 200px;
+}
+
+.favoriteStockCard .cardHeader {
+  text-align: center;
+}
+
+.favoriteStockCard .cardDetails {
+  white-space: pre-wrap;
+}
+
+.favoriteStockCard .cardButtonsContainer {
+  display: flex;
+  justify-content: space-around;
+}

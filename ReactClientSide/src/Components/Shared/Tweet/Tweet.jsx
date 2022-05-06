@@ -1,21 +1,24 @@
 import React from "react";
-import LoadingCircle from "./LoadingCircle";
+import LoadingCircle from "../LoadingCircle";
+import "./TweetStyles.css";
 import { TwitterTweetEmbed } from "react-twitter-embed";
 
 export default function Tweet(props) {
+  const tweet_options = {
+    width: 380,
+    hideCard: false,
+    hideThread: false,
+  };
+
   return (
-    <div style={{ display: "flex", justifyContent: "center" }}>
-      <div style={{ width: 380 }}>
+    <div className="tweetContainer">
+      <div>
         <TwitterTweetEmbed
           key={props.tweetId}
-          onLoad={function noRefCheck() {}}
-          options={{
-            width: 380,
-            hideCard: false,
-            hideThread: false,
-          }}
-          placeholder={<LoadingCircle />}
           tweetId={props.tweetId}
+          options={tweet_options}
+          onLoad={function noRefCheck() {}}
+          placeholder={<LoadingCircle />}
         />
       </div>
     </div>

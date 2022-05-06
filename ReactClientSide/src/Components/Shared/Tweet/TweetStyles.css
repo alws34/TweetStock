@@ -1,0 +1,8 @@
+.tweetContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.tweetContainer > div {
+  width: 380px;
+}

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import NewsCard from "./NewsCard";
+import "./NewsPageStyles.css";
+import NewsCardsContainer from "./Components/NewsCardsContainer";
 import PageHeader from "../../Shared/PageHeader/PageHeader";
-import TextField from "@mui/material/TextField";
-import SearchIcon from "@mui/icons-material/Search";
+import NewsSearchBar from "./Components/NewsSearchBar";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
-export default function News() {
+export default function NewsPage() {
   const [news, setNews] = useState(null);
   const MySwal = withReactContent(Swal);
   const displayErrorMsg = (text, footer) => {
@@ -45,19 +45,8 @@ export default function News() {
           } else if (result.results.length === 0) {
             displayErrorMsg(`Could not find news`, "No news were found");
           } else {
-            setNews(
-              result.results.map((n) => (
-                <NewsCard
-                  key={n.id}
-                  published={n.published_utc}
-                  title={n.title}
-                  author={n.publisher.name}
-                  description={n.description}
-                  image_url={n.image_url}
-                  article_url={n.article_url}
-                />
-              ))
-            );
+            let newsData = result.results;
+            setNews(newsData);
           }
         },
         (error) => {
@@ -70,59 +59,16 @@ export default function News() {
     fetchNews(null); // ticker=null for general news
   };
 
-  const StockSearchBar = (props) => {
-    const [ticker, setTicker] = useState("");
-
-    const fetchNewsByTicker = () => {
-      console.log("Searching");
-      ticker.length > -1 && props.fetchNews(ticker);
-    };
-    const inputHandler = (e) => {
-      setTicker(e.target.value.toUpperCase());
-    };
-    return (
-      <div
-        className="search"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          width: "50%",
-          margin: "auto",
-        }}
-      >
-        <TextField
-          id="outlined-basic"
-          onChange={inputHandler}
-          onKeyPress={(e) => e.key === "Enter" && fetchNewsByTicker()}
-          variant="outlined"
-          fullWidth
-          label="Search Stock News"
-        />
-        <SearchIcon
-          style={{ marginTop: 14 }}
-          onClick={fetchNewsByTicker}
-          onMouseEnter={(e) => {
-            e.target.style.background = "rgb(239, 239, 245)";
-            e.target.style.borderRadius = "20px";
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = "none";
-          }}
-        />
-      </div>
-    );
-  };
-
   useEffect(() => {
     console.clear();
     fetchGeneralNews();
   }, []);
 
   return (
-    <div>
+    <div className="newsPage">
       <PageHeader text={"News"} />
-      <StockSearchBar fetchNews={fetchNews} />
-      {news}
+      <NewsSearchBar fetchNews={fetchNews} />
+      <NewsCardsContainer news={news} />
     </div>
   );
 }

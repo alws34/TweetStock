@@ -3,7 +3,7 @@ import StockDetails from "./Components/StockDetails";
 import StockChart from "../../Shared/Stock/StockChart";
 import StockChat from "./Components/StockChat/StockChat";
 import PageHeader from "../../Shared/PageHeader/PageHeader";
-import Tweet from "../../Shared/Tweet";
+import Tweet from "../../Shared/Tweet/Tweet";
 import PredTable from "./Components/PredictionStatsTable/PredictionTable";
 import Prediction from "../../Shared/Prediction/Prediction";
 import LoadingCircle from "../../Shared/LoadingCircle";
@@ -217,20 +217,6 @@ export default function StockDetailsPage() {
               );
             })}
         </div>
-        {/* <button
-          onClick={() =>
-            setFlaskResponse({
-              prediction: 1,
-              tweets: [
-                { tweet_id: "1516555826986508291" },
-                { tweet_id: "1516413583122472967" },
-                { tweet_id: "1516612115116789764" },
-              ],
-            })
-          }
-        >
-          Predict
-        </button> */}
       </div>
     );
   };

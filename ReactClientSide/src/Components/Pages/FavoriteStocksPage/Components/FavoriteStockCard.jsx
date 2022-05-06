@@ -13,60 +13,75 @@ import { useNavigate } from "react-router-dom";
 
 export default function FavoriteStockCard(props) {
   const navigate = useNavigate();
-  console.log(props.name);
-  let name = props.name;
-  if (props.name && props.name.includes(".com")) {
-    name = props.name.slice(0, -4);
+  console.log(props.stockData);
+  const stockData = props.stockData;
+  var name = stockData.displayName;
+  if (name && name.includes(".com")) {
+    name = name.slice(0, -4);
   }
-  let stockImageSrc = `https://logo.clearbit.com/${name}.com?size=80&greyscale=false`;
-  const getPriceNow = () => {
-    if (props.priceNow && props.priceNow !== 0) {
-      return `Price Now: ${props.priceNow}\n`;
-    }
-    return "";
+  // const isValidImageUrl = async (url) => {
+  //   const res = await fetch(url);
+  //   const buff = await res.blob();
+
+  //   return buff.type.startsWith("image/");
+  // };
+
+  const stockImageSrc = `https://logo.clearbit.com/${name}.com?size=80&greyscale=false`;
+  const defaultImageSrc =
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1665px-No-Image-Placeholder.svg.png";
+
+  const CardImage = () => {
+    return (
+      <CardMedia
+        className="cardImage"
+        component="img"
+        image={stockImageSrc}
+        alt={"No image"}
+      />
+    );
   };
 
-  return (
-    <Card sx={{ maxWidth: 200, margin: 1 }}>
-      <CardActionArea>
-        <CardMedia
-          component="img"
-          height="200"
-          image={stockImageSrc}
-          alt="No image was found..."
-        />
-        <CardContent>
-          <Typography
-            textAlign={"center"}
-            gutterBottom
-            variant="h5"
-            component="div"
-          >
-            {props.name}
-          </Typography>
-          <Typography
-            style={{ whiteSpace: "pre-wrap" }}
-            variant="body2"
-            color="text.secondary"
-          >
-            Symbol: {props.symbol}
-            <br />
-            Currency: {props.currency}
-            <br />
-            {getPriceNow()}
-            Open: {props.openPrice}
-            <br />
-            Close: {props.closePrice} <br />
-            <br />
-          </Typography>
-        </CardContent>
-      </CardActionArea>
-      <CardActions sx={{ display: "flex", justifyContent: "space-around" }}>
+  const CardHeader = () => {
+    return (
+      <Typography
+        className="cardHeader"
+        gutterBottom
+        variant="h5"
+        component="div"
+      >
+        {name}
+      </Typography>
+    );
+  };
+
+  const CardDetails = () => {
+    return (
+      <Typography
+        className="cardDetails"
+        variant="body2"
+        color="text.secondary"
+      >
+        Symbol: {stockData.symbol}
+        <br />
+        Currency: {stockData.currency}
+        <br />
+        <PriceNow />
+        Open: {stockData.regularMarketOpen}
+        <br />
+        Close: {stockData.regularMarketPrice} <br />
+        <br />
+      </Typography>
+    );
+  };
+
+  const CardButtonsRow = () => {
+    return (
+      <CardActions className="cardButtonsContainer">
         <Button
           size="small"
           color="warning"
           variant="contained"
-          onClick={() => props.deleteFav(props.symbol)}
+          onClick={() => props.deleteFavoriteStock(stockData.symbol)}
         >
           remove
         </Button>
@@ -74,15 +89,38 @@ export default function FavoriteStockCard(props) {
           size="small"
           color="primary"
           variant="contained"
-          onClick={() =>
-            navigate(navPaths["about"], {
-              state: { ticker: props.symbol, data: null },
-            })
-          }
+          onClick={navigateToStockDetailsPage}
         >
           More...
         </Button>
       </CardActions>
+    );
+  };
+
+  const PriceNow = () => {
+    let priceNow = stockData.postMarketPrice;
+    return priceNow && priceNow !== 0 ? `Price Now: ${priceNow}\n` : "";
+  };
+
+  const navigateToStockDetailsPage = () => {
+    navigate(navPaths["about"], {
+      state: {
+        ticker: stockData.symbol,
+        data: null,
+      },
+    });
+  };
+
+  return (
+    <Card className="favoriteStockCard">
+      <CardActionArea onClick={navigateToStockDetailsPage}>
+        <CardImage />
+        <CardContent>
+          <CardHeader />
+          <CardDetails />
+        </CardContent>
+      </CardActionArea>
+      <CardButtonsRow />
     </Card>
   );
 }
