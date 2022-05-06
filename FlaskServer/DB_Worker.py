@@ -1,3 +1,4 @@
+from numpy import outer
 import pandas as pd
 from TweetStockModel import TweetStockModel as tsm
 import time
@@ -80,15 +81,18 @@ def update_db(models=MODELS):
         model = tsm(
             model_path=models[ticker]['path'], model_ticker=ticker, features_version=models[ticker]['features'])
         sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
-        if sql_Ticker_and_Pred_Table_DF.empty and sql_Ticker_Stats_Table_DF.empty:
+        if sql_Ticker_and_Pred_Table_DF is not None and sql_Ticker_and_Pred_Table_DF.empty and sql_Ticker_Stats_Table_DF is not None and sql_Ticker_Stats_Table_DF.empty:
             print("Error Getting data from model!\nSQL DB won't update")
             break
         # Update result
-        result['pred_df'].append(
-            sql_Ticker_and_Pred_Table_DF, ignore_index=True)
-        result['tweets_df'].append(
-            sql_Ticker_Stats_Table_DF, ignore_index=True)
-        time.sleep(15*60)  # sleep 15 mins
+        result['pred_df']= pd.concat([result['pred_df'],sql_Ticker_and_Pred_Table_DF], join="outer",axis=0)
+        #.append(
+            #sql_Ticker_and_Pred_Table_DF, ignore_index=True)
+        result['tweets_df']= pd.concat([result['pred_df'],sql_Ticker_Stats_Table_DF], join="outer",axis=0)
+        # result['tweets_df'].append(
+        #     sql_Ticker_Stats_Table_DF, ignore_index=True)
+        print("Not Sleeping for 15 mins")
+        #time.sleep(15*60)  # sleep 15 mins
 
     post_to_db(result['pred_table'], result["tweets_df"])
 
@@ -111,7 +115,8 @@ def post_to_db(pred_df, tweets_df):
         table.to_sql(f'{SQL_Tables[i]}', con=engine,
                      if_exists='replace', index=False)
 
-    #df = pd.read_sql(f'SELECT * FROM {table}', engine)
+    df = pd.read_sql(f'SELECT * FROM {table}', engine)
+    print(df)
 
 
 def is_valid_day():
@@ -130,6 +135,7 @@ def is_valid_day():
         schedule = nyse.schedule(
             start_date=today, end_date=today)
     except Exception as e:
+        write_to_log(f'nyse.open_at_time says:\n{e}')
         return False
 
     timestamp = pd.Timestamp(

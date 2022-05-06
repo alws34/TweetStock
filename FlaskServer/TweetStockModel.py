@@ -98,20 +98,30 @@ class TweetStockModel:
             return df.groupby(by='date').mean().reset_index()
 
     def get_scale_and_mean(self, df, n_past=N_PAST, scaling='min_max'):
-        if scaling == 'min_max':
-            scaler = MinMaxScaler()
-        elif scaling == 'standard':
-            scaler = StandardScaler()
+        # if scaling == 'min_max':
+        #     scaler = MinMaxScaler()
+        # elif scaling == 'standard':
+        #     scaler = StandardScaler()
+
+        def is_scalable_feature(f):
+            return f in self.feature_set or f == 's_compound'
+
+        def is_sentiment_feature(f):
+            return f in ['s_compound', 's_neg', 's_pos', 's_neu']
         if n_past == 1:
             df_dict = {}
             for col in df.columns:
-                df_dict[col] = []
-                f = df[col] * df["s_compound"] if col != "s_compound" else df[col]
-                df_dict[col].append(scaler.fit_transform(
-                    np.array(f).reshape(-1, 1)).mean())
+                if is_scalable_feature(col):
+                    df_dict[col] = []
+                    f = df[col] * \
+                        df["s_compound"] if not is_sentiment_feature(
+                            col) else df[col]
+                    scaler = MinMaxScaler() if scaling == 'min_max' else StandardScaler()
+                    df_dict[col].append(scaler.fit_transform(
+                        np.array(f).reshape(-1, 1)).mean())
             return pd.DataFrame.from_dict(df_dict)
         else:
-            return None
+            return "N_past is not 1 @ get_scale_and_mean()"
 
     def scale_seq(self, seq):
         scaler = MinMaxScaler()
@@ -195,7 +205,7 @@ class TweetStockModel:
                     return None
             except Exception as err:
                 print(f"{err}")
-                raise Exception("") from err
+                raise Exception("") from err 
 
         return tweets
 
