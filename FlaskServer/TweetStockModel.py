@@ -290,11 +290,12 @@ class TweetStockModel:
     def prep_data(self, df):
         #print(f"Prepping model data of {self.ticker} for {self.ip}")
         # 1 Select features
+        df = self.get_scale_and_mean(df)
         df = df[self.feature_set]
 
         # 2 Get df mean
         #print('before mean', df, len(df), df.shape)
-        df = self.get_scale_and_mean(df)
+        #df = self.get_scale_and_mean(df)
         #print('after mean', df, len(df), df.shape)
 
         # 3 Create sequence from df
@@ -411,7 +412,7 @@ class TweetStockModel:
 
         # Step 6.0 Transform from dictionary to df for easier data handling
         tweets_df = self.twitter_dict_res_to_df(tweets)
-        if tweets_df == None:
+        if tweets_df.empty:
             print("Couldnt convert twitter res dict to df @twitter_dict_res_to_df()")
             return None, None
         sql_Ticker_Stats_Table_DF = self.get_stats_table_sql_result(

@@ -57,17 +57,18 @@ def Main():
         #     continue
 
 
-def GetDateTime():
+def Get_Date_Time():
     return dt.now()
 
 
-def GetDateTimeStringify(format="%d_%m_%Y_%H"):
-    return GetDateTime().strftime(format)
+def Get_Date_Time_Stringify(format="%d_%m_%Y_%H"):
+    return Get_Date_Time().strftime(format)
 
 
 def write_to_log(msg):
-    with open(f'LOG_{GetDateTimeStringify()}', 'a+', encoding='utf-8') as f:
+    with open(f'LOG_{Get_Date_Time_Stringify()}', 'a+', encoding='utf-8') as f:
         f.write(msg)
+
 
 def update_db(models=MODELS):
     result = {
@@ -118,7 +119,7 @@ def is_valid_day():
     This method converts israel's time to NY time, 
     and checks if the current date and time is during stock excange open hours (NYSE & NASDAQ)
     '''
-    current_time = GetDateTime()
+    current_time = Get_Date_Time()
     year, month, day, hour, minute = current_time.year, current_time.month, current_time.day, current_time.hour, current_time.minute
     today, time = f'{year}-{month}-{day}', f'{hour}:{minute}'
     start_of_year, end_of_year = f'{year}-01-01', f'{year}-12-31'
