@@ -13,7 +13,8 @@ from pathlib import Path
 import math
 
 TWITTER_VERSION = 2             # twitter version.
-N_PAST = 1                      # days on which the model was train to precict based on.
+# days on which the model was train to precict based on.
+N_PAST = 1
 MAX_TWEETS_RESULTS = 100        # max results for first tweets query.
 MAX_USER_TWEETS_RESULT = 100    # max results for use engagement tweets
 MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
@@ -72,7 +73,7 @@ class TweetStockModel:
         return start_date.isoformat('T')+'Z', end_date.isoformat('T')+'Z'
 
     def twitter_dict_res_to_df(self, data):
-        #print(data)
+        # print(data)
         try:
             keys = data[0].keys()
             temp = {}
@@ -86,7 +87,7 @@ class TweetStockModel:
         # print(temp)
         return pd.DataFrame.from_dict(temp)
 
-    def get_df_mean_old(self, df, n_past=N_PAST): #replaced by get_scale_and_mean
+    def get_df_mean_old(self, df, n_past=N_PAST):  # replaced by get_scale_and_mean
         if n_past == 1:
             df_dict = {}
             for col in df:
@@ -105,7 +106,7 @@ class TweetStockModel:
             df_dict = {}
             for col in df.columns:
                 df_dict[col] = []
-                f = df[col] * df["s_compound"] if col != "s_compound" else df[col] 
+                f = df[col] * df["s_compound"] if col != "s_compound" else df[col]
                 df_dict[col].append(scaler.fit_transform(
                     np.array(f).reshape(-1, 1)).mean())
             return pd.DataFrame.from_dict(df_dict)
@@ -123,6 +124,7 @@ class TweetStockModel:
 # -------------------------------------------------------------------------------------------------------------- #
 
     # Step 1
+
     def get_tweets(self, ticker, max_results=MAX_TWEETS_RESULTS, n_past=N_PAST, twitter_version=TWITTER_VERSION):
         #print(f"Getting Tweets of {self.ticker} for {self.ip} ")
         if '$' in ticker:
@@ -348,20 +350,23 @@ class TweetStockModel:
                 res_dict['sentiment_neg'].append(None)
                 res_dict['sentiment_compound'].append(tweet['s_compound'])
         return pd.DataFrame.from_dict(res_dict)
+
     def get_stats_table_sql_result(self, tweets_df):
-        features = ['tweet_id', 'u_engagement', 'n_likes', 'n_replies', 'n_retweets', 's_pos', 's_neu', 's_neg', 's_compound']
+        features = ['tweet_id', 'u_engagement', 'n_likes', 'n_replies',
+                    'n_retweets', 's_pos', 's_neu', 's_neg', 's_compound']
         renames = {
-            'u_engagement' : 'user_engagement',
+            'u_engagement': 'user_engagement',
             'n_likes': 'tweet_likes',
             'n_replies': 'tweet_replies',
             'n_retweets': 'tweet_retweets',
             's_pos': 'sentiment_pos',
-            's_neu':'sentiment_neut',
-            's_neg':'sentiment_neg',
-            's_compound':'sentiment_compound'
+            's_neu': 'sentiment_neut',
+            's_neg': 'sentiment_neg',
+            's_compound': 'sentiment_compound'
         }
         return tweets_df[features].rename(columns=renames)
     # Step 7.1
+
     def get_pred_table_sql_result(self, prepared_df, prediction):
         # init dict
         res_dict = {}
@@ -373,7 +378,7 @@ class TweetStockModel:
             for val in prepared_df[col]:
                 res_dict[col].append(val)
         return pd.DataFrame.from_dict(res_dict)
-    
+
     # Pred Function
     def get_prediction(self):
         # Step 1
@@ -381,51 +386,51 @@ class TweetStockModel:
                                  n_past=N_PAST, twitter_version=TWITTER_VERSION)
         if tweets == None:
             print("Couldnt get tweets @get_tweets()")
-            return
+            return None, None
         # Step 2
         tweets = self.get_sentiment(tweets)
         if tweets == None:
             print("Couldnt get sentiment @get_sentiment()")
-            return
+            return None, None
         # Step 3
         tweets = self.filter_tweets(
             tweets, threshold=MIN_TWEET_STATS_SUM)
         if len(tweets) == 0:
             print("Filtered all tweets @filter_tweets()")
-            return
+            return None, None
         # Step 4
         tweets = self.get_users_engagement(tweets)
         if tweets == None:
             print("Couldnt get use engagement @get_user_engagement()")
-            return
+            return None, None
         # Step 5
         tweets = self.filter_users(tweets, threshold=MIN_USER_FOLLOWERS)
         if len(tweets) == 0:
             print("Filtered all users @filter_users()")
-            return
+            return None, None
 
         # Step 6.0 Transform from dictionary to df for easier data handling
         tweets_df = self.twitter_dict_res_to_df(tweets)
         if tweets_df == None:
             print("Couldnt convert twitter res dict to df @twitter_dict_res_to_df()")
-            return
-        sql_Ticker_Stats_Table_DF = self.get_stats_table_sql_result(tweets_df=tweets_df)
+            return None, None
+        sql_Ticker_Stats_Table_DF = self.get_stats_table_sql_result(
+            tweets_df=tweets_df)
         # Step 6.1
         preped_for_model, preped_df = self.prep_data(tweets_df)
         # Step 6.2
         pred = self.get_pred(preped_for_model)
-        sql_Ticker_and_Pred_Table_DF = self.get_pred_table_sql_result(prepared_df=preped_df, prediction=pred)
+        sql_Ticker_and_Pred_Table_DF = self.get_pred_table_sql_result(
+            prepared_df=preped_df, prediction=pred)
 
-
-        print("pred","\n",sql_Ticker_and_Pred_Table_DF)
-        print("tweets","\n",sql_Ticker_Stats_Table_DF)
+        print("pred", "\n", sql_Ticker_and_Pred_Table_DF)
+        print("tweets", "\n", sql_Ticker_Stats_Table_DF)
         return sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF
 
 
 if __name__ == "__main__":
     model = TweetStockModel(
-    model_path=f'/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
-    model_ticker="AAPL",
-    features_version=1)
+        model_path=f'/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
+        model_ticker="AAPL",
+        features_version=1)
     sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
-

@@ -10,7 +10,7 @@ from sqlalchemy import create_engine
 # ----------------------------------------------------------------------------------------------- #
 if os.name == 'nt':
     delimiter = '\\'
-    prefix = ''
+    prefix = f'{os.getcwd()}\\FlaskServer\\'
 elif os.name == 'posix':
     delimiter = '/'
     prefix = '/home/pi/FinalProject/FlaskServer/'
@@ -69,7 +69,6 @@ def write_to_log(msg):
     with open(f'LOG_{GetDateTimeStringify()}', 'a+', encoding='utf-8') as f:
         f.write(msg)
 
-
 def update_db(models=MODELS):
     result = {
         'pred_df': pd.DataFrame(),
@@ -80,6 +79,9 @@ def update_db(models=MODELS):
         model = tsm(
             model_path=models[ticker]['path'], model_ticker=ticker, features_version=models[ticker]['features'])
         sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
+        if sql_Ticker_and_Pred_Table_DF.empty and sql_Ticker_Stats_Table_DF.empty:
+            print("Error Getting data from model!\nSQL DB won't update")
+            break
         # Update result
         result['pred_df'].append(
             sql_Ticker_and_Pred_Table_DF, ignore_index=True)
@@ -123,8 +125,11 @@ def is_valid_day():
 
     nyse = mcal.get_calendar('NYSE')
 
-    schedule = nyse.schedule(
-        start_date=today, end_date=today)
+    try:
+        schedule = nyse.schedule(
+            start_date=today, end_date=today)
+    except Exception as e:
+        return False
 
     timestamp = pd.Timestamp(
         f'{today} {time}', tz='Israel').tz_convert('America/New_York')  # convert israel time to NY time
