@@ -1,12 +1,14 @@
-from numpy import outer
+import numpy as np
 import pandas as pd
 from TweetStockModel import TweetStockModel as tsm
 import time
 import pandas_market_calendars as mcal
 from datetime import datetime as dt
 import os
-import sqlalchemy as sal
-from sqlalchemy import create_engine
+import json
+#from sqlalchemy import create_engine
+import firebase_admin
+from firebase_admin import credentials, db
 
 # ----------------------------------------------------------------------------------------------- #
 if os.name == 'nt':
@@ -16,27 +18,39 @@ elif os.name == 'posix':
     delimiter = '/'
     prefix = '/home/pi/FinalProject/FlaskServer/'
 
+PRED_cred = credentials.Certificate(
+    f"{prefix}CONFIGS/tweetstockpred-firebase-adminsdk-nctp0-54e961d24e.json")
+
+firebase_admin.initialize_app(PRED_cred, {
+    'databaseURL': "https://tweetstockpred-default-rtdb.europe-west1.firebasedatabase.app/"
+})
+
+os.system(
+    f'export GOOGLE_APPLICATION_CREDENTIALS="{prefix}CONFIGS/tweetstockpred-firebase-adminsdk-nctp0-54e961d24e.json"')
+Tweets_cred = ""
+
+
 MODELS = {
-    'AAPL': {
-        'path': f'{prefix}SelectedModels{delimiter}AAPL{delimiter}AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
-        'features': 1
-    },
-    'AMZN': {
-        'path': f'{prefix}SelectedModels{delimiter}AMZN{delimiter}AMZN_acc_0.673_npast_1_epoch_7_opt_rmsprop_num_1396.h5',
-        'features': 1
-    },
-    'GOOG': {
-        'path': f'{prefix}SelectedModels{delimiter}GOOG{delimiter}GOOG_acc_0.612_npast_1_epoch_10_opt_adam_num_2283.h5',
-        'features': 1
-    },
-    'GOOGL': {
-        'path': f'{prefix}SelectedModels{delimiter}GOOGL{delimiter}GOOGL_acc_1.0_npast_1_epoch_4_opt_adam_num_3147.h5',
-        'features': 1
-    },
-    'MSFT': {
-        'path': f'{prefix}SelectedModels{delimiter}MSFT{delimiter}MSFT_acc_0.612_npast_1_epoch_4_opt_adam_num_4359.h5',
-        'features': 2
-    },
+    # 'AAPL': {
+    #     'path': f'{prefix}SelectedModels{delimiter}AAPL{delimiter}AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
+    #     'features': 1
+    # },
+    # 'AMZN': {
+    #     'path': f'{prefix}SelectedModels{delimiter}AMZN{delimiter}AMZN_acc_0.673_npast_1_epoch_7_opt_rmsprop_num_1396.h5',
+    #     'features': 1
+    # },
+    # 'GOOG': {
+    #     'path': f'{prefix}SelectedModels{delimiter}GOOG{delimiter}GOOG_acc_0.612_npast_1_epoch_10_opt_adam_num_2283.h5',
+    #     'features': 1
+    # },
+    # 'GOOGL': {
+    #     'path': f'{prefix}SelectedModels{delimiter}GOOGL{delimiter}GOOGL_acc_1.0_npast_1_epoch_4_opt_adam_num_3147.h5',
+    #     'features': 1
+    # },
+    # 'MSFT': {
+    #     'path': f'{prefix}SelectedModels{delimiter}MSFT{delimiter}MSFT_acc_0.612_npast_1_epoch_4_opt_adam_num_4359.h5',
+    #     'features': 2
+    # },
     'TSLA': {
         'path': f'{prefix}SelectedModels{delimiter}TSLA{delimiter}TSLA_acc_0.633_npast_1_epoch_4_opt_adam_num_804.h5',
         'features': 1
@@ -49,7 +63,7 @@ def Main():
     # 'features': 2 --> ['Tweet_Sentiment','Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
 
     while True:
-        update_db()
+        Get_predictions()
         # if (is_valid_day()):
         #     update_db()
         #     time.sleep(3 * 60 * 60)  # sleep 3 hours
@@ -71,54 +85,63 @@ def write_to_log(msg):
         f.write(msg)
 
 
-def update_db(models=MODELS):
+def Get_predictions(models=MODELS):
     result = {
-        'pred_df': pd.DataFrame(),
-        'tweets_df': pd.DataFrame()
+        'pred_df': {},
+        'tweets_df': {}
     }
     for ticker in models.keys():
         # Run the model
         model = tsm(
             model_path=models[ticker]['path'], model_ticker=ticker, features_version=models[ticker]['features'])
-        sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
-        if sql_Ticker_and_Pred_Table_DF is not None and sql_Ticker_and_Pred_Table_DF.empty and sql_Ticker_Stats_Table_DF is not None and sql_Ticker_Stats_Table_DF.empty:
-            print("Error Getting data from model!\nSQL DB won't update")
+        Ticker_and_Pred_Table_Dict, Ticker_Stats_Table_Dict = model.get_prediction()
+
+        if Ticker_and_Pred_Table_Dict in (None, '', '[]', r'[{}]') or Ticker_Stats_Table_Dict in (None, '', '[]', r'[{}]'):
+            print("Error Getting data from model!")
             break
-        # Update result
-            # result['pred_df'].append(
-        #     sql_Ticker_and_Pred_Table_DF, ignore_index=True)
-        # result['tweets_df'].append(
-        #     sql_Ticker_Stats_Table_DF, ignore_index=True)
-        result['pred_df'] = pd.concat(
-            [result['pred_df'], sql_Ticker_and_Pred_Table_DF], join="outer", axis=0)
-        result['tweets_df'] = pd.concat(
-            [result['pred_df'], sql_Ticker_Stats_Table_DF], join="outer", axis=0)
-        print("Not Sleeping for 15 mins")
+        if len(Ticker_and_Pred_Table_Dict) == 1:
+            result['pred_df'].update({ticker: Ticker_and_Pred_Table_Dict[0]})
+        else:
+            write_to_log(
+                f'Ticker_and_Pred_Table_Dict returned greater than 1:\n{Ticker_and_Pred_Table_Dict}')
+
+        if len(Ticker_Stats_Table_Dict) > 0:
+            for tweet in Ticker_Stats_Table_Dict:
+                result['tweets_df'].update(
+                    {ticker: tweet})
+        else:
+            write_to_log(
+                f'Ticker_Stats_Table_Dict returned null:\n{Ticker_Stats_Table_Dict}')
+
         # time.sleep(15*60)  # sleep 15 mins
 
+    invalid_results = (None, '')
+    if result['pred_df'] in invalid_results or result['tweets_df'] in invalid_results:
+        print("@DB_Worker- bad results")
+        return
     post_to_db(result['pred_df'], result["tweets_df"])
 
 
-def post_to_db(pred_df, tweets_df):
-    user = 'bgroup57'
-    passwd = 'bgroup57_40988'
-    host = 'media.ruppin.ac.il'
-    port = '1433'
-    db = 'bgroup57_test2'
+def df_to_json(df):
+    return df.to_json(orient='records')
 
-    url = f'mssql+pyodbc://{user}:{passwd}@{host}:{port}/{db}?driver=SQL+Server'
 
-    engine = create_engine(url)
+def post_to_db(pred_dict, tweets_dict):
 
-    SQL_Tables = ['TweetStock_Prediction_2022', 'TweetStock_Tweets_2022']
-    tables = [pred_df, tweets_df]
-    for i, table in enumerate(tables):
-        # if_exists{‘fail’, ‘replace’, ‘append’}, default ‘fail’
-        table.to_sql(f'{SQL_Tables[i]}', con=engine,
-                     if_exists='replace', index=False)
+    #pushtoDB(Tweets_cred, tables[1], "Tweets")
+    def pushtoDB(dict_to_push, name):
+        ref = get_db_ref(name)
+        to_push = json.dumps(dict_to_push)
+        ref.set(
+            {
+                name: {
+                    to_push[0]
+                }
+            }
+        )
 
-        df = pd.read_sql(f'SELECT * FROM {table}', engine)
-        print(df)
+    pushtoDB(pred_dict, "Prediction")
+    #pushtoDB(PRED_cred, tweets_df, "Tweets")
 
 
 def is_valid_day():
@@ -151,6 +174,10 @@ def is_valid_day():
             write_to_log(f'nyse.open_at_time says:\n{ve}')
             return False
     return False
+
+
+def get_db_ref(root_name):
+    return db.reference(f"/{root_name}")
 
 
 # ----------------------------------------------------------------------------------------------- #

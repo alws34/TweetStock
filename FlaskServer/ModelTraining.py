@@ -12,7 +12,7 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import models, layers
 from keras.datasets import mnist
-from tensorflow.keras.utils import to_categorical
+from keras.utils import to_categorical
 import csv
 import os
 import sys

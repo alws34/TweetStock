@@ -53,8 +53,9 @@ sudo pip uninstall tensorflow
 pip uninstall tensorflow
 pip install  tensorflow-[Your version here].whl
 
-3.1 install dependencfa on venv
-pip install numpy pandas telepot psutil requests flask flask_cors  flask_restful TwitterAPI tweepy vaderSentiment sklearn opencv-contrib-python "picamera[array]" numpy --upgrade
+3.1 install other libraries on venv
+pip install numpy pandas telepot psutil requests flask flask_cors flask_restful TwitterAPI tweepy pandas_market_calendars firebase_admin matplotlib scikit-learn vaderSentiment sklearn opencv-contrib-python "picamera[array]" numpy --upgrade
+python -m pip install -U autopep8
 
 3.2 restart enviroment
 exec $SHELL

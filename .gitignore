@@ -346,3 +346,4 @@ env/lib/python3.9/site-packages/tensorflow/python/_pywrap_tensorflow_internal.so
 Tensorflow/*.whl
 env/*
 *.img
+FlaskServer/CONFIGS/tweetstockchat-firebase-adminsdk-dwhlz-5c492168ff.json
