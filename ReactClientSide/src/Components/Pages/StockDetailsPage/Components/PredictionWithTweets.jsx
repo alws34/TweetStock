@@ -1,4 +1,5 @@
 import React from "react";
+import "../StockDetailsPageStyles.css";
 import Tweet from "../../../Shared/Tweet/Tweet";
 import PredTable from "./PredictionStatsTable/PredictionTable";
 import Prediction from "../../../Shared/Prediction/Prediction";
@@ -7,14 +8,8 @@ export default function PredictionWithTweets(props) {
   const flaskResponse = props.flaskResponse;
   const ticker = props.ticker;
   return (
-    <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+    <div className="predictionWithTweets">
+      <div className="predictionContainer">
         <Prediction
           isLoading={flaskResponse === null}
           size={"400px"}
@@ -24,30 +19,16 @@ export default function PredictionWithTweets(props) {
           }
         ></Prediction>
       </div>
-      <div>
+      <div className="tweetsAndTableContainer">
         {flaskResponse &&
           flaskResponse["tweets"].map((tweet) => {
             return (
-              <div
-                style={{
-                  maxWidth: "800px",
-                  marginLeft: "auto",
-                  marginRight: "auto",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-evenly",
-                    alignItems: "center",
-                  }}
-                >
-                  <div style={{ margin: 0 }}>
-                    <Tweet tweetId={tweet["tweet_id"]} />
-                  </div>
-                  <div style={{ margin: 0 }}>
-                    <PredTable tweet={tweet}></PredTable>
-                  </div>
+              <div className="tweetsAndTableContainer">
+                <div>
+                  <Tweet tweetId={tweet["tweet_id"]} />
+                </div>
+                <div>
+                  <PredTable tweet={tweet}></PredTable>
                 </div>
               </div>
             );

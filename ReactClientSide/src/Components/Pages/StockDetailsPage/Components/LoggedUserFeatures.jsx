@@ -7,6 +7,7 @@ import { FavoriteBorder, Favorite } from "@mui/icons-material";
 import PopupStockChat from "./StockChat/PopupStockChat";
 import { apiUrlFavorites } from "../../../Configs/apiUrlsKeys";
 import { getLoggedUser } from "../../../Configs/getLoggedUser";
+
 export default function LoggedUserFeatures(props) {
   const navigate = useNavigate();
   const user = getLoggedUser();
@@ -104,17 +105,10 @@ export default function LoggedUserFeatures(props) {
   useEffect(fetchIsFavStock, [ticker, user.Id]);
 
   return (
-    <div>
+    <div className="loggedUserFeatures">
       <Row>
         <Col>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 10,
-            }}
-          >
+          <div className="featuresContainer">
             <Button
               variant="contained"
               size="medium"
@@ -136,7 +130,7 @@ export default function LoggedUserFeatures(props) {
           </div>
         </Col>
       </Row>
-      <PopupStockChat />
+      <PopupStockChat ticker={ticker} />
     </div>
   );
 }
