@@ -3,6 +3,7 @@
 ### About This Project:
 
 This is our final project in our B.Sc in computer science at Ruppin Academic Center.
+[Live WebSite](https://proj.ruppin.ac.il/bgroup57/test2/tar1/build/)
 <br>
 In this project we are trying to predict stock price changes for the end of the trading day - for specific stocks, based on chatter analysis from twitter.<br><br>
 The stocks that we monitor are: Tesla (tsla), Amazon (amzn), Apple (aapl),Microsoft (msft) and Google (goog & googl).<br><br>
