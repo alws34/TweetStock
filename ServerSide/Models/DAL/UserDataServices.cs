@@ -57,7 +57,7 @@ namespace finalServerSide.Models.DAL
             {
                 con = connect("DBConnectionString"); // create the connection
                 //checking if the email already exists
-                String selectSTR = "SELECT * FROM Users_2022 WHERE email = '" + user.Email + "'";
+                String selectSTR = "SELECT * FROM TweetStockApp_Users_2022 WHERE email = '" + user.Email + "'";
                 cmd = new SqlCommand(selectSTR, con);
 
                 // get a reader
@@ -110,7 +110,7 @@ namespace finalServerSide.Models.DAL
             StringBuilder sb = new StringBuilder();
             // use a string builder to create the dynamic string
             sb.AppendFormat("Values('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')", user.FirstName, user.LastName, user.Email, user.Password, user.Address, user.Picture);
-            String prefix = "INSERT INTO Users_2022 " + "([firstName], [lastName], [email], [password], [address], [picture]) ";
+            String prefix = "INSERT INTO TweetStockApp_Users_2022 " + "([firstName], [lastName], [email], [password], [address], [picture]) ";
             command = prefix + sb.ToString();
             return command;
         }
@@ -127,7 +127,7 @@ namespace finalServerSide.Models.DAL
             {
                 con = connect("DBConnectionString"); // create the connection
                 //checking if the email already exists
-                String selectSTR = "SELECT * FROM Users_2022 WHERE email = '" + email + "'AND password= '" + pass +"'";
+                String selectSTR = "SELECT * FROM TweetStockApp_Users_2022 WHERE email = '" + email + "'AND password= '" + pass +"'";
                 cmd = new SqlCommand(selectSTR, con);
 
                 // get a reader
@@ -171,7 +171,7 @@ namespace finalServerSide.Models.DAL
             {
                 con = connect("DBConnectionString"); // create the connection
                 //checking if the email already exists
-                String selectSTR = "SELECT * FROM Users_2022 WHERE id = "+ id ;
+                String selectSTR = "SELECT * FROM TweetStockApp_Users_2022 WHERE id = "+ id ;
                 cmd = new SqlCommand(selectSTR, con);
 
                 // get a reader
@@ -217,7 +217,7 @@ namespace finalServerSide.Models.DAL
             {
                 con = connect("DBConnectionString"); // create the connection
                 List<User> usersList = new List<User>();
-                String selectSTR = "SELECT * FROM Users_2022";//WHERE isAdmin=false
+                String selectSTR = "SELECT * FROM TweetStockApp_Users_2022";//WHERE isAdmin=false
                 cmd = new SqlCommand(selectSTR, con);
 
                 // get a reader
@@ -303,7 +303,7 @@ namespace finalServerSide.Models.DAL
             StringBuilder string_builder = new StringBuilder();
             // use a string builder to create the dynamic string
             string_builder.AppendFormat(" SET [FirstName]='{0}', [LastName]='{1}', [Email]='{2}', "+pass+" [Picture]='{3}'", user.FirstName, user.LastName, user.Email, user.Picture);
-            String prefix = "UPDATE Users_2022" + " ";
+            String prefix = "UPDATE TweetStockApp_Users_2022" + " ";
             String end = " WHERE id= " + user.Id;
             command = prefix + string_builder.ToString() + end;
             return command;
@@ -403,7 +403,7 @@ namespace finalServerSide.Models.DAL
         private String BuildDeleteCommand(int id)
         {
             String command;
-            command = "DELETE FROM Users_2022 where id =" + id;
+            command = "DELETE FROM TweetStockApp_Users_2022 where id =" + id;
             return command;
         }
         //--------------------------------------------------------------------
@@ -412,7 +412,7 @@ namespace finalServerSide.Models.DAL
         private String BuildDeleteFavoritesCommand(int id)
         {
             String command;
-            command = "DELETE FROM Favorites_2022 where userId =" + id;
+            command = "DELETE FROM TweetStockApp_Favorites_2022 where userId =" + id;
             return command;
         }
     }
