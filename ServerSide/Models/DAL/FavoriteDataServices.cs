@@ -61,7 +61,7 @@ namespace finalServerSide.Models.DAL
                 // write to log
                 throw (ex);
             }
-            String query = "INSERT INTO Favorites_2022 (userId, ticker) VALUES (@userId,@ticker)";
+            String query = "INSERT INTO TweetStockApp_Favorites_2022 (userId, ticker) VALUES (@userId,@ticker)";
 
             using (SqlCommand command = new SqlCommand(query, con))
             {
@@ -133,7 +133,7 @@ namespace finalServerSide.Models.DAL
         private String BuildDeleteFavCommand(int userId, string ticker)
         {
             String command;
-            command = "DELETE from Favorites_2022 where userId =" + userId + " and ticker = '" + ticker + "'";
+            command = "DELETE from TweetStockApp_Favorites_2022 where userId =" + userId + " and ticker = '" + ticker + "'";
             return command;
         }
 
@@ -148,7 +148,7 @@ namespace finalServerSide.Models.DAL
             {
                 con = connect("DBConnectionString"); // create a connection to the database using the connection String defined in the web config file
 
-                String selectSTR = "Select * From Favorites_2022 WHERE userId = " + userId;
+                String selectSTR = "Select * From TweetStockApp_Favorites_2022 WHERE userId = " + userId;
                 SqlCommand cmd = new SqlCommand(selectSTR, con);
                 // get a reader
                 SqlDataReader dr = cmd.ExecuteReader(CommandBehavior.CloseConnection); // CommandBehavior.CloseConnection: the connection will be closed after reading has reached the end

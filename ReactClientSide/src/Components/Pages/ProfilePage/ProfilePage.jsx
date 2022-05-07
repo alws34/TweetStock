@@ -1,4 +1,6 @@
 import { React, useState } from "react";
+import "../../Shared/Forms/FormStyles.css";
+import FormField from "../../Shared/Forms/FormField";
 import Copyright from "../../Shared/UserDetails/Copyright";
 import Camera from "../../Shared/Camera/Camera";
 import { apiUrlUsers } from "../../Configs/apiUrlsKeys";
@@ -12,7 +14,6 @@ import {
   Avatar,
   Button,
   CssBaseline,
-  TextField,
   Grid,
   Box,
   Typography,
@@ -103,16 +104,18 @@ export default function ProfilePage() {
 
     const data = new FormData(event.currentTarget);
 
-    let pass = data.get("password").length != 0 ? data.get("password") : "-1";
+    let pass = data.get("password").length !== 0 ? data.get("password") : "-1";
     console.log("pass", pass);
     updated_user = {
       Id: user.Id,
       FirstName:
-        data.get("firstName").length != 0
+        data.get("firstName").length !== 0
           ? data.get("firstName")
           : user.FirstName,
       LastName:
-        data.get("lastName").length != 0 ? data.get("lastName") : user.LastName,
+        data.get("lastName").length !== 0
+          ? data.get("lastName")
+          : user.LastName,
       Email: user.Email,
       Password: pass,
       // address: country,
@@ -136,18 +139,38 @@ export default function ProfilePage() {
     });
   };
 
+  const ButtonsContainer = () => {
+    return (
+      <div className="buttonsContainer">
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          sx={{ mt: 3, mb: 2 }}
+          color="success"
+        >
+          Update Profile
+        </Button>
+        <Grid container justifyContent="flex-end">
+          <Grid item>
+            <Button
+              onClick={() => navigate(navPaths["home"])}
+              variant="contained"
+              color="secondary"
+            >
+              Home Page
+            </Button>
+          </Grid>
+        </Grid>
+      </div>
+    );
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
+        <Box className="formContainer">
           <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
             <LockOutlinedIcon />
           </Avatar>
@@ -156,95 +179,69 @@ export default function ProfilePage() {
           </Typography>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="given-name"
-                  name="firstName"
-                  fullWidth
-                  id="firstName"
-                  defaultValue={user.FirstName}
-                  label="firstName"
-                  autoFocus
-                  inputProps={{
-                    minlength: 2,
-                    maxlength: 15,
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  id="lastName"
-                  defaultValue={user.LastName}
-                  label="lastName"
-                  name="lastName"
-                  autoComplete="family-name"
-                  inputProps={{
-                    minlength: 2,
-                    maxlength: 15,
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  id="email"
-                  defaultValue={user.Email}
-                  label="email"
-                  name="email"
-                  autoComplete="email"
-                  inputProps={{
-                    readOnly: true,
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  name="password"
-                  label="password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
-                  inputProps={{
-                    minlength: 6,
-                  }}
-                />
-              </Grid>
+              <FormField
+                xs={12}
+                sm={6}
+                label="First Name"
+                autoComplete="given-name"
+                fieldName="firstName"
+                fieldValue={user.FirstName}
+                inputProps={{
+                  minlength: 2,
+                  maxlength: 15,
+                }}
+                sx={{
+                  autoFocus: true,
+                }}
+              />
+
+              <FormField
+                xs={12}
+                sm={6}
+                label="Last Name"
+                autoComplete="family-name"
+                fieldName="lastName"
+                fieldValue={user.LastName}
+                inputProps={{
+                  minlength: 2,
+                  maxlength: 15,
+                }}
+              />
+
+              <FormField
+                xs={12}
+                label="Email"
+                autoComplete="email"
+                fieldName="email"
+                fieldValue={user.Email}
+                inputProps={{
+                  readOnly: true,
+                }}
+              />
+
+              <FormField
+                xs={12}
+                label="Password"
+                autoComplete="new-password"
+                fieldName="password"
+                inputProps={{
+                  minlength: 6,
+                }}
+                sx={{
+                  type: "password",
+                }}
+              />
+
               {/* <Grid item xs={12}>
                 <CountrySelect id="country" sendToForm={getCountry} />
               </Grid> */}
+
               <Grid item xs={12}>
                 <Camera img={img} setParentImg={setImg} />
                 <br />
               </Grid>
             </Grid>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Update Profile
-            </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Button
-                  onClick={() => navigate(navPaths["home"])}
-                  variant="body2"
-                >
-                  <p
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    Back to Home
-                  </p>
-                </Button>
-              </Grid>
-            </Grid>
+            <ButtonsContainer />
           </Box>
         </Box>
         <Copyright sx={{ mt: 5 }} />

@@ -1,8 +1,10 @@
 import * as React from "react";
 import { useState } from "react";
+import "../../Shared/Forms/FormStyles.css";
 import CountrySelect from "../../Shared/UserDetails/CountrySelect";
 import Camera from "../../Shared/Camera/Camera";
 import Copyright from "../../Shared/UserDetails/Copyright";
+import FormField from "../../Shared/Forms/FormField";
 import { apiUrlUsers } from "../../Configs/apiUrlsKeys";
 //import { getRememberMe, saveUserLocalStorage } from "../Configs/getLoggedUser";
 import { navPaths } from "../../Configs/navPaths";
@@ -10,12 +12,10 @@ import {
   Avatar,
   Button,
   CssBaseline,
-  TextField,
   Grid,
   Box,
   Typography,
   Container,
-  Link,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -103,18 +103,39 @@ export default function SignUp() {
     postUser(user);
   };
 
+  const ButtonsContainer = () => {
+    return (
+      <div className="buttonsContainer">
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          sx={{ mt: 3, mb: 2 }}
+          color="success"
+        >
+          Sign Up
+        </Button>
+        <Grid container justifyContent="flex-end">
+          <Grid item>
+            <Button
+              onClick={() => navigate(navPaths["sign in"])}
+              fullWidth
+              variant="contained"
+              color="secondary"
+            >
+              Sign In page
+            </Button>
+          </Grid>
+        </Grid>
+      </div>
+    );
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
+        <Box className="formContainer">
           <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
             <LockOutlinedIcon />
           </Avatar>
@@ -123,88 +144,71 @@ export default function SignUp() {
           </Typography>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="given-name"
-                  name="firstName"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  autoFocus
-                  inputProps={{
-                    minlength: 2,
-                    maxlength: 15,
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
-                  inputProps={{
-                    minlength: 2,
-                    maxlength: 15,
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  inputProps={{
-                    pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
-                  inputProps={{
-                    minlength: 6,
-                  }}
-                />
-              </Grid>
+              <FormField
+                xs={12}
+                sm={6}
+                label="First Name"
+                autoComplete="given-name"
+                fieldName="firstName"
+                fieldValue={user.FirstName}
+                inputProps={{
+                  minlength: 2,
+                  maxlength: 15,
+                }}
+                sx={{
+                  autoFocus: true,
+                  required: true,
+                }}
+              />
+              <FormField
+                xs={12}
+                sm={6}
+                label="Last Name"
+                autoComplete="family-name"
+                fieldName="lastName"
+                fieldValue={user.LastName}
+                inputProps={{
+                  minlength: 2,
+                  maxlength: 15,
+                }}
+                sx={{ required: true }}
+              />
+              <FormField
+                xs={12}
+                label="Email Address"
+                autoComplete="email"
+                fieldName="email"
+                fieldValue={user.Email}
+                inputProps={{
+                  pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
+                }}
+                sx={{ required: true }}
+              />
+
+              <FormField
+                xs={12}
+                label="Password"
+                autoComplete="new-password"
+                fieldName="password"
+                inputProps={{
+                  minlength: 6,
+                }}
+                sx={{
+                  type: "password",
+                  required: true,
+                }}
+              />
+
               <Grid item xs={12}>
                 <CountrySelect id="country" sendToForm={getCountry} />
               </Grid>
+
               <Grid item xs={12}>
                 <Camera img={img} setParentImg={setImg} />
                 <br />
               </Grid>
             </Grid>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Sign Up
-            </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Button
-                  onClick={() => navigate(navPaths["sign in"])}
-                  //variant="body2"
-                >
-                  <Link>Already have an account? Sign in </Link>
-                </Button>
-              </Grid>
-            </Grid>
+            <ButtonsContainer />
           </Box>
         </Box>
         <Copyright sx={{ mt: 5 }} />
