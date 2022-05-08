@@ -57,6 +57,7 @@ def init_Firebase_config():
 
 firebase_config = init_Firebase_config()
 firebase = pyrebase.initialize_app(firebase_config)
+db = firebase.database()
 
 
 def clear_table(table_name, date):
