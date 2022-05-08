@@ -1,21 +1,24 @@
-from numpy import outer
 import pandas as pd
-from TweetStockModel import TweetStockModel as tsm
-import time
 import pandas_market_calendars as mcal
-from datetime import datetime as dt
 import os
-import sqlalchemy as sal
-from sqlalchemy import create_engine
+import json
+import time
+import pyrebase
+from datetime import datetime as dt
+from TweetStockModel import TweetStockModel as tsm
 
-# ----------------------------------------------------------------------------------------------- #
+# ---------------------------------Paths Init----------------------------------------------- #
 if os.name == 'nt':
     delimiter = '\\'
     prefix = f'{os.getcwd()}\\FlaskServer\\'
+    pinger = 'ping -n 1 1.1.1.1'
 elif os.name == 'posix':
     delimiter = '/'
     prefix = '/home/pi/FinalProject/FlaskServer/'
+    pinger = 'ping -c 1 1.1.1.1'
 
+
+# -------------------------------Available Models paths------------------------------------- #
 MODELS = {
     'AAPL': {
         'path': f'{prefix}SelectedModels{delimiter}AAPL{delimiter}AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
@@ -43,19 +46,63 @@ MODELS = {
     }
 }
 
+# -------------------------------FireBase------------------------------------- #
 
-def Main():
-    # 'features': 1 --> ['Tweet_Comments', 'Tweet_Retweets','Tweet_Likes', 'Positivity', 'Negativity', 'Neutral']
-    # 'features': 2 --> ['Tweet_Sentiment','Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
 
-    while True:
-        update_db()
-        # if (is_valid_day()):
-        #     update_db()
-        #     time.sleep(3 * 60 * 60)  # sleep 3 hours
-        # else:
-        #     print("invalid day")
-        #     continue
+def init_Firebase_config():
+    with open(f'{prefix}CONFIGS/firebaseconfig.json', 'r') as firebase_conf:
+        firebase_config = json.load(firebase_conf)
+    return firebase_config
+
+
+firebase_config = init_Firebase_config()
+firebase = pyrebase.initialize_app(firebase_config)
+
+
+def clear_table(table_name, date):
+    db.child(date).child(table_name).set({})
+
+
+def post_to_FireBase(tables_dict, date):
+    try:
+        for table_name, table_dict in tables_dict.items():
+
+            for stock_name, stock_dict in table_dict.items():
+                if type(stock_dict) == dict:
+                    db.child(date).child(table_name).child(
+                        stock_name).set(stock_dict)
+                elif type(stock_dict) == list:
+                    clear_table(table_name, date)
+                    for item in stock_dict:
+                        if type(item) == dict and 'tweet_id' in item.keys():
+                            db.child(date).child(table_name).child(stock_name).child(
+                                item['tweet_id']).set(item)
+                        else:
+                            return None
+                else:
+                    return None
+    except Exception as e:
+        write_to_log(f'{e}')
+
+
+# -------------------------------MODEL------------------------------------- #
+
+
+def is_valid_model_response(pred_dict, tweets_dict):
+    invalid_responses = (None, '', '[]', r'[{}]')
+    return len(pred_dict) == 1 and pred_dict not in invalid_responses and len(tweets_dict) > 0 and tweets_dict not in invalid_responses
+
+
+def Get_prediction(ticker, path, features_version):
+
+    model = tsm(
+        model_path=path, model_ticker=ticker, features_version=features_version)
+
+    Ticker_and_Pred_Table_Dict, Ticker_Stats_Table_Dict = model.get_prediction()
+
+    return Ticker_and_Pred_Table_Dict, Ticker_Stats_Table_Dict
+
+# -------------------------------DATETIME------------------------------------- #
 
 
 def Get_Date_Time():
@@ -65,60 +112,14 @@ def Get_Date_Time():
 def Get_Date_Time_Stringify(format="%d_%m_%Y_%H"):
     return Get_Date_Time().strftime(format)
 
+# -------------------------------LOGGING------------------------------------- #
+
 
 def write_to_log(msg):
-    with open(f'LOG_{Get_Date_Time_Stringify()}', 'a+', encoding='utf-8') as f:
+    with open(f'{prefix}/Logs/LOG_{Get_Date_Time_Stringify()}', 'a+', encoding='utf-8') as f:
         f.write(msg)
 
-
-def update_db(models=MODELS):
-    result = {
-        'pred_df': pd.DataFrame(),
-        'tweets_df': pd.DataFrame()
-    }
-    for ticker in models.keys():
-        # Run the model
-        model = tsm(
-            model_path=models[ticker]['path'], model_ticker=ticker, features_version=models[ticker]['features'])
-        sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
-        if sql_Ticker_and_Pred_Table_DF is not None and sql_Ticker_and_Pred_Table_DF.empty and sql_Ticker_Stats_Table_DF is not None and sql_Ticker_Stats_Table_DF.empty:
-            print("Error Getting data from model!\nSQL DB won't update")
-            break
-        # Update result
-            # result['pred_df'].append(
-        #     sql_Ticker_and_Pred_Table_DF, ignore_index=True)
-        # result['tweets_df'].append(
-        #     sql_Ticker_Stats_Table_DF, ignore_index=True)
-        result['pred_df'] = pd.concat(
-            [result['pred_df'], sql_Ticker_and_Pred_Table_DF], join="outer", axis=0)
-        result['tweets_df'] = pd.concat(
-            [result['pred_df'], sql_Ticker_Stats_Table_DF], join="outer", axis=0)
-        print("Not Sleeping for 15 mins")
-        # time.sleep(15*60)  # sleep 15 mins
-
-    post_to_db(result['pred_df'], result["tweets_df"])
-
-
-def post_to_db(pred_df, tweets_df):
-    user = 'bgroup57'
-    passwd = 'bgroup57_40988'
-    host = 'media.ruppin.ac.il'
-    port = '1433'
-    db = 'bgroup57_test2'
-
-    url = f'mssql+pyodbc://{user}:{passwd}@{host}:{port}/{db}?driver=SQL+Server'
-
-    engine = create_engine(url)
-
-    SQL_Tables = ['TweetStock_Prediction_2022', 'TweetStock_Tweets_2022']
-    tables = [pred_df, tweets_df]
-    for i, table in enumerate(tables):
-        # if_exists{‘fail’, ‘replace’, ‘append’}, default ‘fail’
-        table.to_sql(f'{SQL_Tables[i]}', con=engine,
-                     if_exists='replace', index=False)
-
-        df = pd.read_sql(f'SELECT * FROM {table}', engine)
-        print(df)
+# -------------------------------MAIN------------------------------------- #
 
 
 def is_valid_day():
@@ -151,6 +152,60 @@ def is_valid_day():
             write_to_log(f'nyse.open_at_time says:\n{ve}')
             return False
     return False
+
+
+def sleep_until_market_opens():
+    #now = Get_Date_Time()
+    now = {'hour': 1, 'min': 2}
+    start_hour, start_min = 16, 30
+    start_hour_in_sec = (start_hour * 60 + start_min) * 60
+    now_in_sec = (now.hour * 60 + now.min) * 60
+    if now_in_sec < start_hour_in_sec:
+        time.sleep(start_hour_in_sec - now_in_sec)
+    else:
+        one_day_in_sec = 24 * 60 * 60
+        time.sleep(one_day_in_sec - (now_in_sec - start_hour_in_sec))
+
+
+def update_firebase_db():
+    updated_db = {
+        'Prediction': {},
+        'Tweets': {}
+    }
+
+    for ticker, stock in MODELS.items():
+        pred_dict, tweets_dict = Get_prediction(
+            ticker=ticker, path=stock['path'], features_version=stock['features'])
+        if is_valid_model_response(pred_dict, tweets_dict):
+            date, time = Get_Date_Time_Stringify(
+                format="%d_%m_%Y"), Get_Date_Time_Stringify(format="%H_%M")
+            pred_dict[0]['last_update'] = date + "_" + time
+            for i in range(len(tweets_dict)):
+                tweets_dict[i]['last_update'] = date + "_" + time
+
+            updated_db['Prediction'][ticker], updated_db['Tweets'][ticker] = pred_dict[0], tweets_dict
+
+        else:
+            write_to_log(
+                f'DB update error for ticker {ticker}:\npred_dict: {len(pred_dict)}\ntweets_dict: {len(tweets_dict)}\n\n')
+        time.sleep(15*60)  # sleep 15 min for each ticker
+
+    post_to_FireBase(updated_db, date)
+
+
+def Main():
+    # 'features': 1 --> ['Tweet_Comments', 'Tweet_Retweets','Tweet_Likes', 'Positivity', 'Negativity', 'Neutral']
+    # 'features': 2 --> ['Tweet_Sentiment','Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
+
+    # update_firebase_db()
+    while True:
+        if os.system(pinger) == 0:  # check first for internet connectivity
+            if (is_valid_day()):
+                update_firebase_db()
+                sleeping_hours, sleeping_mins = 2, 0
+                time.sleep((sleeping_hours * 60 + sleeping_mins) * 60)
+            else:
+                sleep_until_market_opens()
 
 
 # ----------------------------------------------------------------------------------------------- #
