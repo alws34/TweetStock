@@ -205,7 +205,7 @@ class TweetStockModel:
                     return None
             except Exception as err:
                 print(f"{err}")
-                raise Exception("") from err 
+                raise Exception("") from err
 
         return tweets
 
@@ -327,42 +327,42 @@ class TweetStockModel:
         return result
 
     # Step 7.0
-    def get_stats_table_sql_result_old(self, tweets_dict):
-        # init dict
-        res_dict = {
-            'ticker': [],
-            'tweet_id': [],
-            'user_engagement': [],
-            'tweet_likes': [],
-            'tweet_replies': [],
-            'tweet_retweets': [],
-            'sentiment_pos': [],
-            'sentiment_neu': [],
-            'sentiment_neg': [],
-            'sentiment_compound': []
-        }
+    # def get_stats_table_dict_result_old(self, tweets_dict):
+    #     # init dict
+    #     res_dict = {
+    #         'ticker': [],
+    #         'tweet_id': [],
+    #         'user_engagement': [],
+    #         'tweet_likes': [],
+    #         'tweet_replies': [],
+    #         'tweet_retweets': [],
+    #         'sentiment_pos': [],
+    #         'sentiment_neu': [],
+    #         'sentiment_neg': [],
+    #         'sentiment_compound': []
+    #     }
 
-        # push values
-        for tweet in tweets_dict:
-            res_dict['ticker'].append(self.ticker)
-            res_dict['tweet_id'].append(tweet['tweet_id'])
-            res_dict['user_engagement'].append(tweet['u_engagement'])
-            res_dict['tweet_likes'].append(tweet['n_likes'])
-            res_dict['tweet_replies'].append(tweet['n_replies'])
-            res_dict['tweet_retweets'].append(tweet['n_retweets'])
-            if self.features_version == 1:
-                res_dict['sentiment_pos'].append(tweet['s_pos'])
-                res_dict['sentiment_neu'].append(tweet['s_neu'])
-                res_dict['sentiment_neg'].append(tweet['s_neg'])
-                res_dict['sentiment_compound'].append(None)
-            elif self.features_version == 2:
-                res_dict['sentiment_pos'].append(None)
-                res_dict['sentiment_neu'].append(None)
-                res_dict['sentiment_neg'].append(None)
-                res_dict['sentiment_compound'].append(tweet['s_compound'])
-        return pd.DataFrame.from_dict(res_dict)
+    #     # push values
+    #     for tweet in tweets_dict:
+    #         res_dict['ticker'].append(self.ticker)
+    #         res_dict['tweet_id'].append(tweet['tweet_id'])
+    #         res_dict['user_engagement'].append(tweet['u_engagement'])
+    #         res_dict['tweet_likes'].append(tweet['n_likes'])
+    #         res_dict['tweet_replies'].append(tweet['n_replies'])
+    #         res_dict['tweet_retweets'].append(tweet['n_retweets'])
+    #         if self.features_version == 1:
+    #             res_dict['sentiment_pos'].append(tweet['s_pos'])
+    #             res_dict['sentiment_neu'].append(tweet['s_neu'])
+    #             res_dict['sentiment_neg'].append(tweet['s_neg'])
+    #             res_dict['sentiment_compound'].append(None)
+    #         elif self.features_version == 2:
+    #             res_dict['sentiment_pos'].append(None)
+    #             res_dict['sentiment_neu'].append(None)
+    #             res_dict['sentiment_neg'].append(None)
+    #             res_dict['sentiment_compound'].append(tweet['s_compound'])
+    #     return pd.DataFrame.from_dict(res_dict)
 
-    def get_stats_table_sql_result(self, tweets_df):
+    def get_stats_table_dict_result(self, tweets_df):
         features = ['tweet_id', 'u_engagement', 'n_likes', 'n_replies',
                     'n_retweets', 's_pos', 's_neu', 's_neg', 's_compound']
         renames = {
@@ -375,10 +375,10 @@ class TweetStockModel:
             's_neg': 'sentiment_neg',
             's_compound': 'sentiment_compound'
         }
-        return tweets_df[features].rename(columns=renames)
+        return tweets_df[features].rename(columns=renames).to_dict(orient='records')
     # Step 7.1
 
-    def get_pred_table_sql_result(self, prepared_df, prediction):
+    def get_Pred_Table_dict_dict_result(self, prepared_df, prediction):
         # init dict
         res_dict = {}
         # push values
@@ -388,9 +388,10 @@ class TweetStockModel:
             res_dict[col] = []
             for val in prepared_df[col]:
                 res_dict[col].append(val)
-        return pd.DataFrame.from_dict(res_dict)
+        return pd.DataFrame.from_dict(res_dict).to_dict(orient='records')
 
     # Pred Function
+
     def get_prediction(self):
         # Step 1
         tweets = self.get_tweets(self.ticker, max_results=MAX_TWEETS_RESULTS,
@@ -425,18 +426,18 @@ class TweetStockModel:
         if tweets_df.empty:
             print("Couldnt convert twitter res dict to df @twitter_dict_res_to_df()")
             return None, None
-        sql_Ticker_Stats_Table_DF = self.get_stats_table_sql_result(
+        Tweets_Table_dict = self.get_stats_table_dict_result(
             tweets_df=tweets_df)
         # Step 6.1
         preped_for_model, preped_df = self.prep_data(tweets_df)
         # Step 6.2
         pred = self.get_pred(preped_for_model)
-        sql_Ticker_and_Pred_Table_DF = self.get_pred_table_sql_result(
+        Pred_Table_dict = self.get_Pred_Table_dict_dict_result(
             prepared_df=preped_df, prediction=pred)
 
-        print("pred", "\n", sql_Ticker_and_Pred_Table_DF)
-        print("tweets", "\n", sql_Ticker_Stats_Table_DF)
-        return sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF
+        print("pred", "\n", Pred_Table_dict)
+        print("tweets", "\n", Tweets_Table_dict)
+        return Pred_Table_dict, Tweets_Table_dict
 
 
 if __name__ == "__main__":
@@ -444,4 +445,4 @@ if __name__ == "__main__":
         model_path=f'/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
         model_ticker="AAPL",
         features_version=1)
-    sql_Ticker_and_Pred_Table_DF, sql_Ticker_Stats_Table_DF = model.get_prediction()
+    Pred_Table_dict, Tweets_Table_dict = model.get_prediction()

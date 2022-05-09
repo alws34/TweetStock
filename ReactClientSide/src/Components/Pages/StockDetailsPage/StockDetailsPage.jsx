@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "./StockDetailsPageStyles.css";
 import StockDetails from "./Components/StockDetails";
 import StockChart from "../../Shared/Stock/StockChart";
 import PageHeader from "../../Shared/PageHeader/PageHeader";
@@ -10,7 +11,6 @@ import { useLocation } from "react-router-dom";
 // import { Button, Checkbox } from "@mui/material";
 import { Row, Col } from "react-bootstrap";
 import "reactjs-popup/dist/index.css";
-import "./Components/StockChat/PopupChat.css";
 import LoggedUserFeatures from "./Components/LoggedUserFeatures";
 import PredictionWithTweets from "./Components/PredictionWithTweets";
 
@@ -64,141 +64,6 @@ export default function StockDetailsPage() {
       );
   };
 
-  // const PredictionWithTweets = () => {
-  //   return (
-  //     <div>
-  //       <div
-  //         style={{
-  //           display: "flex",
-  //           justifyContent: "center",
-  //           alignItems: "center",
-  //         }}
-  //       >
-  //         <Prediction
-  //           isLoading={flaskResponse === null}
-  //           size={"400px"}
-  //           ticker={ticker}
-  //           dir={
-  //             flaskResponse && flaskResponse["prediction"] === 1 ? "up" : "down"
-  //           }
-  //         ></Prediction>
-  //       </div>
-  //       <div>
-  //         {flaskResponse &&
-  //           flaskResponse["tweets"].map((tweet) => {
-  //             return (
-  //               <div
-  //                 style={{
-  //                   maxWidth: "800px",
-  //                   marginLeft: "auto",
-  //                   marginRight: "auto",
-  //                 }}
-  //               >
-  //                 <div
-  //                   style={{
-  //                     display: "flex",
-  //                     justifyContent: "space-evenly",
-  //                     alignItems: "center",
-  //                   }}
-  //                 >
-  //                   <div style={{ margin: 0 }}>
-  //                     <Tweet tweetId={tweet["tweet_id"]} />
-  //                   </div>
-  //                   <div style={{ margin: 0 }}>
-  //                     <PredTable tweet={tweet}></PredTable>
-  //                   </div>
-  //                 </div>
-  //               </div>
-  //             );
-  //           })}
-  //       </div>
-  //     </div>
-  //   );
-  // };
-
-  // const LoggedUserFields = () => {
-  //   console.clear();
-  //   console.log("renderLogged");
-  //   return (
-  //     <div>
-  //       <Row>
-  //         <Col>
-  //           <div
-  //             style={{
-  //               display: "flex",
-  //               justifyContent: "center",
-  //               alignItems: "center",
-  //               marginTop: 10,
-  //             }}
-  //           >
-  //             <Button
-  //               variant="contained"
-  //               size="medium"
-  //               onClick={() =>
-  //                 navigate(navPaths["popular tweets"], { state: ticker })
-  //               }
-  //             >
-  //               Popular Tweets
-  //             </Button>
-  //             <Checkbox
-  //               onClick={(e) => handleCheckFav(e)}
-  //               sx={{ color: "red" }}
-  //               {...label}
-  //               checked={favChecked}
-  //               icon={<FavoriteBorder sx={{ fontSize: 40 }} />}
-  //               checkedIcon={<Favorite sx={{ fontSize: 40 }} />}
-  //               color="error"
-  //             />
-  //           </div>
-  //         </Col>
-  //       </Row>
-  //       <PopUpChat />
-  //     </div>
-  //   );
-  // };
-
-  // const PopUpChat = () => {
-  //   return (
-  //     <Sticky mode="bottom">
-  //       <div
-  //         style={{
-  //           display: "flex",
-  //           justifyContent: "start",
-  //         }}
-  //       >
-  //         <Popup
-  //           trigger={
-  //             <Checkbox
-  //               checked={false}
-  //               icon={
-  //                 <ForumRoundedIcon
-  //                   sx={{
-  //                     fontSize: 40,
-  //                   }}
-  //                   color="info"
-  //                 ></ForumRoundedIcon>
-  //               }
-  //               checkedIcon={
-  //                 <ForumRoundedIcon
-  //                   sx={{
-  //                     fontSize: 40,
-  //                   }}
-  //                   color="info"
-  //                 ></ForumRoundedIcon>
-  //               }
-  //             />
-  //           }
-  //           position="right bottom"
-  //         >
-  //           <Sticky>
-  //             <StockChat ticker={ticker} />
-  //           </Sticky>
-  //         </Popup>
-  //       </div>
-  //     </Sticky>
-  //   );
-  // };
-
   useEffect(() => {
     console.clear();
     console.log("use effect", ticker);
@@ -240,3 +105,140 @@ export default function StockDetailsPage() {
     </div>
   );
 }
+
+// old componenets which were moved to seperate jsx file
+
+// const PredictionWithTweets = () => {
+//   return (
+//     <div>
+//       <div
+//         style={{
+//           display: "flex",
+//           justifyContent: "center",
+//           alignItems: "center",
+//         }}
+//       >
+//         <Prediction
+//           isLoading={flaskResponse === null}
+//           size={"400px"}
+//           ticker={ticker}
+//           dir={
+//             flaskResponse && flaskResponse["prediction"] === 1 ? "up" : "down"
+//           }
+//         ></Prediction>
+//       </div>
+//       <div>
+//         {flaskResponse &&
+//           flaskResponse["tweets"].map((tweet) => {
+//             return (
+//               <div
+//                 style={{
+//                   maxWidth: "800px",
+//                   marginLeft: "auto",
+//                   marginRight: "auto",
+//                 }}
+//               >
+//                 <div
+//                   style={{
+//                     display: "flex",
+//                     justifyContent: "space-evenly",
+//                     alignItems: "center",
+//                   }}
+//                 >
+//                   <div style={{ margin: 0 }}>
+//                     <Tweet tweetId={tweet["tweet_id"]} />
+//                   </div>
+//                   <div style={{ margin: 0 }}>
+//                     <PredTable tweet={tweet}></PredTable>
+//                   </div>
+//                 </div>
+//               </div>
+//             );
+//           })}
+//       </div>
+//     </div>
+//   );
+// };
+
+// const LoggedUserFields = () => {
+//   console.clear();
+//   console.log("renderLogged");
+//   return (
+//     <div>
+//       <Row>
+//         <Col>
+//           <div
+//             style={{
+//               display: "flex",
+//               justifyContent: "center",
+//               alignItems: "center",
+//               marginTop: 10,
+//             }}
+//           >
+//             <Button
+//               variant="contained"
+//               size="medium"
+//               onClick={() =>
+//                 navigate(navPaths["popular tweets"], { state: ticker })
+//               }
+//             >
+//               Popular Tweets
+//             </Button>
+//             <Checkbox
+//               onClick={(e) => handleCheckFav(e)}
+//               sx={{ color: "red" }}
+//               {...label}
+//               checked={favChecked}
+//               icon={<FavoriteBorder sx={{ fontSize: 40 }} />}
+//               checkedIcon={<Favorite sx={{ fontSize: 40 }} />}
+//               color="error"
+//             />
+//           </div>
+//         </Col>
+//       </Row>
+//       <PopUpChat />
+//     </div>
+//   );
+// };
+
+// const PopUpChat = () => {
+//   return (
+//     <Sticky mode="bottom">
+//       <div
+//         style={{
+//           display: "flex",
+//           justifyContent: "start",
+//         }}
+//       >
+//         <Popup
+//           trigger={
+//             <Checkbox
+//               checked={false}
+//               icon={
+//                 <ForumRoundedIcon
+//                   sx={{
+//                     fontSize: 40,
+//                   }}
+//                   color="info"
+//                 ></ForumRoundedIcon>
+//               }
+//               checkedIcon={
+//                 <ForumRoundedIcon
+//                   sx={{
+//                     fontSize: 40,
+//                   }}
+//                   color="info"
+//                 ></ForumRoundedIcon>
+//               }
+//             />
+//           }
+//           position="right bottom"
+//         >
+//           <Sticky>
+//             <StockChat ticker={ticker} />
+//           </Sticky>
+//         </Popup>
+//       </div>
+//     </Sticky>
+//   );
+// };
