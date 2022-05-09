@@ -1,16 +1,19 @@
+import os
+import json
 import pandas as pd
 import numpy as np
-import datetime
-from datetime import datetime as dt, timedelta
+import tweepy
+import math
 import sklearn
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import tensorflow as tf
 from keras.models import load_model
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer  # sentiment score
 from TwitterAPI import TwitterAPI, TwitterOAuth, TwitterRequestError, TwitterConnectionError, TwitterPager
-import tweepy  # tweeter API
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from datetime import datetime as dt, timedelta
 from pathlib import Path
-import math
+from Helper import Helper
+
 
 TWITTER_VERSION = 2             # twitter version.
 # days on which the model was train to precict based on.
@@ -21,25 +24,32 @@ MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
 MIN_USER_FOLLOWERS = 100        # min user followers num to be included
 
 
+delimiter, prefix = Helper.Get_Prefix_Path()
+
+
 class TweetStockModel:
     def __init__(self, model_path, model_ticker, features_version, ip='No_IP', id=0):
         self.id = id
         self.ticker = model_ticker
         self.features_version = features_version
         self.ip = ip
-        if features_version == 1:
-            self.feature_set = ['n_replies', 'n_retweets',
-                                'n_likes', 's_pos', 's_neg', 's_neu', 'u_engagement']
-        elif features_version == 2:
-            self.feature_set = ['n_replies', 'n_retweets',
-                                'n_likes', 's_compound', 'u_engagement']
+
+        self.feature_set = self.Get_Feature_Set(features_version)
 
         self.model_path = Path(model_path)
         self.model = load_model(model_path)
-        #self.save_path = Path(save_path)
         self.sentiment_analyzer = SentimentIntensityAnalyzer()
         self.twitter = self.connect_to_twitter()
         pd.set_option('display.max_columns', None)
+
+    def Get_Feature_Set(self, features_version):
+        '''
+        returns relevant feature version
+        '''
+        if features_version == 1:
+            return ['n_replies', 'n_retweets', 'n_likes', 's_pos', 's_neg', 's_neu', 'u_engagement']
+        elif features_version == 2:
+            return['n_replies', 'n_retweets', 'n_likes', 's_compound', 'u_engagement']
 
     def get_model_path(self):
         return self.model_path
@@ -47,11 +57,14 @@ class TweetStockModel:
     def get_save_path(self):
         return self.save_path
 
-    def connect_to_twitter(self, version=TWITTER_VERSION):  # v2 for now
-        consumer_key = 'mymakG2knztQ2GYaTNaRGTIOi'
-        consumer_secret = 'lGXmXu9K7DQftUjvVempNg1vGjS362zbKo7p12yaa5RrBelIlj'
-        access_token = '561299890-kjoCtIBYvSHeIVfhYEbHfNXHAqVklnMze2Wce1JT'
-        access_token_secret = 'U1fR9nx24H1Eo3dvlLYO9LhDxwYWWZ5x2JEltgA4xUy6o'
+    def connect_to_twitter(self, version=TWITTER_VERSION):
+
+        Twitter_Config = self.Get_Twitter_Config()
+        consumer_key = Twitter_Config['consumer_key']
+        consumer_secret = Twitter_Config['consumer_secret']
+        access_token = Twitter_Config['access_token']
+        access_token_secret = Twitter_Config['access_token_secret']
+
         if version == 2:
             return TwitterAPI(consumer_key, consumer_secret, access_token,
                               access_token_secret, api_version='2')
@@ -60,9 +73,15 @@ class TweetStockModel:
             auth.set_access_token(access_token, access_token_secret)
             return tweepy.API(auth)
 
-    def get_n_past_date(self, days_to_subtract=1, hours_to_subtract=2):  # N_PAST)
+    def Get_Twitter_Config(self):
+        with open(f'{prefix}CONFIGS/twitterconfig.json', 'r') as json_file:
+            twitter_configs = json.load(json_file)
+        return twitter_configs
+
+    def get_n_past_date(self, days_to_subtract=1, hours_to_subtract=2):
         if days_to_subtract < 0:
             days_to_subtract *= -1
+
         days_to_subtract -= 1
         now = dt.utcnow()
         midnight = dt.combine(now, dt.min.time())
@@ -73,11 +92,9 @@ class TweetStockModel:
         return start_date.isoformat('T')+'Z', end_date.isoformat('T')+'Z'
 
     def twitter_dict_res_to_df(self, data):
-        # print(data)
         try:
-            keys = data[0].keys()
             temp = {}
-            for key in keys:
+            for key in data[0].keys():
                 temp[key] = []
                 for d in data:
                     temp[key].append(d[key])
@@ -98,10 +115,6 @@ class TweetStockModel:
             return df.groupby(by='date').mean().reset_index()
 
     def get_scale_and_mean(self, df, n_past=N_PAST, scaling='min_max'):
-        # if scaling == 'min_max':
-        #     scaler = MinMaxScaler()
-        # elif scaling == 'standard':
-        #     scaler = StandardScaler()
 
         def is_scalable_feature(f):
             return f in self.feature_set or f == 's_compound'
@@ -134,6 +147,7 @@ class TweetStockModel:
 # -------------------------------------------------------------------------------------------------------------- #
 
     # Step 1
+
 
     def get_tweets(self, ticker, max_results=MAX_TWEETS_RESULTS, n_past=N_PAST, twitter_version=TWITTER_VERSION):
         #print(f"Getting Tweets of {self.ticker} for {self.ip} ")

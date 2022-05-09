@@ -6,46 +6,11 @@ import time
 import pyrebase
 from datetime import datetime as dt
 from TweetStockModel import TweetStockModel as tsm
-
-# ---------------------------------Paths Init----------------------------------------------- #
-if os.name == 'nt':
-    delimiter = '\\'
-    prefix = f'{os.getcwd()}\\FlaskServer\\'
-    pinger = 'ping -n 1 1.1.1.1'
-elif os.name == 'posix':
-    delimiter = '/'
-    prefix = '/home/pi/FinalProject/FlaskServer/'
-    pinger = 'ping -c 1 1.1.1.1'
-
-
-# -------------------------------Available Models paths------------------------------------- #
-MODELS = {
-    'AAPL': {
-        'path': f'{prefix}SelectedModels{delimiter}AAPL{delimiter}AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
-        'features': 1
-    },
-    'AMZN': {
-        'path': f'{prefix}SelectedModels{delimiter}AMZN{delimiter}AMZN_acc_0.673_npast_1_epoch_7_opt_rmsprop_num_1396.h5',
-        'features': 1
-    },
-    'GOOG': {
-        'path': f'{prefix}SelectedModels{delimiter}GOOG{delimiter}GOOG_acc_0.612_npast_1_epoch_10_opt_adam_num_2283.h5',
-        'features': 1
-    },
-    'GOOGL': {
-        'path': f'{prefix}SelectedModels{delimiter}GOOGL{delimiter}GOOGL_acc_1.0_npast_1_epoch_4_opt_adam_num_3147.h5',
-        'features': 1
-    },
-    'MSFT': {
-        'path': f'{prefix}SelectedModels{delimiter}MSFT{delimiter}MSFT_acc_0.612_npast_1_epoch_4_opt_adam_num_4359.h5',
-        'features': 2
-    },
-    'TSLA': {
-        'path': f'{prefix}SelectedModels{delimiter}TSLA{delimiter}TSLA_acc_0.633_npast_1_epoch_4_opt_adam_num_804.h5',
-        'features': 1
-    }
-}
-
+from Helper import Helper
+# ---------------------------------Init----------------------------------------------- #
+delimiter, prefix = Helper.Get_Prefix_Path()
+ping_command = Helper.Get_Ping_Command()
+MODELS = Helper.Get_Models()
 # -------------------------------FireBase------------------------------------- #
 
 
@@ -53,11 +18,6 @@ def init_Firebase_config():
     with open(f'{prefix}CONFIGS/firebaseconfig.json', 'r') as firebase_conf:
         firebase_config = json.load(firebase_conf)
     return firebase_config
-
-
-firebase_config = init_Firebase_config()
-firebase = pyrebase.initialize_app(firebase_config)
-db = firebase.database()
 
 
 def clear_table(table_name, date):
@@ -83,9 +43,12 @@ def post_to_FireBase(tables_dict, date):
                 else:
                     return None
     except Exception as e:
-        write_to_log(f'{e}')
+        Helper.write_to_log(f'{e}')
 
 
+firebase_config = init_Firebase_config()
+firebase = pyrebase.initialize_app(firebase_config)
+db = firebase.database()
 # -------------------------------MODEL------------------------------------- #
 
 
@@ -103,32 +66,15 @@ def Get_prediction(ticker, path, features_version):
 
     return Ticker_and_Pred_Table_Dict, Ticker_Stats_Table_Dict
 
-# -------------------------------DATETIME------------------------------------- #
-
-
-def Get_Date_Time():
-    return dt.now()
-
-
-def Get_Date_Time_Stringify(format="%d_%m_%Y_%H"):
-    return Get_Date_Time().strftime(format)
-
-# -------------------------------LOGGING------------------------------------- #
-
-
-def write_to_log(msg):
-    with open(f'{prefix}/Logs/LOG_{Get_Date_Time_Stringify()}', 'a+', encoding='utf-8') as f:
-        f.write(msg)
 
 # -------------------------------MAIN------------------------------------- #
-
 
 def is_valid_day():
     '''
     This method converts israel's time to NY time, 
     and checks if the current date and time is during stock excange open hours (NYSE & NASDAQ)
     '''
-    current_time = Get_Date_Time()
+    current_time = Helper.Get_Date_Time()
     year, month, day, hour, minute = current_time.year, current_time.month, current_time.day, current_time.hour, current_time.minute
     today, time = f'{year}-{month}-{day}', f'{hour}:{minute}'
     start_of_year, end_of_year = f'{year}-01-01', f'{year}-12-31'
@@ -139,7 +85,7 @@ def is_valid_day():
         schedule = nyse.schedule(
             start_date=today, end_date=today)
     except Exception as e:
-        write_to_log(f'nyse.open_at_time says:\n{e}')
+        Helper.write_to_log(f'nyse.open_at_time says:\n{e}')
         return False
 
     timestamp = pd.Timestamp(
@@ -150,14 +96,14 @@ def is_valid_day():
             if nyse.open_at_time(schedule, timestamp):
                 return True
         except ValueError as ve:
-            write_to_log(f'nyse.open_at_time says:\n{ve}')
+            Helper.write_to_log(f'nyse.open_at_time says:\n{ve}')
             return False
     return False
 
 
 def sleep_until_market_opens():
-    #now = Get_Date_Time()
-    now = {'hour': 1, 'min': 2}
+    now = Helper.Get_Date_Time()
+    #now = {'hour': 1, 'min': 2}
     start_hour, start_min = 16, 30
     start_hour_in_sec = (start_hour * 60 + start_min) * 60
     now_in_sec = (now.hour * 60 + now.min) * 60
@@ -178,8 +124,8 @@ def update_firebase_db():
         pred_dict, tweets_dict = Get_prediction(
             ticker=ticker, path=stock['path'], features_version=stock['features'])
         if is_valid_model_response(pred_dict, tweets_dict):
-            date, time = Get_Date_Time_Stringify(
-                format="%d_%m_%Y"), Get_Date_Time_Stringify(format="%H_%M")
+            date, time = Helper.Get_Date_Time_Stringify(
+                format="%d_%m_%Y"), Helper.Get_Date_Time_Stringify(format="%H_%M")
             pred_dict[0]['last_update'] = date + "_" + time
             for i in range(len(tweets_dict)):
                 tweets_dict[i]['last_update'] = date + "_" + time
@@ -187,7 +133,7 @@ def update_firebase_db():
             updated_db['Prediction'][ticker], updated_db['Tweets'][ticker] = pred_dict[0], tweets_dict
 
         else:
-            write_to_log(
+            Helper.write_to_log(
                 f'DB update error for ticker {ticker}:\npred_dict: {len(pred_dict)}\ntweets_dict: {len(tweets_dict)}\n\n')
         time.sleep(15*60)  # sleep 15 min for each ticker
 
@@ -200,7 +146,7 @@ def Main():
 
     # update_firebase_db()
     while True:
-        if os.system(pinger) == 0:  # check first for internet connectivity
+        if os.system(ping_command) == 0:  # check first for internet connectivity
             if (is_valid_day()):
                 update_firebase_db()
                 sleeping_hours, sleeping_mins = 2, 0
