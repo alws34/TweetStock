@@ -342,7 +342,7 @@ class TweetStockModel:
 
     # Step 7.0
 
-    def get_stats_table_dict_result(self, tweets_df):
+    def get_tweets_table_dict_result(self, tweets_df):
         features = ['tweet_id', 'u_engagement', 'n_likes', 'n_replies',
                     'n_retweets', 's_pos', 's_neu', 's_neg', 's_compound']
         renames = {
@@ -358,7 +358,7 @@ class TweetStockModel:
         return tweets_df[features].rename(columns=renames).to_dict(orient='records')
     # Step 7.1
 
-    def get_Pred_Table_dict_dict_result(self, prepared_df, prediction):
+    def get_pred_table_dict_result(self, prepared_df, prediction):
         # init dict
         res_dict = {}
         # push values
@@ -406,21 +406,21 @@ class TweetStockModel:
         if tweets_df.empty:
             print("Couldnt convert twitter res dict to df @twitter_dict_res_to_df()")
             return None, None
-        Tweets_Table_dict = self.get_stats_table_dict_result(
+        tweets_table_dict = self.get_tweets_table_dict_result(
             tweets_df=tweets_df)
         # Step 6.1
         preped_for_model, preped_df = self.prep_data(tweets_df)
         # Step 6.2
         pred = self.get_pred(preped_for_model)
-        Pred_Table_dict = self.get_Pred_Table_dict_dict_result(
+        pred_table_dict = self.get_pred_table_dict_result(
             prepared_df=preped_df, prediction=pred)
 
-        print("pred", "\n", Pred_Table_dict)
-        print("tweets", "\n", Tweets_Table_dict)
-        return Pred_Table_dict, Tweets_Table_dict
+        print("pred", "\n", pred_table_dict)
+        print("tweets", "\n", tweets_table_dict)
+        return pred_table_dict, tweets_table_dict
     
     #--------- OLD DEPRECATED FUNCTIONS (COULD BE REUSED) -------#
-    def get_stats_table_dict_result_old(self, tweets_dict):
+    def get_tweets_table_dict_result_old(self, tweets_dict):
         # init dict
         res_dict = {
             'ticker': [],
@@ -462,4 +462,4 @@ if __name__ == "__main__":
         model_path=f'/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
         model_ticker="AAPL",
         features_version=1)
-    Pred_Table_dict, Tweets_Table_dict = model.get_prediction()
+    pred_table_dict, tweets_table_dict = model.get_prediction()
