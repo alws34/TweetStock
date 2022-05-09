@@ -3,13 +3,18 @@ from datetime import datetime as dt
 
 
 class Helper:
+    def clear_console(self, msg=''):
+        os.system('cls')
+        print(msg, 'At:', self.get_date_time_stringify(
+            '%d-%m-%Y at %H:%M:%S'))
+
     def get_OS_type(self):
         if os.name == 'nt':  # windows
             return 0
         elif os.name == 'posix':  # unix
             return 1
 
-    def Get_Prefix_Path(self):
+    def get_prefix_path(self):
         if self.get_OS_type() == 0:
             delimiter = '\\'
             prefix = f'{os.getcwd()}\\FlaskServer\\'
@@ -19,13 +24,13 @@ class Helper:
 
         return delimiter, prefix
 
-    def Get_Date_Time(self):
+    def get_date_time(self):
         return dt.now()
 
-    def Get_Date_Time_Stringify(self, format="%d_%m_%Y_%H"):
-        return self.Get_Date_Time().strftime(format)
+    def get_date_time_stringify(self, format="%d_%m_%Y_%H"):
+        return self.get_date_time().strftime(format)
 
-    def Get_Ping_Command(self, how_many_pings='1', host='1.1.1.1'):
+    def get_ping_command(self, how_many_pings='1', host='1.1.1.1'):
 
         def get_var():
             if self.get_OS_type() == 0:
@@ -36,11 +41,11 @@ class Helper:
         return f'ping -{get_var()} {how_many_pings} {host}'
 
     def write_to_log(self, msg):
-        with open(f'{self.Get_Prefix_Path()[1]}/Logs/LOG_{self.Get_Date_Time_Stringify()}', 'a+', encoding='utf-8') as f:
+        with open(f'{self.get_prefix_path()[1]}/Logs/LOG_{self.get_date_time_stringify()}', 'a+', encoding='utf-8') as f:
             f.write(msg)
 
-    def Get_Models(self):
-        delimiter, prefix = self.Get_Prefix_Path()
+    def get_models(self):
+        delimiter, prefix = self.get_prefix_path()
         return {
             'AAPL': {
                 'path': f'{prefix}SelectedModels{delimiter}AAPL{delimiter}AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
@@ -68,7 +73,7 @@ class Helper:
             }
         }
 
-    def Get_Paths(self, user):
+    def get_paths(self, user):
         paths = {
             'guy': {'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',
                     'stocks_2019_path': "/content/drive/MyDrive/Final Project/Data/From the Web/StockMarketData/",

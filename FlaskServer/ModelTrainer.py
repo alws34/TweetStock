@@ -24,7 +24,7 @@ class ModelTrainer:
         self.path = path
         self.merged_df = self.init_data(scale_and_multiply=False)
 
-        self.paths = Helper.Get_Paths(user)
+        self.paths = Helper.get_paths(user)
 
         self.all_features = ['ticker_symbol', 'Date', 'Low', 'Open', 'Stock_Volume', 'High', 'Close',
                              'Stock_Adj_Close', 'price_difference', 'tweet_id', 'writer',
@@ -233,7 +233,7 @@ class ModelTrainer:
             return None, None, None
 
         test_loss, test_acc = network.evaluate(test_seq, test_label)
-        self.clear_console(f'Acc = {test_acc}')
+        Helper.clear_console(f'Acc = {test_acc}')
         return network, round(test_acc, 7), history
 
     def run_auto_training(self, acc_saving_threshold):
@@ -284,12 +284,6 @@ class ModelTrainer:
                                                         model, model_name, model_prms, history)
                                                     model_id += 1
 
-
-    #------------ HELPERS ----------------#
-    def clear_console(self, msg=''):
-        os.system('cls')
-        print(msg, 'Done at:', Helper.Get_Date_Time().strftime(
-            '%d-%m-%Y at %H:%M:%S'))
 
 
     #------------ DATA INITIALIZATION ----------------#
@@ -438,7 +432,7 @@ class ModelTrainer:
                                     self.init_stocks(stocks_2019),
                                     exclude_TSLA=False)
         print('merged\n\n', merged_df)
-        self.clear_console()
+        Helper.clear_console()
 
         merged_df['Date'] = pd.to_datetime(
             merged_df['Date'], format='%d/%m/%Y')
@@ -455,7 +449,7 @@ class ModelTrainer:
 
 
 
-    #------------ OLD DEPREATED FUNCTIONS (COULD BE REUSED) ----------------#
+    #------------ OLD DEPRECATED FUNCTIONS (COULD BE REUSED) ----------------#
     def get_LSTM_accuracy(self, original_df_in, forecast_df_in):
 
         forecast_df = forecast_df_in.reset_index().rename(
@@ -608,7 +602,7 @@ class ModelTrainer:
         else:
             mode = 'Ended at: '
 
-        now = Helper.Get_Date_Time()
+        now = Helper.get_date_time()
         with open(f'Logs\\test{num}.txt', 'a+') as f:
             f.write(f'TRY {num}\t{mode}{now}\n')
 
