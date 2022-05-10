@@ -21,6 +21,7 @@ SCALING = 'min_max'
 
 
 #------ ModelTrainer.py -------#
+
 def mt_scale_data(df, target='price_difference', scaling=SCALING):
     def is_scalable_feature(feature):
         return feature != 'Date' and feature != target
@@ -210,8 +211,8 @@ def sort_df_by_dates(df, date_col_name='Date', format='%d/%m/%Y'):
     df[date_col_name] = pd.to_datetime(df[date_col_name], format=format)
     return df.sort_values(by=date_col_name).reset_index(drop=True)
 
-#------ TweetStockModel.py -------#
 
+#------ TweetStockModel.py -------#
 
 def tsm_create_sequence(dataset):
     return np.array(dataset)
@@ -254,11 +255,57 @@ def tsm_twitter_dict_res_to_df(data):
     return pd.DataFrame.from_dict(temp)
 
 
-def tsm_prep_data(df):
-    #print(f"Prepping model data of {self.ticker} for {self.ip}")
+def tsm_filter_tweets(tweets, threshold=MIN_TWEET_STATS_SUM):
+    #print(f"Filtering Tweets of {self.ticker} for {self.ip}")
+    tweets_to_remove = []
+    #print("len before", len(tweets))
+    for tweet in tweets:
+        if tweet['s_compound'] == 0.0 or tweet['s_neu'] == 1.0 or tweet['n_retweets'] + tweet['n_likes'] + tweet['n_replies'] < threshold:
+            tweets_to_remove.append(tweet)
+
+    for tweet in tweets_to_remove:
+        tweets.remove(tweet)
+
+    #print("len after", len(tweets))
+    # for tweet in tweets:
+    #     print(tweet['s_neu'])
+    return tweets
+
+
+def tsm_get_single_user_eng_score(user_tweets, user_followers):
+    u_tweets = user_tweets
+    u_log_n_followers = math.log(user_followers, 2)
+    u_n_tweets, u_n_rts, u_n_replies, u_n_likes = 0, 0, 0, 0
+    for u_tweet in u_tweets:
+        u_n_rts += u_tweet['public_metrics']['retweet_count']
+        u_n_replies += u_tweet['public_metrics']['reply_count']
+        u_n_likes += u_tweet['public_metrics']['like_count']
+        u_n_tweets += 1
+    #print(u_n_tweets, u_n_rts, u_n_replies, u_n_likes, u_log_n_followers)
+    eng = 0
+    if math.log(u_log_n_followers, 2) > 0 and u_n_tweets > 0:
+        eng = (u_n_rts + u_n_replies + u_n_likes) / \
+            math.log(u_log_n_followers, 2)/u_n_tweets
+    return eng
+
+
+def tsm_filter_users(tweets, threshold=MIN_USER_FOLLOWERS):
+    #print(f"Filtering users of {self.ticker} for {self.ip}")
+    tweets_to_remove = []
+    for tweet in tweets:
+        if tweet['u_n_followers'] < threshold or tweet['u_engagement'] == 0:
+            tweets_to_remove.append(tweet)
+
+    for tweet in tweets_to_remove:
+        tweets.remove(tweet)
+
+    return tweets
+
+
+def tsm_prep_data(df, feature_set):
     # 1 Select features
-    df = self.get_scale_and_mean(df)
-    df = df[self.feature_set]
+    df = tsm_get_scale_and_mean(df)
+    df = df[feature_set]
 
     # 2 Get df mean
     #print('before mean', df, len(df), df.shape)
@@ -266,7 +313,7 @@ def tsm_prep_data(df):
     #print('after mean', df, len(df), df.shape)
 
     # 3 Create sequence from df
-    test_seq = self.create_sequence(df)
+    test_seq = tsm_create_sequence(df)
     #print('\n\n', test_seq, test_seq.shape)
 
     # 4 Scale data
@@ -276,3 +323,32 @@ def tsm_prep_data(df):
 
     # Return preped data
     return tf.convert_to_tensor(test_seq, dtype=tf.float32), df
+
+
+def tsm_get_tweets_table_dict_result(tweets_df):
+    features = ['tweet_id', 'u_engagement', 'n_likes', 'n_replies',
+                'n_retweets', 's_pos', 's_neu', 's_neg', 's_compound']
+    renames = {
+        'u_engagement': 'user_engagement',
+        'n_likes': 'tweet_likes',
+        'n_replies': 'tweet_replies',
+        'n_retweets': 'tweet_retweets',
+        's_pos': 'sentiment_pos',
+        's_neu': 'sentiment_neut',
+        's_neg': 'sentiment_neg',
+        's_compound': 'sentiment_compound'
+    }
+    return tweets_df[features].rename(columns=renames).to_dict(orient='records')
+
+
+def tsm_get_pred_table_dict_result(prepared_df, prediction, ticker):
+    # init dict
+    res_dict = {}
+    # push values
+    res_dict['ticker'] = [ticker for i in range(len(prepared_df))]
+    res_dict['prediction'] = [prediction for i in range(len(prepared_df))]
+    for col in prepared_df:
+        res_dict[col] = []
+        for val in prepared_df[col]:
+            res_dict[col].append(val)
+    return pd.DataFrame.from_dict(res_dict).to_dict(orient='records')

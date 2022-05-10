@@ -155,3 +155,134 @@
         now = Helper.get_date_time()
         with open(f'Logs\\test{num}.txt', 'a+') as f:
             f.write(f'TRY {num}\t{mode}{now}\n')
+
+
+
+
+ #----------- Moved to DataHandler.py -----------#
+    """
+    def get_price_diff(self, stocks_df):
+        # gets the close price diff (today-yesterday) 1 = up, 0 = down
+        temp_stocks = stocks_df.reset_index(drop=True)
+        temp_stocks['price_difference'] = [
+            0.0 for i in range(len(temp_stocks))]
+
+        for i in range(1, len(temp_stocks)):
+            # Next Close - Today Close
+            # today = float(temp_stocks['Close'][i])
+            # yesterday = float(temp_stocks['Close'][i-1])
+            # # try getAvg(high,low)
+            # price_diff = today-yesterday
+
+            price_diff = float(temp_stocks['Close'][i]) - \
+                float(temp_stocks['Open'][i])
+            # temp_stocks['price_difference'][i] = price_diff
+            temp_stocks['price_difference'][i] = 1 if price_diff >= 0 else 0
+            # if (price_diff>=0): temp_stocks['price_difference'][i] = 1
+            # else: temp_stocks['price_difference'][i] = 0
+
+        temp_stocks.drop([0], inplace=True)
+        temp_stocks.reset_index(drop=True, inplace=True)
+        return temp_stocks
+
+    def init_users(self, users_df):
+        print("----init_users----")
+        temp_users_df = users_df.copy()
+
+        temp_users_df = self.filter_users(
+            temp_users_df, follower_threshold=150)
+        temp_users_df = self.get_eng_score(
+            temp_users_df, include_replies=False, include_followers=True)
+        temp_users_df['eng_score'] = temp_users_df['eng_score'].astype(float)
+        print("\n\n")
+        return temp_users_df
+
+    def filter_users(self, df, follower_threshold):
+        '''
+        -- 1. remove broken/bad eng score (user blocked public metrics)
+        -- 2. removes users with less than follower_threshold
+        '''
+        to_remove = []
+        print("len before = " + str(len(df)))
+        for i in range(len(df)):
+            try:
+                df['eng_score'][i] = float(df['eng_score'][i])
+            except ValueError as ex:
+                to_remove.append(i)
+                print(ex)
+            except:
+                print('Problem getting eng_score at index', i)
+
+        for i in range(len(df)):
+            if df['eng_score'][i] == math.inf or df['followers_count'][i] < follower_threshold:
+                to_remove.append(i)
+
+        df.drop(to_remove, inplace=True)
+        df.reset_index(drop=True, inplace=True)
+        print("len after = " + str(len(df)))
+        return df
+
+    def get_eng_score(self, users_df, include_followers=True, include_replies=True):
+        # gets users df and returns the df with the engagement score calculated.
+        #    df should have the following columns:
+        df = users_df
+        for i in range(len(df)):
+            rts = df['eng_total_retweets'][i]
+            likes = df['eng_total_likes'][i]
+            replies = df['eng_total_replies'][i]
+            total_tweets = df['eng_tweets_length'][i]
+            followers = df['followers_count'][i]
+
+            new_replies = replies if include_replies else 0
+            new_followers = math.log(
+                followers, 2) if include_followers else 1
+            df['eng_score'][i] = (
+                (rts+likes+new_replies)/total_tweets)/new_followers
+            # if include_followers:
+            #   df['eng_score'][i] = ((rts+likes+replies)/total_tweets)/math.log(followers,2) if include_replies else ((rts+likes)/total_tweets)/followers
+            # else:
+            #   df['eng_score'][i] = ((rts+likes+replies)/total_tweets) if include_replies else ((rts+likes)/total_tweets)
+        return df
+
+    def init_tweets(self, tweets_df, tweet_stats_threshold=25):
+        '''
+        naive filtering based on comment+liikes+retweets < 25
+        also gets rid of sentiments=0
+        '''
+        print("----init_tweets----")
+        print('len before', len(tweets_df))
+
+        # filter the tweets
+        temp_tweets = tweets_df[tweets_df['comment_num'] +
+                                tweets_df['retweet_num'] + tweets_df['like_num'] > tweet_stats_threshold]
+        temp_tweets = temp_tweets[temp_tweets['Compound'] != 0]
+        temp_tweets = temp_tweets[temp_tweets['Neutral'] != 1]
+
+        temp_tweets.reset_index(drop=True, inplace=True)
+        print('len after', len(temp_tweets))
+        print("\n\n")
+        return temp_tweets
+
+    def get_merged(self, tweets_df, users_df, stocks_df, exclude_TSLA=False):
+        ''' Get the merged tweets users and stocks dataframe - returns the merged df '''
+        print("---get_merged----")
+        # --> merge stocks_2019 with tweets_2019 by ticker and date
+        temp_merged_df = pd.merge(stocks_df, tweets_df, on=[
+            'Date', 'ticker_symbol'], how='inner')
+        # --> and users to it
+        temp_users = users_df.copy()
+        temp_users.rename(columns={'screen_name': 'writer'}, inplace=True)
+        merged_df = pd.merge(temp_merged_df, temp_users,
+                             on=['writer'], how='inner')
+        if exclude_TSLA:
+            print('with TSLA', len(merged_df))
+            merged_df = merged_df[merged_df['ticker_symbol'] != 'TSLA']
+            print('without TSLA', len(merged_df))
+        # clear nulls
+        merged_df.dropna(axis=0, inplace=True)
+        merged_df.reset_index(drop=True, inplace=True)
+        print("\n\n")
+        return merged_df
+
+    """
+#----------- End Moved to DataHandler.py -----------#

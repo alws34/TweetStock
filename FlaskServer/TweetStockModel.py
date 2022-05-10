@@ -13,7 +13,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from datetime import datetime as dt, timedelta
 from pathlib import Path
 import Helper
-from DataHandler import DataHandler
+import DataHandler
 
 TWITTER_VERSION = 2             # twitter version.
 # days on which the model was train to precict based on.
@@ -90,6 +90,7 @@ class TweetStockModel:
 
         return start_date.isoformat('T')+'Z', end_date.isoformat('T')+'Z'
 
+    """
     def twitter_dict_res_to_df(self, data):
         try:
             temp = {}
@@ -125,20 +126,15 @@ class TweetStockModel:
         else:
             return "N_past is not 1 @ get_scale_and_mean()"
 
-    def scale_seq(self, seq):
-        scaler = MinMaxScaler()
-        return scaler.fit_transform(seq)
 
     def create_sequence(self, dataset):
         return np.array(dataset)
-
+    """
 
 # -------------------------------------------------------------------------------------------------------------- #
 
-    # Step 1
-
-    def get_tweets(self, ticker, max_results=MAX_TWEETS_RESULTS, n_past=N_PAST, twitter_version=TWITTER_VERSION):
-        #print(f"Getting Tweets of {self.ticker} for {self.ip} ")
+    def fetch_live_tweets(self, ticker, max_results=MAX_TWEETS_RESULTS, n_past=N_PAST, twitter_version=TWITTER_VERSION):
+        # print(f"Getting Tweets of {self.ticker} for {self.ip} ")
         if '$' in ticker:
             ticker = ticker.replace('$', '')
 
@@ -203,7 +199,7 @@ class TweetStockModel:
                         })
 
                 else:
-                    #raise Exception(f"Couldn't Get Tweets!\nCode Returned from twitter:{temp_tweets.status_code}")
+                    # raise Exception(f"Couldn't Get Tweets!\nCode Returned from twitter:{temp_tweets.status_code}")
                     return None
             except Exception as err:
                 print(f"{err}")
@@ -211,35 +207,15 @@ class TweetStockModel:
 
         return tweets
 
-    # Step 2
-    def get_sentiment(self, tweets):
-        #print(f"Getting Sentiment of {self.ticker} for {self.ip}")
+    def calc_tweets_sentiment(self, tweets):
+        # print(f"Getting Sentiment of {self.ticker} for {self.ip}")
         for tweet in tweets:
             s = self.sentiment_analyzer.polarity_scores(tweet['text'])
             tweet['s_neg'], tweet['s_neu'], tweet['s_pos'], tweet['s_compound'] = s['neg'], s['neu'], s['pos'], s['compound']
             # tweets['subjectivity'] = sentiment_analyzer.subjectivity_scores(tweet['text']) # optional
         return tweets
 
-    # Step 3
-    def filter_tweets(self, tweets, threshold=MIN_TWEET_STATS_SUM):
-        #print(f"Filtering Tweets of {self.ticker} for {self.ip}")
-        tweets_to_remove = []
-        #print("len before", len(tweets))
-        for tweet in tweets:
-            if tweet['s_compound'] == 0.0 or tweet['s_neu'] == 1.0 or tweet['n_retweets'] + tweet['n_likes'] + tweet['n_replies'] < threshold:
-                tweets_to_remove.append(tweet)
-
-        for tweet in tweets_to_remove:
-            tweets.remove(tweet)
-
-        #print("len after", len(tweets))
-        # for tweet in tweets:
-        #     print(tweet['s_neu'])
-        return tweets
-
-    # Step 4
-    def get_users_engagement(self, tweets, max_tweets_results=MAX_USER_TWEETS_RESULT, twitter_version=TWITTER_VERSION):
-        #print(f"Getting user engagement of {self.ticker} for {self.ip}")
+    def fetch_users_with_eng_by_tweets(self, tweets, max_tweets_results=MAX_USER_TWEETS_RESULT, twitter_version=TWITTER_VERSION):
         if twitter_version == 1:
             pass
         elif twitter_version == 2:
@@ -253,20 +229,9 @@ class TweetStockModel:
                 try:
                     u_tweets = self.twitter.request(
                         resource='users/:'+tweet['u_id']+'/tweets', params=prms)
-                    u_log_n_followers = math.log(tweet['u_n_followers'], 2)
-                    u_n_tweets, u_n_rts, u_n_replies, u_n_likes = 0, 0, 0, 0
-                    for u_tweet in u_tweets:
-                        u_n_rts += u_tweet['public_metrics']['retweet_count']
-                        u_n_replies += u_tweet['public_metrics']['reply_count']
-                        u_n_likes += u_tweet['public_metrics']['like_count']
-                        u_n_tweets += 1
-                    #print(u_n_tweets, u_n_rts, u_n_replies, u_n_likes, u_log_n_followers)
-                    if math.log(u_log_n_followers, 2) > 0 and u_n_tweets > 0:
-                        eng = (u_n_rts + u_n_replies + u_n_likes) / \
-                            math.log(u_log_n_followers, 2)/u_n_tweets
-                    else:
-                        eng = 0
-                    tweets[i]['u_engagement'] = eng
+
+                    tweets[i]['u_engagement'] = DataHandler.tsm_get_single_user_eng_score(
+                        user_tweets=u_tweets, user_followers=tweet['u_n_followers'])
 
                 except TwitterRequestError as err:
                     if "429" in str(err):
@@ -285,121 +250,56 @@ class TweetStockModel:
 
         return tweets
 
-    # Step 5
-    def filter_users(self, tweets, threshold=MIN_USER_FOLLOWERS):
-        #print(f"Filtering users of {self.ticker} for {self.ip}")
-        tweets_to_remove = []
-        for tweet in tweets:
-            if tweet['u_n_followers'] < threshold or tweet['u_engagement'] == 0:
-                tweets_to_remove.append(tweet)
-
-        for tweet in tweets_to_remove:
-            tweets.remove(tweet)
-
-        return tweets
-
-    # Step 6.0
-    def prep_data(self, df):
-        #print(f"Prepping model data of {self.ticker} for {self.ip}")
-        # 1 Select features
-        df = self.get_scale_and_mean(df)
-        df = df[self.feature_set]
-
-        # 2 Get df mean
-        #print('before mean', df, len(df), df.shape)
-        #df = self.get_scale_and_mean(df)
-        #print('after mean', df, len(df), df.shape)
-
-        # 3 Create sequence from df
-        test_seq = self.create_sequence(df)
-        #print('\n\n', test_seq, test_seq.shape)
-
-        # 4 Scale data
-        test_seq = test_seq.reshape(
-            (len(test_seq), test_seq.shape[0] * test_seq.shape[1]))
-        #scaled_test_seq = scale_seq(test_seq)
-
-        # Return preped data
-        return tf.convert_to_tensor(test_seq, dtype=tf.float32), df
-
-    # Step 6.1
-    def get_pred(self, prepped_data):
+    def predict(self, prepped_data):
         pred = self.model.predict(prepped_data)
         result = 1 if pred[0][1] >= pred[0][0] else -1
         return result
 
-    # Step 7.0
-    def get_tweets_table_dict_result(self, tweets_df):
-        features = ['tweet_id', 'u_engagement', 'n_likes', 'n_replies',
-                    'n_retweets', 's_pos', 's_neu', 's_neg', 's_compound']
-        renames = {
-            'u_engagement': 'user_engagement',
-            'n_likes': 'tweet_likes',
-            'n_replies': 'tweet_replies',
-            'n_retweets': 'tweet_retweets',
-            's_pos': 'sentiment_pos',
-            's_neu': 'sentiment_neut',
-            's_neg': 'sentiment_neg',
-            's_compound': 'sentiment_compound'
-        }
-        return tweets_df[features].rename(columns=renames).to_dict(orient='records')
-    
-    # Step 7.1
-    def get_pred_table_dict_result(self, prepared_df, prediction):
-        # init dict
-        res_dict = {}
-        # push values
-        res_dict['ticker'] = [self.ticker for i in range(len(prepared_df))]
-        res_dict['prediction'] = [prediction for i in range(len(prepared_df))]
-        for col in prepared_df:
-            res_dict[col] = []
-            for val in prepared_df[col]:
-                res_dict[col].append(val)
-        return pd.DataFrame.from_dict(res_dict).to_dict(orient='records')
-
     # Pred Function
     def get_prediction(self):
-        # Step 1
-        tweets = self.get_tweets(self.ticker, max_results=MAX_TWEETS_RESULTS,
-                                 n_past=N_PAST, twitter_version=TWITTER_VERSION)
+        # Step 1 - fetch the live tweets from twitter
+        tweets = self.fetch_live_tweets(self.ticker, max_results=MAX_TWEETS_RESULTS,
+                                        n_past=N_PAST, twitter_version=TWITTER_VERSION)
         if tweets == None:
             print("Couldnt get tweets @get_tweets()")
             return None, None
-        # Step 2
-        tweets = self.get_sentiment(tweets)
+        # calculate sentiment score for each tweet
+        tweets = self.calc_tweets_sentiment(tweets)
         if tweets == None:
             print("Couldnt get sentiment @get_sentiment()")
             return None, None
-        # Step 3
-        tweets = self.filter_tweets(
-            tweets, threshold=MIN_TWEET_STATS_SUM)
+
+        # filter tweets
+        tweets = DataHandler.tsm_filter_tweets(tweets)
         if len(tweets) == 0:
             print("Filtered all tweets @filter_tweets()")
             return None, None
-        # Step 4
-        tweets = self.get_users_engagement(tweets)
+        # get user engagement
+        tweets = self.fetch_users_with_eng_by_tweets(tweets)
         if tweets == None:
             print("Couldnt get use engagement @get_user_engagement()")
             return None, None
-        # Step 5
-        tweets = self.filter_users(tweets, threshold=MIN_USER_FOLLOWERS)
+        # filter users
+        tweets = DataHandler.tsm_filter_users(
+            tweets, threshold=MIN_USER_FOLLOWERS)
         if len(tweets) == 0:
             print("Filtered all users @filter_users()")
             return None, None
-
-        # Step 6.0 Transform from dictionary to df for easier data handling
-        tweets_df = self.twitter_dict_res_to_df(tweets)
+        # Transform from dictionary to df for easier data handling
+        tweets_df = DataHandler.tsm_twitter_dict_res_to_df(tweets)
         if tweets_df.empty:
             print("Couldnt convert twitter res dict to df @twitter_dict_res_to_df()")
             return None, None
-        tweets_table_dict = self.get_tweets_table_dict_result(
+        tweets_table_dict = DataHandler.tsm_get_tweets_table_dict_result(
             tweets_df=tweets_df)
-        # Step 6.1
-        preped_for_model, preped_df = self.prep_data(tweets_df)
-        # Step 6.2
-        pred = self.get_pred(preped_for_model)
-        pred_table_dict = self.get_pred_table_dict_result(
-            prepared_df=preped_df, prediction=pred)
+        # Prepare data for model
+        preped_for_model, preped_df = DataHandler.tsm_prep_data(
+            tweets_df, self.feature_set)
+        # Perform the prediction (0,1 --> -1,1)
+        pred = self.predict(preped_for_model)
+
+        pred_table_dict = DataHandler.tsm_get_pred_table_dict_result(
+            prepared_df=preped_df, prediction=pred, ticker=self.ticker)
 
         print("pred", "\n", pred_table_dict)
         print("tweets", "\n", tweets_table_dict)
