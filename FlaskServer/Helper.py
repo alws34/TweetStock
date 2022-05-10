@@ -5,15 +5,15 @@ from datetime import datetime as dt
 class Helper:
     def get_OS_type(self):
         if os.name == 'nt':  # windows
-            return 0
+            return False
         elif os.name == 'posix':  # unix
-            return 1
+            return True
 
     def Get_Prefix_Path(self):
-        if self.get_OS_type() == 0:
+        if not self.get_OS_type():
             delimiter = '\\'
             prefix = f'{os.getcwd()}\\FlaskServer\\'
-        elif self.get_OS_type() == 1:
+        else:
             delimiter = '/'
             prefix = '/home/pi/FinalProject/FlaskServer/'
 
@@ -28,9 +28,9 @@ class Helper:
     def Get_Ping_Command(self, how_many_pings='1', host='1.1.1.1'):
 
         def get_var():
-            if self.get_OS_type() == 0:
+            if not self.get_OS_type():
                 return'n'
-            elif self.get_OS_type() == 1:
+            else:
                 return 'c'
 
         return f'ping -{get_var()} {how_many_pings} {host}'
