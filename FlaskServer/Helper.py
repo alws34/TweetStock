@@ -10,15 +10,16 @@ class Helper:
 
     def get_OS_type(self):
         if os.name == 'nt':  # windows
-            return False
+            return "windows"
         elif os.name == 'posix':  # unix
-            return True
+            return "unix"
 
-    def Get_Prefix_Path(self):
-        if not self.get_OS_type():
+    def get_prefix_path(self):
+        os_type = self.get_OS_type()
+        if os_type == "windows":
             delimiter = '\\'
             prefix = f'{os.getcwd()}\\FlaskServer\\'
-        else:
+        elif os_type == "unix":
             delimiter = '/'
             prefix = '/home/pi/FinalProject/FlaskServer/'
 
@@ -33,9 +34,10 @@ class Helper:
     def get_ping_command(self, how_many_pings='1', host='1.1.1.1'):
 
         def get_var():
-            if not self.get_OS_type():
+            os_type = self.get_OS_type()
+            if os_type=="windows":
                 return'n'
-            else:
+            elif os_type=="unix":
                 return 'c'
 
         return f'ping -{get_var()} {how_many_pings} {host}'
