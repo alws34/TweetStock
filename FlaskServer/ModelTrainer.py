@@ -16,14 +16,15 @@ from keras.utils import to_categorical
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from gc import collect
 from Helper import Helper
+from DataHandler import DataHandler
 
 
 class ModelTrainer:
     def __init__(self, user, path):
         #global merged_df
         self.path = path
-        self.merged_df = self.init_data(scale_and_multiply=False)
-
+        self.dataHandler = DataHandler(user=user, path=path)
+        self.merged_df = self.dataHandler.init_data(scale_and_multiply=False)
         self.paths = Helper.get_paths(user)
 
         self.all_features = ['ticker_symbol', 'Date', 'Low', 'Open', 'Stock_Volume', 'High', 'Close',
@@ -44,9 +45,9 @@ class ModelTrainer:
 
         self.features = self.stock_features + self.tweet_features + self.user_features
         self.features2 = self.stock_features + self.tweet_features2 + self.user_features
-
+        '''
         # self.model_params --> Redundant?
-        #
+        
         # self.model_params = {
         #     'ticker': 'TSLA',
         #     'features': self.features2,
@@ -61,8 +62,9 @@ class ModelTrainer:
         #     'epochs': 5,
         #     'batch_size': 8
         # }
-
-    #---------- AUTOMATED TRAINING ---------# 
+        '''
+    #---------- AUTOMATED TRAINING ---------#
+    '''
     def scale_data(self, df, target='price_difference', scaling='min_max'):
         def is_scalable_feature(feature):
             return feature != 'Date' and feature != target
@@ -128,6 +130,7 @@ class ModelTrainer:
                 labels.append(dataset.iloc[stop_idx])
                 start_idx += 1
         return (np.array(sequences), np.array(labels))
+    '''
 
     def save_model(self, model, name, params, history):
         '''Save the generated model'''
@@ -169,21 +172,22 @@ class ModelTrainer:
         dnn_df = dnn_df[dnn_df['ticker_symbol'] ==
                         ticker_symbol].drop(columns=['ticker_symbol'])
 
-        scaled_dnn_df = self.scale_data(dnn_df)
+        scaled_dnn_df = self.dataHandler.mt_scale_data(dnn_df)
         scaled_dnn_df = scaled_dnn_df.drop(columns=['Date'])
 
         # train_data,validation_data,test_data = split_data(dnn_df,version=1)
-        train_data, validation_data, test_data = self.split_data(scaled_dnn_df, version=2)
+        train_data, validation_data, test_data = self.dataHandler.mt_split_data(
+            scaled_dnn_df, version=2)
 
         # train_data.shape, test_data.shape
 
         n_past = model_params['n_past']
         target = 'price_difference'
-        train_seq, train_label = self.create_sequence(
+        train_seq, train_label = self.dataHandler.mt_create_sequence(
             train_data, rows_at_a_time=n_past, target=target)
-        validation_seq, validation_label = self.create_sequence(
+        validation_seq, validation_label = self.dataHandler.mt_create_sequence(
             validation_data, rows_at_a_time=n_past, target=target)
-        test_seq, test_label = self.create_sequence(
+        test_seq, test_label = self.dataHandler.mt_create_sequence(
             test_data, rows_at_a_time=n_past, target=target)
 
         output_dims = model_params['output_dim']
@@ -276,7 +280,8 @@ class ModelTrainer:
                                                 'epochs': n_epoch,
                                                 'batch_size': 8
                                             }
-                                            model, test_Acc, history = self.train_model_with_params(model_params=model_prms)
+                                            model, test_Acc, history = self.train_model_with_params(
+                                                model_params=model_prms)
                                             if test_Acc != None:
                                                 if float(test_Acc) > test_threshold:
                                                     model_name = f"{ticker}_acc_{round(test_Acc, 3)}_npast_{n_past}_epoch_{n_epoch}_opt_{optimizer}_num_{model_id}"
@@ -284,15 +289,15 @@ class ModelTrainer:
                                                         model, model_name, model_prms, history)
                                                     model_id += 1
 
-
-
     #------------ DATA INITIALIZATION ----------------#
+    """
     def init_stocks(self, stocks_df):
         print("----init_stocks---- (does nothing at the time)")
         stocks_df = self.get_price_diff(stocks_df)
         return stocks_df
+    
     def get_price_diff(self, stocks_df):
-        ''' gets the close price diff (today-yesterday) 1 = up, 0 = down '''
+        # gets the close price diff (today-yesterday) 1 = up, 0 = down 
         temp_stocks = stocks_df.reset_index(drop=True)
         temp_stocks['price_difference'] = [
             0.0 for i in range(len(temp_stocks))]
@@ -314,7 +319,7 @@ class ModelTrainer:
         temp_stocks.drop([0], inplace=True)
         temp_stocks.reset_index(drop=True, inplace=True)
         return temp_stocks
-
+    
     def init_users(self, users_df):
         print("----init_users----")
         temp_users_df = users_df.copy()
@@ -326,11 +331,12 @@ class ModelTrainer:
         temp_users_df['eng_score'] = temp_users_df['eng_score'].astype(float)
         print("\n\n")
         return temp_users_df
+    
     def filter_users(self, df, follower_threshold):
-        """
+        '''
         -- 1. remove broken/bad eng score (user blocked public metrics)
         -- 2. removes users with less than follower_threshold
-        """
+        '''
         to_remove = []
         print("len before = " + str(len(df)))
         for i in range(len(df)):
@@ -349,10 +355,11 @@ class ModelTrainer:
         df.drop(to_remove, inplace=True)
         df.reset_index(drop=True, inplace=True)
         print("len after = " + str(len(df)))
-        return df    
+        return df
+    
     def get_eng_score(self, users_df, include_followers=True, include_replies=True):
-        ''' gets users df and returns the df with the engagement score calculated.
-            df should have the following columns:  '''
+        # gets users df and returns the df with the engagement score calculated.
+        #    df should have the following columns:  
         df = users_df
         for i in range(len(df)):
             rts = df['eng_total_retweets'][i]
@@ -371,12 +378,12 @@ class ModelTrainer:
             # else:
             #   df['eng_score'][i] = ((rts+likes+replies)/total_tweets) if include_replies else ((rts+likes)/total_tweets)
         return df
-
-    def init_tweets(self, tweets_df, tweet_stats_threshold = 25):
-        """
+    
+    def init_tweets(self, tweets_df, tweet_stats_threshold=25):
+        '''
         naive filtering based on comment+liikes+retweets < 25
         also gets rid of sentiments=0
-        """
+        '''
         print("----init_tweets----")
         print('len before', len(tweets_df))
 
@@ -390,7 +397,7 @@ class ModelTrainer:
         print('len after', len(temp_tweets))
         print("\n\n")
         return temp_tweets
-
+    
     def get_merged(self, tweets_df, users_df, stocks_df, exclude_TSLA=False):
         ''' Get the merged tweets users and stocks dataframe - returns the merged df '''
         print("---get_merged----")
@@ -412,6 +419,7 @@ class ModelTrainer:
         print("\n\n")
         return merged_df
     
+
     def init_data(self, scale_and_multiply=False):
         ''' Read the data to be trained - should come back formatted as google csv shown here https://www.youtube.com/watch?v=gSYiKKoREFI '''
         # get the currect dataframes from drive in "paths" section
@@ -446,167 +454,8 @@ class ModelTrainer:
                                          'Volume': 'Stock_Volume',
                                          'Adjusted Close': 'Stock_Adj_Close',
                                          })
-
-
-
-    #------------ OLD DEPRECATED FUNCTIONS (COULD BE REUSED) ----------------#
-    def get_LSTM_accuracy(self, original_df_in, forecast_df_in):
-
-        forecast_df = forecast_df_in.reset_index().rename(
-            columns={'index': 'Date'})
-        original_df = original_df_in.reset_index().rename(
-            columns={'index': 'Date'})
-        print('pred', forecast_df)
-        print('orig\n', original_df)
-        n_correct = 0
-        date_index = 'Date'
-        target_index = 'Open'
-        for i in range(1, len(forecast_df) - 1):
-            day = forecast_df[date_index].iloc[i]
-            day_after = forecast_df[date_index].iloc[i+1]
-            orig_day = original_df[original_df[date_index] == day]
-            orig_day_after = original_df[original_df[date_index] == day_after]
-            forecast_day = forecast_df[forecast_df[date_index] == day]
-            forecast_day_after = forecast_df[forecast_df[date_index] == day_after]
-
-            original_volatility = float(
-                orig_day_after[target_index]) - float(orig_day[target_index])
-            forecast_volatility = float(
-                forecast_day_after[target_index]) - float(forecast_day[target_index])
-
-            if (original_volatility >= 0 and forecast_volatility >= 0) or (original_volatility < 0 and forecast_volatility < 0):
-                n_correct += 1
-
-        return str(round((n_correct/(len(forecast_df)-2))*100, 3)) + '%'
-    
-    def sort_dates(self, dates_series, date_format):
-        ''' Takes a date series and returns it sorted '''
-        dates = [datetime.strptime(date, date_format) for date in dates_series]
-        dates.sort()
-        sorted_dates = [datetime.strftime(date, date_format) for date in dates]
-        return sorted_dates
-
-    def min_max(self, x, x_min, x_max):
-        range = x_max-x_min
-        return float((x - x_min) / range)
-
-    def min_max_col(self, column):
-        try:
-            col = column.astype(float)
-        except:
-            print('cant use astype(float)')
-            col = column
-        x_min = col.min()
-        x_max = col.max()
-        for i in range(len(col)):
-            col[i] = self.min_max(col[i], x_min, x_max)
-        return col
-
-    def min_max_and_mult_col(self, df, feature):
-        df[feature] = df[feature].astype(float)
-        # 1
-        for i in range(len(df)):
-            # mult by absolute value of the sentiment
-            df[feature][i] = df[feature][i] * abs(df['Compound'][i])
-        # 2
-        df[feature] = self.min_max_col(df[feature])  # scale
-        # 3
-        print('before', df[feature].min(), df[feature].max())
-        for i in range(len(df)):
-            # will mult by *-1 if sentiment negative else *1
-            df[feature][i] *= df['Compound'][i]/abs(df['Compound'][i])
-        print('after', df[feature].min(), df[feature].max())
-        return df[feature]
+    """
    
-    def split_stocks_df(self, stocks_df):
-        df = stocks_df
-        dfs = []
-        ticker_symbols = ['AAPL', 'AMZN', 'GOOG', 'GOOGL', 'MSFT', 'TSLA']
-        for ticker_symbol in ticker_symbols:
-            dfs.append(df[df['ticker_symbol'] ==
-                          ticker_symbol].reset_index(drop=True))
-        return dfs
-  
-    def scale_and_multiply_df(self, df, stock_features, tweet_features, user_features):
-        ''' min max scale the dataframe '''
-        print("scaling")
-
-        dfs = self.split_stocks_df(df)
-        print("splitted")
-
-        # Scaling and Multiplying
-        features_to_skip = ['Compound', 'Date',
-                            'ticker_symbol', 'target', 'price_difference']
-        for df in dfs:
-            for feature in df:
-                if feature not in features_to_skip:
-                    if feature in stock_features:
-                        print('stock fueature = ', feature)
-                        df[feature] = self.min_max_col(df[feature])  # scale
-                    else:
-                        print('tweet/user fueature = ', feature)
-                        df[feature] = self.min_max_and_mult_col(df, feature)
-
-        scaled_df = pd.concat(dfs)
-        print("scaled")
-        return scaled_df
-
-    def read_data(self, is_testing_data=False):
-        if is_testing_data:
-            return pd.read_csv(self.paths["from_the_web"] + "StockMarketData/sp500/csv/GOOG.csv")
-        else:
-            return self.merged_df.drop(columns='ticker_symbol')
-
-    def read_one_stock(self, stock_ticker="TSLA"):
-        return self.merged_df[self.merged_df['ticker_symbol'] == stock_ticker].drop(columns='ticker_symbol').reset_index(drop=True)
-
-    def get_cols(self, df, is_testing_data=False):
-        if is_testing_data:
-            return ['Open', 'Low', 'High', 'Close', 'Adjusted Close']
-        else:
-            return list(df)[1:df.shape[1]]
-
-    def scale_data_old(self, df, target='price_difference', scaling='min_max'):
-        def is_scalable_feature(feature):
-            return feature != 'Date' and feature != target
-
-        def is_sentiment_feature(feature):
-            return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
-        scaled_df = pd.DataFrame(columns=df.columns)
-        df = df.groupby(by=['Date'])
-
-        for date in df:
-            to_append = {}
-            to_append['Date'] = date[0]
-            to_append[target] = date[1][target].iloc[0]
-            for feature in scaled_df.columns:
-                if is_scalable_feature(feature):
-                    if scaling == 'min_max':
-                        scaler = MinMaxScaler()
-                    elif scaling == 'standard':
-                        scaler = StandardScaler()
-
-                    to_append = date[1][feature] * date[1]["Tweet_Sentiment"] if not is_sentiment_feature(
-                        feature) else date[1][feature]
-
-                    to_append[feature] = scaler.fit_transform(
-                        np.array(to_append).reshape(-1, 1)).mean()
-
-            scaled_df = scaled_df.append(to_append, ignore_index=True)
-        return scaled_df
-
-    def savetimes(num, isstart):
-        '''Save Start and end times for autotests'''
-        if isstart:
-            mode = 'Started at: '
-        else:
-            mode = 'Ended at: '
-
-        now = Helper.get_date_time()
-        with open(f'Logs\\test{num}.txt', 'a+') as f:
-            f.write(f'TRY {num}\t{mode}{now}\n')
-
-
 
 #---------- MAIN -----------#
 if __name__ == '__main__':

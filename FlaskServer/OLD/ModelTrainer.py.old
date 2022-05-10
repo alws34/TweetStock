@@ -1,0 +1,157 @@
+ #------------ OLD DEPRECATED FUNCTIONS (COULD BE REUSED) ----------------#
+
+    def get_LSTM_accuracy(self, original_df_in, forecast_df_in):
+
+        forecast_df = forecast_df_in.reset_index().rename(
+            columns={'index': 'Date'})
+        original_df = original_df_in.reset_index().rename(
+            columns={'index': 'Date'})
+        print('pred', forecast_df)
+        print('orig\n', original_df)
+        n_correct = 0
+        date_index = 'Date'
+        target_index = 'Open'
+        for i in range(1, len(forecast_df) - 1):
+            day = forecast_df[date_index].iloc[i]
+            day_after = forecast_df[date_index].iloc[i+1]
+            orig_day = original_df[original_df[date_index] == day]
+            orig_day_after = original_df[original_df[date_index] == day_after]
+            forecast_day = forecast_df[forecast_df[date_index] == day]
+            forecast_day_after = forecast_df[forecast_df[date_index] == day_after]
+
+            original_volatility = float(
+                orig_day_after[target_index]) - float(orig_day[target_index])
+            forecast_volatility = float(
+                forecast_day_after[target_index]) - float(forecast_day[target_index])
+
+            if (original_volatility >= 0 and forecast_volatility >= 0) or (original_volatility < 0 and forecast_volatility < 0):
+                n_correct += 1
+
+        return str(round((n_correct/(len(forecast_df)-2))*100, 3)) + '%'
+
+    def sort_dates(self, dates_series, date_format):
+        ''' Takes a date series and returns it sorted '''
+        dates = [datetime.strptime(date, date_format) for date in dates_series]
+        dates.sort()
+        sorted_dates = [datetime.strftime(date, date_format) for date in dates]
+        return sorted_dates
+
+    def min_max(self, x, x_min, x_max):
+        range = x_max-x_min
+        return float((x - x_min) / range)
+
+    def min_max_col(self, column):
+        try:
+            col = column.astype(float)
+        except:
+            print('cant use astype(float)')
+            col = column
+        x_min = col.min()
+        x_max = col.max()
+        for i in range(len(col)):
+            col[i] = self.min_max(col[i], x_min, x_max)
+        return col
+
+    def min_max_and_mult_col(self, df, feature):
+        df[feature] = df[feature].astype(float)
+        # 1
+        for i in range(len(df)):
+            # mult by absolute value of the sentiment
+            df[feature][i] = df[feature][i] * abs(df['Compound'][i])
+        # 2
+        df[feature] = self.min_max_col(df[feature])  # scale
+        # 3
+        print('before', df[feature].min(), df[feature].max())
+        for i in range(len(df)):
+            # will mult by *-1 if sentiment negative else *1
+            df[feature][i] *= df['Compound'][i]/abs(df['Compound'][i])
+        print('after', df[feature].min(), df[feature].max())
+        return df[feature]
+
+    def split_stocks_df(self, stocks_df):
+        df = stocks_df
+        dfs = []
+        ticker_symbols = ['AAPL', 'AMZN', 'GOOG', 'GOOGL', 'MSFT', 'TSLA']
+        for ticker_symbol in ticker_symbols:
+            dfs.append(df[df['ticker_symbol'] ==
+                          ticker_symbol].reset_index(drop=True))
+        return dfs
+
+    def scale_and_multiply_df(self, df, stock_features, tweet_features, user_features):
+        ''' min max scale the dataframe '''
+        print("scaling")
+
+        dfs = self.split_stocks_df(df)
+        print("splitted")
+
+        # Scaling and Multiplying
+        features_to_skip = ['Compound', 'Date',
+                            'ticker_symbol', 'target', 'price_difference']
+        for df in dfs:
+            for feature in df:
+                if feature not in features_to_skip:
+                    if feature in stock_features:
+                        print('stock fueature = ', feature)
+                        df[feature] = self.min_max_col(df[feature])  # scale
+                    else:
+                        print('tweet/user fueature = ', feature)
+                        df[feature] = self.min_max_and_mult_col(df, feature)
+
+        scaled_df = pd.concat(dfs)
+        print("scaled")
+        return scaled_df
+
+    def read_data(self, is_testing_data=False):
+        if is_testing_data:
+            return pd.read_csv(self.paths["from_the_web"] + "StockMarketData/sp500/csv/GOOG.csv")
+        else:
+            return self.merged_df.drop(columns='ticker_symbol')
+
+    def read_one_stock(self, stock_ticker="TSLA"):
+        return self.merged_df[self.merged_df['ticker_symbol'] == stock_ticker].drop(columns='ticker_symbol').reset_index(drop=True)
+
+    def get_cols(self, df, is_testing_data=False):
+        if is_testing_data:
+            return ['Open', 'Low', 'High', 'Close', 'Adjusted Close']
+        else:
+            return list(df)[1:df.shape[1]]
+
+    def scale_data_old(self, df, target='price_difference', scaling='min_max'):
+        def is_scalable_feature(feature):
+            return feature != 'Date' and feature != target
+
+        def is_sentiment_feature(feature):
+            return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
+        scaled_df = pd.DataFrame(columns=df.columns)
+        df = df.groupby(by=['Date'])
+
+        for date in df:
+            to_append = {}
+            to_append['Date'] = date[0]
+            to_append[target] = date[1][target].iloc[0]
+            for feature in scaled_df.columns:
+                if is_scalable_feature(feature):
+                    if scaling == 'min_max':
+                        scaler = MinMaxScaler()
+                    elif scaling == 'standard':
+                        scaler = StandardScaler()
+
+                    to_append = date[1][feature] * date[1]["Tweet_Sentiment"] if not is_sentiment_feature(
+                        feature) else date[1][feature]
+
+                    to_append[feature] = scaler.fit_transform(
+                        np.array(to_append).reshape(-1, 1)).mean()
+
+            scaled_df = scaled_df.append(to_append, ignore_index=True)
+        return scaled_df
+
+    def savetimes(num, isstart):
+        '''Save Start and end times for autotests'''
+        if isstart:
+            mode = 'Started at: '
+        else:
+            mode = 'Ended at: '
+
+        now = Helper.get_date_time()
+        with open(f'Logs\\test{num}.txt', 'a+') as f:
+            f.write(f'TRY {num}\t{mode}{now}\n')

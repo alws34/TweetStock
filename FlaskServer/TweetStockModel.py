@@ -13,7 +13,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from datetime import datetime as dt, timedelta
 from pathlib import Path
 from Helper import Helper
-
+from DataHandler import DataHandler
 
 TWITTER_VERSION = 2             # twitter version.
 # days on which the model was train to precict based on.
@@ -115,12 +115,12 @@ class TweetStockModel:
             return df.groupby(by='date').mean().reset_index()
 
     def get_scale_and_mean(self, df, n_past=N_PAST, scaling='min_max'):
-
         def is_scalable_feature(f):
             return f in self.feature_set or f == 's_compound'
 
         def is_sentiment_feature(f):
             return f in ['s_compound', 's_neg', 's_pos', 's_neu']
+
         if n_past == 1:
             df_dict = {}
             for col in df.columns:
@@ -147,7 +147,6 @@ class TweetStockModel:
 # -------------------------------------------------------------------------------------------------------------- #
 
     # Step 1
-
 
     def get_tweets(self, ticker, max_results=MAX_TWEETS_RESULTS, n_past=N_PAST, twitter_version=TWITTER_VERSION):
         #print(f"Getting Tweets of {self.ticker} for {self.ip} ")
@@ -418,7 +417,7 @@ class TweetStockModel:
         print("pred", "\n", pred_table_dict)
         print("tweets", "\n", tweets_table_dict)
         return pred_table_dict, tweets_table_dict
-    
+
     #--------- OLD DEPRECATED FUNCTIONS (COULD BE REUSED) -------#
     def get_tweets_table_dict_result_old(self, tweets_dict):
         # init dict
@@ -454,7 +453,6 @@ class TweetStockModel:
                 res_dict['sentiment_neg'].append(None)
                 res_dict['sentiment_compound'].append(tweet['s_compound'])
         return pd.DataFrame.from_dict(res_dict)
-
 
 
 if __name__ == "__main__":
