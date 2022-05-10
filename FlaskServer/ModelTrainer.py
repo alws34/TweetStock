@@ -12,19 +12,20 @@ import re
 from tensorflow import keras
 from keras import models, layers
 from keras.datasets import mnist
-from keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from gc import collect
-from Helper import Helper
+import Helper
 from DataHandler import DataHandler
 
 
 class ModelTrainer:
-    def __init__(self, user, path):
+    def __init__(self, user, saving_path):
         #global merged_df
-        self.path = path
-        self.dataHandler = DataHandler(user=user, path=path)
-        self.merged_df = self.dataHandler.init_data(scale_and_multiply=False)
+        self.saving_path = saving_path
+        self.dataHandler = DataHandler(user=user, path=saving_path)
+        self.merged_df = self.dataHandler.mt_init_data(
+            scale_and_multiply=False)
         self.paths = Helper.get_paths(user)
 
         self.all_features = ['ticker_symbol', 'Date', 'Low', 'Open', 'Stock_Volume', 'High', 'Close',
@@ -132,16 +133,16 @@ class ModelTrainer:
         return (np.array(sequences), np.array(labels))
     '''
 
-    def save_model(self, model, name, params, history):
+    def save_model(self, model, model_name, params, history):
         '''Save the generated model'''
-        if not os.path.exists(self.path):
-            os.mkdir(self.path)
+        if not os.path.exists(self.saving_path):
+            os.mkdir(self.saving_path)
 
-        self.model.save(f'{self.path}{name}.h5')
-        self.save_graph(history, self.path, name)
-        self.save_model_params(params, self.path, name)
+        model.save(f'{self.saving_path}{model_name}.h5')
+        self.save_graph(history, self.saving_path, model_name)
+        self.save_model_params(params, self.saving_path, model_name)
 
-    def save_graph(self, history, path, name):
+    def save_graph(self, history, model_name):
         '''Save Model's Graph'''
         plt.clf()
         acc = history.history['accuracy']
@@ -157,10 +158,10 @@ class ModelTrainer:
         plt.xlabel('Epochs')
         plt.ylabel('Acc')
         plt.legend()
-        plt.savefig(f'{path}{name}_graph.png')
+        plt.savefig(f'{self.saving_path}{model_name}_graph.png')
 
-    def save_model_params(self, params, path, name):
-        with open(f'{path}{name}_params.csv', 'w') as f:
+    def save_model_params(self, params, model_name):
+        with open(f'{self.saving_path}{model_name}_params.csv', 'w') as f:
             for key in params.keys():
                 f.write("%s,%s\n" % (key, params[key]))
 
@@ -455,13 +456,13 @@ class ModelTrainer:
                                          'Adjusted Close': 'Stock_Adj_Close',
                                          })
     """
-   
+
 
 #---------- MAIN -----------#
 if __name__ == '__main__':
-    try_num = 5
-    path = f"D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\{try_num}\\"
+    try_num = 6
+    save_path = f"D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\{try_num}\\"
     # availables: 'alon' , 'guy', 'hadar'
     user = 'alon'
-    mt = ModelTrainer(user=user, path=path)
+    mt = ModelTrainer(user=user, saving_path=save_path)
     mt.run_auto_training(acc_saving_threshold=0.55)

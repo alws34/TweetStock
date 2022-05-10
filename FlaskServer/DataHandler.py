@@ -3,19 +3,26 @@ import numpy as np
 import tensorflow as tf
 import math
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from Helper import Helper
+import Helper
 '''
 This class will be used to coordinate the work between 
 the ModelTrainer.py and TweetStockModel.py .
 It will contain every method which is used to handle data.
 '''
+TWITTER_VERSION = 2             # twitter version.
+# days on which the model was train to precict based on.
+N_PAST = 1
+MAX_TWEETS_RESULTS = 100        # max results for first tweets query.
+MAX_USER_TWEETS_RESULT = 100    # max results for use engagement tweets
+MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
+MIN_USER_FOLLOWERS = 100        # min user followers num to be included
 
 
 class DataHandler():
     def __init__(self, user, path):
         self.path = path
         self.user = user
-        self.paths = Helper.get_paths(user)
+        self.paths = Helper.get_paths(user=user)
 
     #------ ModelTrainer.py -------#
     def mt_scale_data(self, df, target='price_difference', scaling='min_max'):
@@ -84,7 +91,6 @@ class DataHandler():
                 start_idx += 1
         return (np.array(sequences), np.array(labels))
 
-
     def mt_init_stocks(self, stocks_df):
         print("----init_stocks---- (does nothing at the time)")
         stocks_df = self.mt_get_price_diff(stocks_df)
@@ -113,7 +119,6 @@ class DataHandler():
         temp_stocks.drop([0], inplace=True)
         temp_stocks.reset_index(drop=True, inplace=True)
         return temp_stocks
-
 
     def mt_init_users(self, users_df):
         print("----init_users----")
@@ -174,7 +179,6 @@ class DataHandler():
             #   df['eng_score'][i] = ((rts+likes+replies)/total_tweets) if include_replies else ((rts+likes)/total_tweets)
         return df
 
-
     def mt_init_tweets(self, tweets_df, tweet_stats_threshold=25):
         """
         naive filtering based on comment+liikes+retweets < 25
@@ -231,9 +235,9 @@ class DataHandler():
         tweets_2019 = pd.read_csv(tweets_2019_path)
 
         merged_df = self.mt_get_merged(self.mt_init_tweets(tweets_2019),
-                                    self.mt_init_users(users_df),
-                                    self.mt_init_stocks(stocks_2019),
-                                    exclude_TSLA=False)
+                                       self.mt_init_users(users_df),
+                                       self.mt_init_stocks(stocks_2019),
+                                       exclude_TSLA=False)
         print('merged\n\n', merged_df)
         Helper.clear_console()
 

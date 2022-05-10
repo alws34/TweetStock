@@ -12,7 +12,7 @@ from TwitterAPI import TwitterAPI, TwitterOAuth, TwitterRequestError, TwitterCon
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from datetime import datetime as dt, timedelta
 from pathlib import Path
-from Helper import Helper
+import Helper
 from DataHandler import DataHandler
 
 TWITTER_VERSION = 2             # twitter version.

@@ -6,7 +6,7 @@ import time
 import pyrebase
 from datetime import datetime as dt
 from TweetStockModel import TweetStockModel as tsm
-from Helper import Helper
+import Helper
 # ---------------------------------Init----------------------------------------------- #
 delimiter, prefix = Helper.get_prefix_path()
 ping_command = Helper.get_ping_command()
