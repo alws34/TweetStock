@@ -16,16 +16,14 @@ from tensorflow.keras.utils import to_categorical
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from gc import collect
 import Helper
-from DataHandler import DataHandler
+import DataHandler
 
 
 class ModelTrainer:
     def __init__(self, user, saving_path):
-        #global merged_df
+        # global merged_df
         self.saving_path = saving_path
-        self.dataHandler = DataHandler(user=user, path=saving_path)
-        self.merged_df = self.dataHandler.mt_init_data(
-            scale_and_multiply=False)
+        self.merged_df = self.init_data()
         self.paths = Helper.get_paths(user)
 
         self.all_features = ['ticker_symbol', 'Date', 'Low', 'Open', 'Stock_Volume', 'High', 'Close',
@@ -46,92 +44,8 @@ class ModelTrainer:
 
         self.features = self.stock_features + self.tweet_features + self.user_features
         self.features2 = self.stock_features + self.tweet_features2 + self.user_features
-        '''
-        # self.model_params --> Redundant?
-        
-        # self.model_params = {
-        #     'ticker': 'TSLA',
-        #     'features': self.features2,
-        #     'all_features': self.all_features,
-        #     'activation_all': 'relu',  # tanh,relu,leaky_relu,sigmoid
-        #     'activation_last': 'softmax',
-        #     'num_of_layers': 2,
-        #     'loss_func': 'binary_crossentropy',
-        #     'optimizer': 'adam',  # 'rmsprop', linear
-        #     'n_past': 3,  # num days from the past to predict based on
-        #     'output_dim': 2,
-        #     'epochs': 5,
-        #     'batch_size': 8
-        # }
-        '''
+
     #---------- AUTOMATED TRAINING ---------#
-    '''
-    def scale_data(self, df, target='price_difference', scaling='min_max'):
-        def is_scalable_feature(feature):
-            return feature != 'Date' and feature != target
-
-        def is_sentiment_feature(feature):
-            return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
-        columns = df.columns
-        df = df.groupby(by=['Date'])
-        dates_dict = {}
-        for col in columns:
-            dates_dict[col] = []
-
-        for date in df:
-            dates_dict['Date'].append(date[0])
-            dates_dict[target].append(date[1][target].iloc[0])
-            for col in columns:
-                if is_scalable_feature(col):
-                    if scaling == 'min_max':
-                        scaler = MinMaxScaler()
-                    elif scaling == 'standard':
-                        scaler = StandardScaler()
-
-                    to_append = date[1][col] * date[1]["Tweet_Sentiment"] if not is_sentiment_feature(
-                        col) else date[1][col]
-                    print("@TweetStockModel/scale_df()/to_append=", to_append)
-                    dates_dict[col].append(scaler.fit_transform(
-                        np.array(to_append).reshape(-1, 1)).mean())
-
-        return pd.DataFrame.from_dict(dates_dict)
-
-    def split_data(self, dnn_df, version=1):
-        if version == 1:
-            testing_size = 50
-            validation_size = 50
-            training_size = len(dnn_df) - testing_size - validation_size
-
-            train_data = dnn_df[:training_size]
-            validation_data = dnn_df[training_size:training_size+validation_size]
-            test_data = dnn_df[training_size+validation_size:]
-        elif version == 2:
-            validation_size = 50
-            testing_size = 50
-            train_data, validation_data, test_data = np.split(dnn_df.sample(frac=1, random_state=42), [
-                int(len(dnn_df)-testing_size-validation_size), int(len(dnn_df)-testing_size)])
-        return train_data, validation_data, test_data
-
-    def create_sequence(self, dataset, rows_at_a_time, target):
-        sequences = []
-        labels = []
-        start_idx = 0
-        if target:
-            features_df = dataset.drop(columns=target)
-            labels_df = dataset[[target]]
-            # Selecting 50 rows at a time
-            for stop_idx in range(rows_at_a_time, len(dataset)):
-                sequences.append(features_df.iloc[start_idx:stop_idx])
-                labels.append(labels_df.iloc[stop_idx][0])
-                start_idx += 1
-        else:
-            # Selecting 50 rows at a time
-            for stop_idx in range(rows_at_a_time, len(dataset)):
-                sequences.append(dataset.iloc[start_idx:stop_idx])
-                labels.append(dataset.iloc[stop_idx])
-                start_idx += 1
-        return (np.array(sequences), np.array(labels))
-    '''
 
     def save_model(self, model, model_name, params, history):
         '''Save the generated model'''
@@ -173,22 +87,22 @@ class ModelTrainer:
         dnn_df = dnn_df[dnn_df['ticker_symbol'] ==
                         ticker_symbol].drop(columns=['ticker_symbol'])
 
-        scaled_dnn_df = self.dataHandler.mt_scale_data(dnn_df)
+        scaled_dnn_df = DataHandler.mt_scale_data(dnn_df)
         scaled_dnn_df = scaled_dnn_df.drop(columns=['Date'])
 
         # train_data,validation_data,test_data = split_data(dnn_df,version=1)
-        train_data, validation_data, test_data = self.dataHandler.mt_split_data(
+        train_data, validation_data, test_data = DataHandler.mt_split_data(
             scaled_dnn_df, version=2)
 
         # train_data.shape, test_data.shape
 
         n_past = model_params['n_past']
         target = 'price_difference'
-        train_seq, train_label = self.dataHandler.mt_create_sequence(
+        train_seq, train_label = DataHandler.mt_create_sequence(
             train_data, rows_at_a_time=n_past, target=target)
-        validation_seq, validation_label = self.dataHandler.mt_create_sequence(
+        validation_seq, validation_label = DataHandler.mt_create_sequence(
             validation_data, rows_at_a_time=n_past, target=target)
-        test_seq, test_label = self.dataHandler.mt_create_sequence(
+        test_seq, test_label = DataHandler.mt_create_sequence(
             test_data, rows_at_a_time=n_past, target=target)
 
         output_dims = model_params['output_dim']
@@ -292,13 +206,8 @@ class ModelTrainer:
 
     #------------ DATA INITIALIZATION ----------------#
     """
-    def init_stocks(self, stocks_df):
-        print("----init_stocks---- (does nothing at the time)")
-        stocks_df = self.get_price_diff(stocks_df)
-        return stocks_df
-    
     def get_price_diff(self, stocks_df):
-        # gets the close price diff (today-yesterday) 1 = up, 0 = down 
+        # gets the close price diff (today-yesterday) 1 = up, 0 = down
         temp_stocks = stocks_df.reset_index(drop=True)
         temp_stocks['price_difference'] = [
             0.0 for i in range(len(temp_stocks))]
@@ -320,7 +229,7 @@ class ModelTrainer:
         temp_stocks.drop([0], inplace=True)
         temp_stocks.reset_index(drop=True, inplace=True)
         return temp_stocks
-    
+
     def init_users(self, users_df):
         print("----init_users----")
         temp_users_df = users_df.copy()
@@ -332,7 +241,7 @@ class ModelTrainer:
         temp_users_df['eng_score'] = temp_users_df['eng_score'].astype(float)
         print("\n\n")
         return temp_users_df
-    
+
     def filter_users(self, df, follower_threshold):
         '''
         -- 1. remove broken/bad eng score (user blocked public metrics)
@@ -357,10 +266,10 @@ class ModelTrainer:
         df.reset_index(drop=True, inplace=True)
         print("len after = " + str(len(df)))
         return df
-    
+
     def get_eng_score(self, users_df, include_followers=True, include_replies=True):
         # gets users df and returns the df with the engagement score calculated.
-        #    df should have the following columns:  
+        #    df should have the following columns:
         df = users_df
         for i in range(len(df)):
             rts = df['eng_total_retweets'][i]
@@ -379,7 +288,7 @@ class ModelTrainer:
             # else:
             #   df['eng_score'][i] = ((rts+likes+replies)/total_tweets) if include_replies else ((rts+likes)/total_tweets)
         return df
-    
+
     def init_tweets(self, tweets_df, tweet_stats_threshold=25):
         '''
         naive filtering based on comment+liikes+retweets < 25
@@ -398,7 +307,7 @@ class ModelTrainer:
         print('len after', len(temp_tweets))
         print("\n\n")
         return temp_tweets
-    
+
     def get_merged(self, tweets_df, users_df, stocks_df, exclude_TSLA=False):
         ''' Get the merged tweets users and stocks dataframe - returns the merged df '''
         print("---get_merged----")
@@ -419,33 +328,50 @@ class ModelTrainer:
         merged_df.reset_index(drop=True, inplace=True)
         print("\n\n")
         return merged_df
-    
 
-    def init_data(self, scale_and_multiply=False):
-        ''' Read the data to be trained - should come back formatted as google csv shown here https://www.youtube.com/watch?v=gSYiKKoREFI '''
-        # get the currect dataframes from drive in "paths" section
+    """
 
+    def read_dfs_from_paths(self):
         users_path = self.paths['users_path'] + \
             'users_with_eng_v5(with_replies).csv'
         stocks_2019_path = self.paths['stocks_2019_path'] + \
             'stocks_2019.csv'
         tweets_2019_path = self.paths['tweets_2019_path'] + \
             'tweets_2019.csv'
+        return pd.read_csv(tweets_2019_path), pd.read_csv(users_path), pd.read_csv(stocks_2019_path)
 
-        stocks_2019 = pd.read_csv(stocks_2019_path)
-        users_df = pd.read_csv(users_path)
-        tweets_2019 = pd.read_csv(tweets_2019_path)
+    def init_stocks(self, stocks_df):
+        print("----init_stocks---- (does nothing at the time)")
+        return DataHandler.mt_get_price_diff(stocks_df)
 
-        merged_df = self.get_merged(self.init_tweets(tweets_2019),
-                                    self.init_users(users_df),
-                                    self.init_stocks(stocks_2019),
-                                    exclude_TSLA=False)
+    def init_users(self, users_df):
+        print("----init_users----")
+        temp_users_df = users_df.copy()
+
+        temp_users_df = DataHandler.mt_filter_users(temp_users_df)
+        temp_users_df = DataHandler.mt_get_eng_score(temp_users_df)
+        temp_users_df['eng_score'] = temp_users_df['eng_score'].astype(float)
+        print("\n\n")
+        return temp_users_df
+
+    def init_tweets(self, tweets_df):
+        return DataHandler.mt_filter_tweets(tweets_df=tweets_df)
+
+    def init_data(self):
+        ''' Read the data to be trained - should come back formatted as google csv shown here https://www.youtube.com/watch?v=gSYiKKoREFI '''
+        # get the currect dataframes from drive in "paths" section
+        tweets_2019, users_df, stocks_2019 = self.read_dfs_from_paths()
+
+        merged_df = DataHandler.mt_get_merged(self.init_tweets(tweets_2019),
+                                              self.init_users(users_df),
+                                              self.init_stocks(
+            stocks_2019),
+            exclude_TSLA=False)
         print('merged\n\n', merged_df)
         Helper.clear_console()
 
-        merged_df['Date'] = pd.to_datetime(
-            merged_df['Date'], format='%d/%m/%Y')
-        merged_df = merged_df.sort_values(by="Date").reset_index(drop=True)
+        merged_df = DataHandler.sort_df_by_dates(
+            df=merged_df, date_col_name='Date')
 
         return merged_df.rename(columns={'Compound': 'Tweet_Sentiment',
                                          'eng_score': 'User_Engagement',
@@ -455,7 +381,6 @@ class ModelTrainer:
                                          'Volume': 'Stock_Volume',
                                          'Adjusted Close': 'Stock_Adj_Close',
                                          })
-    """
 
 
 #---------- MAIN -----------#

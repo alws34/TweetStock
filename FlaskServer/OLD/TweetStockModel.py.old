@@ -1,0 +1,47 @@
+    #--------- OLD DEPRECATED FUNCTIONS (COULD BE REUSED) -------#
+    def get_tweets_table_dict_result_old(self, tweets_dict):
+        # init dict
+        res_dict = {
+            'ticker': [],
+            'tweet_id': [],
+            'user_engagement': [],
+            'tweet_likes': [],
+            'tweet_replies': [],
+            'tweet_retweets': [],
+            'sentiment_pos': [],
+            'sentiment_neu': [],
+            'sentiment_neg': [],
+            'sentiment_compound': []
+        }
+
+        # push values
+        for tweet in tweets_dict:
+            res_dict['ticker'].append(self.ticker)
+            res_dict['tweet_id'].append(tweet['tweet_id'])
+            res_dict['user_engagement'].append(tweet['u_engagement'])
+            res_dict['tweet_likes'].append(tweet['n_likes'])
+            res_dict['tweet_replies'].append(tweet['n_replies'])
+            res_dict['tweet_retweets'].append(tweet['n_retweets'])
+            if self.features_version == 1:
+                res_dict['sentiment_pos'].append(tweet['s_pos'])
+                res_dict['sentiment_neu'].append(tweet['s_neu'])
+                res_dict['sentiment_neg'].append(tweet['s_neg'])
+                res_dict['sentiment_compound'].append(None)
+            elif self.features_version == 2:
+                res_dict['sentiment_pos'].append(None)
+                res_dict['sentiment_neu'].append(None)
+                res_dict['sentiment_neg'].append(None)
+                res_dict['sentiment_compound'].append(tweet['s_compound'])
+        return pd.DataFrame.from_dict(res_dict)
+
+    
+    # replaced by get_scale_and_mean
+    def tsm_get_df_mean_old(self, df, n_past=N_PAST):
+        if n_past == 1:
+            df_dict = {}
+            for col in df:
+                df_dict[col] = []
+                df_dict[col].append(df[col].mean())
+            return pd.DataFrame.from_dict(df_dict)
+        else:
+            return df.groupby(by='date').mean().reset_index()

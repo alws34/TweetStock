@@ -83,6 +83,8 @@ def get_models():
 
 
 def get_paths(user):
+    if user is None:
+        return None
     paths = {
         'guy': {'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',
                 'stocks_2019_path': "/content/drive/MyDrive/Final Project/Data/From the Web/StockMarketData/",
@@ -105,3 +107,4 @@ def get_paths(user):
                   }
     }
     return paths[user]
+

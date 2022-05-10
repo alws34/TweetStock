@@ -32,7 +32,6 @@ class TweetStockModel:
         self.id = id
         self.ticker = model_ticker
         self.ip = ip
-
         self.features_version = features_version
         self.feature_set = self.get_feature_set(features_version)
 
@@ -103,16 +102,6 @@ class TweetStockModel:
             return None
         # print(temp)
         return pd.DataFrame.from_dict(temp)
-
-    def get_df_mean_old(self, df, n_past=N_PAST):  # replaced by get_scale_and_mean
-        if n_past == 1:
-            df_dict = {}
-            for col in df:
-                df_dict[col] = []
-                df_dict[col].append(df[col].mean())
-            return pd.DataFrame.from_dict(df_dict)
-        else:
-            return df.groupby(by='date').mean().reset_index()
 
     def get_scale_and_mean(self, df, n_past=N_PAST, scaling='min_max'):
         def is_scalable_feature(f):
@@ -340,7 +329,6 @@ class TweetStockModel:
         return result
 
     # Step 7.0
-
     def get_tweets_table_dict_result(self, tweets_df):
         features = ['tweet_id', 'u_engagement', 'n_likes', 'n_replies',
                     'n_retweets', 's_pos', 's_neu', 's_neg', 's_compound']
@@ -355,8 +343,8 @@ class TweetStockModel:
             's_compound': 'sentiment_compound'
         }
         return tweets_df[features].rename(columns=renames).to_dict(orient='records')
+    
     # Step 7.1
-
     def get_pred_table_dict_result(self, prepared_df, prediction):
         # init dict
         res_dict = {}
@@ -370,7 +358,6 @@ class TweetStockModel:
         return pd.DataFrame.from_dict(res_dict).to_dict(orient='records')
 
     # Pred Function
-
     def get_prediction(self):
         # Step 1
         tweets = self.get_tweets(self.ticker, max_results=MAX_TWEETS_RESULTS,
@@ -417,42 +404,6 @@ class TweetStockModel:
         print("pred", "\n", pred_table_dict)
         print("tweets", "\n", tweets_table_dict)
         return pred_table_dict, tweets_table_dict
-
-    #--------- OLD DEPRECATED FUNCTIONS (COULD BE REUSED) -------#
-    def get_tweets_table_dict_result_old(self, tweets_dict):
-        # init dict
-        res_dict = {
-            'ticker': [],
-            'tweet_id': [],
-            'user_engagement': [],
-            'tweet_likes': [],
-            'tweet_replies': [],
-            'tweet_retweets': [],
-            'sentiment_pos': [],
-            'sentiment_neu': [],
-            'sentiment_neg': [],
-            'sentiment_compound': []
-        }
-
-        # push values
-        for tweet in tweets_dict:
-            res_dict['ticker'].append(self.ticker)
-            res_dict['tweet_id'].append(tweet['tweet_id'])
-            res_dict['user_engagement'].append(tweet['u_engagement'])
-            res_dict['tweet_likes'].append(tweet['n_likes'])
-            res_dict['tweet_replies'].append(tweet['n_replies'])
-            res_dict['tweet_retweets'].append(tweet['n_retweets'])
-            if self.features_version == 1:
-                res_dict['sentiment_pos'].append(tweet['s_pos'])
-                res_dict['sentiment_neu'].append(tweet['s_neu'])
-                res_dict['sentiment_neg'].append(tweet['s_neg'])
-                res_dict['sentiment_compound'].append(None)
-            elif self.features_version == 2:
-                res_dict['sentiment_pos'].append(None)
-                res_dict['sentiment_neu'].append(None)
-                res_dict['sentiment_neg'].append(None)
-                res_dict['sentiment_compound'].append(tweet['s_compound'])
-        return pd.DataFrame.from_dict(res_dict)
 
 
 if __name__ == "__main__":
