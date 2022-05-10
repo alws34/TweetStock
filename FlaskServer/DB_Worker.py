@@ -8,9 +8,9 @@ from datetime import datetime as dt
 from TweetStockModel import TweetStockModel as tsm
 from Helper import Helper
 # ---------------------------------Init----------------------------------------------- #
-delimiter, prefix = Helper.Get_Prefix_Path()
-ping_command = Helper.Get_Ping_Command()
-MODELS = Helper.Get_Models()
+delimiter, prefix = Helper.get_prefix_path()
+ping_command = Helper.get_ping_command()
+MODELS = Helper.get_models()
 # -------------------------------FireBase------------------------------------- #
 
 
@@ -74,7 +74,7 @@ def is_valid_day():
     This method converts israel's time to NY time, 
     and checks if the current date and time is during stock excange open hours (NYSE & NASDAQ)
     '''
-    current_time = Helper.Get_Date_Time()
+    current_time = Helper.get_date_time()
     year, month, day, hour, minute = current_time.year, current_time.month, current_time.day, current_time.hour, current_time.minute
     today, time = f'{year}-{month}-{day}', f'{hour}:{minute}'
     start_of_year, end_of_year = f'{year}-01-01', f'{year}-12-31'
@@ -102,7 +102,7 @@ def is_valid_day():
 
 
 def sleep_until_market_opens():
-    now = Helper.Get_Date_Time()
+    now = Helper.get_date_time()
     #now = {'hour': 1, 'min': 2}
     start_hour, start_min = 16, 30
     start_hour_in_sec = (start_hour * 60 + start_min) * 60
@@ -124,8 +124,8 @@ def update_firebase_db():
         pred_dict, tweets_dict = Get_prediction(
             ticker=ticker, path=stock['path'], features_version=stock['features'])
         if is_valid_model_response(pred_dict, tweets_dict):
-            date, time = Helper.Get_Date_Time_Stringify(
-                format="%d_%m_%Y"), Helper.Get_Date_Time_Stringify(format="%H_%M")
+            date, time = Helper.get_date_time_stringify(
+                format="%d_%m_%Y"), Helper.get_date_time_stringify(format="%H_%M")
             pred_dict[0]['last_update'] = date + "_" + time
             for i in range(len(tweets_dict)):
                 tweets_dict[i]['last_update'] = date + "_" + time
