@@ -218,9 +218,9 @@ def tsm_create_sequence(dataset):
     return np.array(dataset)
 
 
-def tsm_get_scale_and_mean(df, n_past=N_PAST, scaling=SCALING):
+def tsm_get_scale_and_mean(df,feature_set, n_past=N_PAST, scaling=SCALING):
     def is_scalable_feature(f):
-        return f in self.feature_set or f == 's_compound'
+        return f in feature_set or f == 's_compound'
 
     def is_sentiment_feature(f):
         return f in ['s_compound', 's_neg', 's_pos', 's_neu']
@@ -304,7 +304,7 @@ def tsm_filter_users(tweets, threshold=MIN_USER_FOLLOWERS):
 
 def tsm_prep_data(df, feature_set):
     # 1 Select features
-    df = tsm_get_scale_and_mean(df)
+    df = tsm_get_scale_and_mean(df,feature_set)
     df = df[feature_set]
 
     # 2 Get df mean

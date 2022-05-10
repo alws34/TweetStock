@@ -23,8 +23,8 @@ class ModelTrainer:
     def __init__(self, user, saving_path):
         # global merged_df
         self.saving_path = saving_path
-        self.merged_df = self.init_data()
         self.paths = Helper.get_paths(user)
+        self.merged_df = self.init_data()
 
         self.all_features = ['ticker_symbol', 'Date', 'Low', 'Open', 'Stock_Volume', 'High', 'Close',
                              'Stock_Adj_Close', 'price_difference', 'tweet_id', 'writer',
@@ -53,8 +53,8 @@ class ModelTrainer:
             os.mkdir(self.saving_path)
 
         model.save(f'{self.saving_path}{model_name}.h5')
-        self.save_graph(history, self.saving_path, model_name)
-        self.save_model_params(params, self.saving_path, model_name)
+        self.save_graph(history=history, model_name=model_name)
+        self.save_model_params(params=params, model_name=model_name)
 
     def save_graph(self, history, model_name):
         '''Save Model's Graph'''
@@ -209,10 +209,8 @@ class ModelTrainer:
     def read_dfs_from_paths(self):
         users_path = self.paths['users_path'] + \
             'users_with_eng_v5(with_replies).csv'
-        stocks_2019_path = self.paths['stocks_2019_path'] + \
-            'stocks_2019.csv'
-        tweets_2019_path = self.paths['tweets_2019_path'] + \
-            'tweets_2019.csv'
+        stocks_2019_path = self.paths['stocks_2019_path'] + 'stocks_2019.csv'
+        tweets_2019_path = self.paths['tweets_2019_path'] + 'tweets_2019.csv'
         return pd.read_csv(tweets_2019_path), pd.read_csv(users_path), pd.read_csv(stocks_2019_path)
 
     def init_stocks(self, stocks_df):
