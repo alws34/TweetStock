@@ -243,11 +243,18 @@ class ModelTrainer:
         Helper.clear_console(f'Acc = {test_acc}')
         return network, round(test_acc, 7), history
 
-    def run_auto_training(self, acc_saving_threshold, saving_path):
+    def run_auto_training(self, saving_path, acc_saving_threshold=0.55):
         '''
         Runs all possible models
         runtime: ~13 hours
         '''
+        if saving_path == None:
+            print(
+                "@ModelTrainer.py/run_auto_training() - missing argument - No saving_path provided...\n")
+            return None
+        else:
+            self.saving_path = saving_path
+
         tickers = ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT']
         feature_sets = [self.feature_set1]  # , self.feature_set2]
         actv_funcs_all = ['relu', 'tanh', 'sigmoid']
@@ -257,8 +264,6 @@ class ModelTrainer:
         n_pasts = [1]  # , 2, 3]
         n_epochs = [4, 7, 10, 15, 20]  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         layers = [[4], [8], [16], [16, 8], [8, 4]]
-
-        self.saving_path = saving_path
 
         model_id = 1
         for ticker in tickers:
