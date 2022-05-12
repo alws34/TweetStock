@@ -34,7 +34,8 @@ class ModelTrainer:
 
     def init_model_saving_params(self):
         """
-        model saving params - initialized to None - will be initialized later according to the trained model,
+        Model saving params - 
+        Will be initialized later according to the trained model,
         its parameters and the saving path provided in @run_auto_training() method
         """
         self.saving_path = None
@@ -45,10 +46,10 @@ class ModelTrainer:
 
     def init_model_training_params(self):
         """
-        initialized model training params.
-        will be later used in @run_auto_training() method.
+        Initialized model training params.
+        Will be later used in @run_auto_training() method.
         Will be used inside the model in order to iterate 
-        over every parameter set.
+        over every parameter combination.
         """
         self.training_batch_size = 8
         self.training_output_dims = 2
