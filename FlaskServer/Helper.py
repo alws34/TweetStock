@@ -82,7 +82,7 @@ def get_models():
     }
 
 
-def get_paths(user):
+def get_user_data_paths(user):
     if user is None:
         return None
     paths = {

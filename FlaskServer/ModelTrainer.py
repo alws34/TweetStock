@@ -4,6 +4,8 @@ import os
 import sys
 import math
 import json
+
+from pyparsing import NoMatch
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -20,49 +22,134 @@ import DataHandler
 
 
 class ModelTrainer:
-    def __init__(self, user, saving_path):
-        # global merged_df
-        self.saving_path = saving_path
-        self.paths = Helper.get_paths(user)
-        self.merged_df = self.init_data()
+    def __init__(self, user):
+        self.user = user
+        self.initialized_df = self.init_data()
+        # model training params
+        self.training_batch_size = 8
+        self.training_output_dims = 2
+        self.model_training_params = self.init_model_training_params()
+        self.feature_set1, self.feature_set2 = self.init_model_features()
+        # model saving params
+        self.saving_path = None
+        self.model = None
+        self.model_name = None
+        self.model_history = None
+        self.test_accuracy = None
 
-        self.all_features = ['ticker_symbol', 'Date', 'Low', 'Open', 'Stock_Volume', 'High', 'Close',
-                             'Stock_Adj_Close', 'price_difference', 'tweet_id', 'writer',
-                             'post_date', 'body', 'Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes',
-                             'Negativity', 'Positivity', 'Neutral', 'Tweet_Sentiment', 'name', 'id',
-                             'id_str', 'description', 'followers_count', 'favourites_count',
-                             'listed_count', 'friends_count', 'statuses_count', 'created_at',
-                             'verified', 'eng_total_retweets', 'eng_total_likes',
-                             'eng_total_replies', 'eng_tweets_length', 'User_Engagement']
-        self.stock_features = ['Date', 'ticker_symbol',
-                               'price_difference']  # ,'Close']
-        self.tweet_features = ['Tweet_Sentiment',
-                               'Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
-        self.tweet_features2 = ['Tweet_Comments', 'Tweet_Retweets',
-                                'Tweet_Likes', 'Positivity', 'Negativity', 'Neutral']
-        self.user_features = ['User_Engagement']
+    #------------ INITIALIZATION ----------------#
 
-        self.features = self.stock_features + self.tweet_features + self.user_features
-        self.features2 = self.stock_features + self.tweet_features2 + self.user_features
+    def init_model_training_params(self):
+        return {
+            'layers': None,
+            'ticker': None,
+            'features': None,
+            'activation_all': None,
+            'activation_last': None,
+            'loss_func': None,
+            'optimizer': None,
+            'n_past': None,  # num days from the past to predict based on
+            'epochs': None,
+            'output_dim': self.training_output_dims,
+            'batch_size': self.training_batch_size,
+            # 'num_of_layers': 2,
+        }
+
+    def init_model_features(self):
+        all_features = ['ticker_symbol', 'Date', 'Low', 'Open', 'Stock_Volume', 'High', 'Close',
+                        'Stock_Adj_Close', 'price_difference', 'tweet_id', 'writer',
+                        'post_date', 'body', 'Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes',
+                        'Negativity', 'Positivity', 'Neutral', 'Tweet_Sentiment', 'name', 'id',
+                        'id_str', 'description', 'followers_count', 'favourites_count',
+                        'listed_count', 'friends_count', 'statuses_count', 'created_at',
+                        'verified', 'eng_total_retweets', 'eng_total_likes',
+                        'eng_total_replies', 'eng_tweets_length', 'User_Engagement']
+
+        stock_features = ['Date', 'ticker_symbol',
+                          'price_difference']  # ,'Close']
+        tweet_features = ['Tweet_Sentiment',
+                          'Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
+        tweet_features2 = ['Tweet_Comments', 'Tweet_Retweets',
+                           'Tweet_Likes', 'Positivity', 'Negativity', 'Neutral']
+        user_features = ['User_Engagement']
+        features = stock_features + tweet_features + user_features
+        features2 = stock_features + tweet_features2 + user_features
+        return features, features2
+
+    def init_paths(self):
+        user_paths = Helper.get_user_data_paths(self.user)
+        users_csv_name, stocks_csv_name, tweets_csv_name = 'users_with_eng_v5(with_replies).csv', 'stocks_2019.csv', 'tweets_2019.csv'
+        users_path = user_paths['users_path'] + users_csv_name
+        stocks_2019_path = user_paths['stocks_2019_path'] + stocks_csv_name
+        tweets_2019_path = user_paths['tweets_2019_path'] + tweets_csv_name
+        return {'users_path': users_path, 'stocks_path': stocks_2019_path, 'tweets_path': tweets_2019_path}
+
+    def read_dfs_from_paths(self):
+        csv_paths = self.init_paths(self.user)
+        tweets_df, users_df, stocks_df = pd.read_csv(csv_paths['tweets_path']), pd.read_csv(
+            csv_paths['users_path']), pd.read_csv(csv_paths['stocks_path'])
+        return tweets_df, users_df, stocks_df
+
+    def init_stocks_df(self, stocks_df):
+        print("----init_stocks---- (does nothing at the time)")
+        return DataHandler.mt_get_price_diff(stocks_df)
+
+    def init_users_df(self, users_df):
+        print("----init_users----")
+        temp_users_df = users_df.copy()
+
+        temp_users_df = DataHandler.mt_filter_users(temp_users_df)
+        temp_users_df = DataHandler.mt_get_eng_score(temp_users_df)
+        temp_users_df['eng_score'] = temp_users_df['eng_score'].astype(float)
+        print("\n\n")
+        return temp_users_df
+
+    def init_tweets_df(self, tweets_df):
+        return DataHandler.mt_filter_tweets(tweets_df=tweets_df)
+
+    def init_data(self):
+        ''' Read the data to be trained - should come back formatted as google csv shown here https://www.youtube.com/watch?v=gSYiKKoREFI '''
+        # get the currect dataframes from drive in "paths" section
+        tweets_2019, users_df, stocks_2019 = self.read_dfs_from_paths()
+
+        merged_df = DataHandler.mt_get_merged(self.init_tweets_df(tweets_2019),
+                                              self.init_users_df(users_df),
+                                              self.init_stocks_df(
+            stocks_2019),
+            exclude_TSLA=False)
+        print('merged\n\n', merged_df)
+        Helper.clear_console()
+
+        merged_df = DataHandler.sort_df_by_dates(
+            df=merged_df, date_col_name='Date')
+
+        return merged_df.rename(columns={'Compound': 'Tweet_Sentiment',
+                                         'eng_score': 'User_Engagement',
+                                         'comment_num': 'Tweet_Comments',
+                                         'retweet_num': 'Tweet_Retweets',
+                                         'like_num': 'Tweet_Likes',
+                                         'Volume': 'Stock_Volume',
+                                         'Adjusted Close': 'Stock_Adj_Close',
+                                         })
 
     #---------- AUTOMATED TRAINING ---------#
 
-    def save_model(self, model, model_name, params, history):
+    def save_model(self):
         '''Save the generated model'''
         if not os.path.exists(self.saving_path):
             os.mkdir(self.saving_path)
 
-        model.save(f'{self.saving_path}{model_name}.h5')
-        self.save_graph(history=history, model_name=model_name)
-        self.save_model_params(params=params, model_name=model_name)
+        self.model.save(f'{self.saving_path}{self.model_name}.h5')
+        self.save_graph()
+        self.save_params()
 
-    def save_graph(self, history, model_name):
+    def save_graph(self):
         '''Save Model's Graph'''
         plt.clf()
-        acc = history.history['accuracy']
-        val_acc = history.history['val_accuracy']
-        loss = history.history['loss']
-        val_loss = history.history['val_loss']
+        acc = self.history.history['accuracy']
+        val_acc = self.history.history['val_accuracy']
+        # loss = self.history.history['loss']
+        # val_loss = self.history.history['val_loss']
 
         epochs = range(1, len(acc) + 1)
 
@@ -72,16 +159,17 @@ class ModelTrainer:
         plt.xlabel('Epochs')
         plt.ylabel('Acc')
         plt.legend()
-        plt.savefig(f'{self.saving_path}{model_name}_graph.png')
+        plt.savefig(f'{self.saving_path}{self.model_name}_graph.png')
 
-    def save_model_params(self, params, model_name):
-        with open(f'{self.saving_path}{model_name}_params.csv', 'w') as f:
-            for key in params.keys():
-                f.write("%s,%s\n" % (key, params[key]))
+    def save_params(self):
+        with open(f'{self.saving_path}{self.model_name}_params.csv', 'w') as f:
+            for key in self.model_training_params.keys():
+                f.write("%s,%s\n" % (key, self.model_training_params[key]))
 
-    def train_model_with_params(self, model_params):
+    def train_with_params(self):
         '''Generates model according to iserted params'''
-        dnn_df = self.merged_df[model_params['features']].copy()
+        model_params = self.model_training_params
+        dnn_df = self.initialized_df[model_params['features']].copy()
         ticker_symbol = model_params['ticker']
 
         dnn_df = dnn_df[dnn_df['ticker_symbol'] ==
@@ -155,14 +243,13 @@ class ModelTrainer:
         Helper.clear_console(f'Acc = {test_acc}')
         return network, round(test_acc, 7), history
 
-    def run_auto_training(self, acc_saving_threshold):
+    def run_auto_training(self, acc_saving_threshold, saving_path):
         '''
         Runs all possible models
         runtime: ~13 hours
         '''
-        test_threshold = acc_saving_threshold
         tickers = ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT']
-        feature_sets = [self.features]  # , features2]
+        feature_sets = [self.feature_set1]  # , self.feature_set2]
         actv_funcs_all = ['relu', 'tanh', 'sigmoid']
         actv_funcs_last = ['softmax', 'sigmoid']  # ,'relu'
         loss_funcs = ['binary_crossentropy', 'mean_squared_error']
@@ -170,6 +257,8 @@ class ModelTrainer:
         n_pasts = [1]  # , 2, 3]
         n_epochs = [4, 7, 10, 15, 20]  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         layers = [[4], [8], [16], [16, 8], [8, 4]]
+
+        self.saving_path = saving_path
 
         model_id = 1
         for ticker in tickers:
@@ -181,86 +270,35 @@ class ModelTrainer:
                                 for n_past in n_pasts:
                                     for n_epoch in n_epochs:
                                         for layer in layers:
-                                            model_prms = {
+                                            self.model_training_params = {
                                                 'layers': layer,
                                                 'ticker': ticker,
                                                 'features': feature_set,
                                                 'activation_all': actv_func_all,
                                                 'activation_last': actv_func_last,
-                                                'num_of_layers': 2,
                                                 'loss_func': loss_func,
                                                 'optimizer': optimizer,  # 'rmsprop', linear
                                                 'n_past': n_past,  # num days from the past to predict based on
-                                                'output_dim': 2,
                                                 'epochs': n_epoch,
-                                                'batch_size': 8
+                                                'output_dim': self.training_output_dims,
+                                                'batch_size': self.training_batch_size,
+                                                # 'num_of_layers': 2,
                                             }
-                                            model, test_Acc, history = self.train_model_with_params(
-                                                model_params=model_prms)
-                                            if test_Acc != None:
-                                                if float(test_Acc) > test_threshold:
-                                                    model_name = f"{ticker}_acc_{round(test_Acc, 3)}_npast_{n_past}_epoch_{n_epoch}_opt_{optimizer}_num_{model_id}"
-                                                    self.save_model(
-                                                        model, model_name, model_prms, history)
+                                            self.model, self.test_accuracy, self.history = self.train_with_params()
+
+                                            if self.test_accuracy != None:
+                                                if float(self.test_accuracy) > acc_saving_threshold:
+                                                    self.model_name = f"{ticker}_acc_{round(self.test_accuracy, 3)}_npast_{n_past}_epoch_{n_epoch}_opt_{optimizer}_num_{model_id}"
+                                                    self.save_model()
                                                     model_id += 1
-
-    #------------ DATA INITIALIZATION ----------------#
-
-    def read_dfs_from_paths(self):
-        users_path = self.paths['users_path'] + \
-            'users_with_eng_v5(with_replies).csv'
-        stocks_2019_path = self.paths['stocks_2019_path'] + 'stocks_2019.csv'
-        tweets_2019_path = self.paths['tweets_2019_path'] + 'tweets_2019.csv'
-        return pd.read_csv(tweets_2019_path), pd.read_csv(users_path), pd.read_csv(stocks_2019_path)
-
-    def init_stocks(self, stocks_df):
-        print("----init_stocks---- (does nothing at the time)")
-        return DataHandler.mt_get_price_diff(stocks_df)
-
-    def init_users(self, users_df):
-        print("----init_users----")
-        temp_users_df = users_df.copy()
-
-        temp_users_df = DataHandler.mt_filter_users(temp_users_df)
-        temp_users_df = DataHandler.mt_get_eng_score(temp_users_df)
-        temp_users_df['eng_score'] = temp_users_df['eng_score'].astype(float)
-        print("\n\n")
-        return temp_users_df
-
-    def init_tweets(self, tweets_df):
-        return DataHandler.mt_filter_tweets(tweets_df=tweets_df)
-
-    def init_data(self):
-        ''' Read the data to be trained - should come back formatted as google csv shown here https://www.youtube.com/watch?v=gSYiKKoREFI '''
-        # get the currect dataframes from drive in "paths" section
-        tweets_2019, users_df, stocks_2019 = self.read_dfs_from_paths()
-
-        merged_df = DataHandler.mt_get_merged(self.init_tweets(tweets_2019),
-                                              self.init_users(users_df),
-                                              self.init_stocks(
-            stocks_2019),
-            exclude_TSLA=False)
-        print('merged\n\n', merged_df)
-        Helper.clear_console()
-
-        merged_df = DataHandler.sort_df_by_dates(
-            df=merged_df, date_col_name='Date')
-
-        return merged_df.rename(columns={'Compound': 'Tweet_Sentiment',
-                                         'eng_score': 'User_Engagement',
-                                         'comment_num': 'Tweet_Comments',
-                                         'retweet_num': 'Tweet_Retweets',
-                                         'like_num': 'Tweet_Likes',
-                                         'Volume': 'Stock_Volume',
-                                         'Adjusted Close': 'Stock_Adj_Close',
-                                         })
 
 
 #---------- MAIN -----------#
 if __name__ == '__main__':
-    try_num = 6
-    save_path = f"D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\{try_num}\\"
     # availables: 'alon' , 'guy', 'hadar'
     user = 'alon'
-    mt = ModelTrainer(user=user, saving_path=save_path)
-    mt.run_auto_training(acc_saving_threshold=0.55)
+    mt = ModelTrainer(user=user)
+
+    try_num = 6
+    save_path = f"D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\{try_num}\\"
+    mt.run_auto_training(acc_saving_threshold=0.55, saving_path=save_path)
