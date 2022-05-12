@@ -26,21 +26,33 @@ class ModelTrainer:
         self.user = user
         self.initialized_df = self.init_data()
         # model training params
-        self.training_batch_size = 8
-        self.training_output_dims = 2
-        self.model_training_params = self.init_model_training_params()
-        self.feature_set1, self.feature_set2 = self.init_model_features()
-        # model saving params
+        self.init_model_training_params()
+        self.init_model_saving_params()
+        self.init_model_features()
+
+    #------------ INITIALIZATION ----------------#
+
+    def init_model_saving_params(self):
+        """
+        model saving params - initialized to None - will be initialized later according to the trained model,
+        its parameters and the saving path provided in @run_auto_training() method
+        """
         self.saving_path = None
         self.model = None
         self.model_name = None
         self.model_history = None
         self.test_accuracy = None
 
-    #------------ INITIALIZATION ----------------#
-
     def init_model_training_params(self):
-        return {
+        """
+        initialized model training params.
+        will be later used in @run_auto_training() method.
+        Will be used inside the model in order to iterate 
+        over every parameter set.
+        """
+        self.training_batch_size = 8
+        self.training_output_dims = 2
+        self.model_training_params = {
             'layers': None,
             'ticker': None,
             'features': None,
@@ -74,7 +86,7 @@ class ModelTrainer:
         user_features = ['User_Engagement']
         features = stock_features + tweet_features + user_features
         features2 = stock_features + tweet_features2 + user_features
-        return features, features2
+        self.feature_set1, self.feature_set2 = features, features2
 
     def init_paths(self):
         user_paths = Helper.get_user_data_paths(self.user)
@@ -85,7 +97,7 @@ class ModelTrainer:
         return {'users_path': users_path, 'stocks_path': stocks_2019_path, 'tweets_path': tweets_2019_path}
 
     def read_dfs_from_paths(self):
-        csv_paths = self.init_paths(self.user)
+        csv_paths = self.init_paths()
         tweets_df, users_df, stocks_df = pd.read_csv(csv_paths['tweets_path']), pd.read_csv(
             csv_paths['users_path']), pd.read_csv(csv_paths['stocks_path'])
         return tweets_df, users_df, stocks_df
@@ -140,8 +152,6 @@ class ModelTrainer:
             os.mkdir(self.saving_path)
 
         self.model.save(f'{self.saving_path}{self.model_name}.h5')
-        self.save_graph()
-        self.save_params()
 
     def save_graph(self):
         '''Save Model's Graph'''
@@ -166,14 +176,16 @@ class ModelTrainer:
             for key in self.model_training_params.keys():
                 f.write("%s,%s\n" % (key, self.model_training_params[key]))
 
-    def train_with_params(self):
-        '''Generates model according to iserted params'''
+    def get_dnn_training_df(self):
         model_params = self.model_training_params
         dnn_df = self.initialized_df[model_params['features']].copy()
-        ticker_symbol = model_params['ticker']
+        dnn_df = dnn_df[dnn_df['ticker_symbol'] == model_params['ticker']]
+        return dnn_df.drop(columns=['ticker_symbol'])
 
-        dnn_df = dnn_df[dnn_df['ticker_symbol'] ==
-                        ticker_symbol].drop(columns=['ticker_symbol'])
+    def train_model(self):
+        '''Generates model according to inserted params'''
+        model_params = self.model_training_params
+        dnn_df = self.get_dnn_training_df()
 
         scaled_dnn_df = DataHandler.mt_scale_data(dnn_df)
         scaled_dnn_df = scaled_dnn_df.drop(columns=['Date'])
@@ -243,17 +255,21 @@ class ModelTrainer:
         Helper.clear_console(f'Acc = {test_acc}')
         return network, round(test_acc, 7), history
 
+    def set_saving_path(self, path):
+        if path != None:
+            self.saving_path = path
+        else:
+            print("@ModelTrainer.py/set_saving_path() - path == None...\n")
+            return None
+
     def run_auto_training(self, saving_path, acc_saving_threshold=0.55):
         '''
         Runs all possible models
         runtime: ~13 hours
         '''
-        if saving_path == None:
+        if self.set_saving_path(path=saving_path) == None:
             print(
-                "@ModelTrainer.py/run_auto_training() - missing argument - No saving_path provided...\n")
-            return None
-        else:
-            self.saving_path = saving_path
+                "ModelTrainer.py/run_auto_test() - missing argument - No saving_path provided...")
 
         tickers = ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT']
         feature_sets = [self.feature_set1]  # , self.feature_set2]
@@ -289,12 +305,14 @@ class ModelTrainer:
                                                 'batch_size': self.training_batch_size,
                                                 # 'num_of_layers': 2,
                                             }
-                                            self.model, self.test_accuracy, self.history = self.train_with_params()
+                                            self.model, self.test_accuracy, self.history = self.train_model()
 
                                             if self.test_accuracy != None:
                                                 if float(self.test_accuracy) > acc_saving_threshold:
                                                     self.model_name = f"{ticker}_acc_{round(self.test_accuracy, 3)}_npast_{n_past}_epoch_{n_epoch}_opt_{optimizer}_num_{model_id}"
                                                     self.save_model()
+                                                    self.save_graph()
+                                                    self.save_params()
                                                     model_id += 1
 
 
