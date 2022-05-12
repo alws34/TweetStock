@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import csv
+from itertools import combinations
 import os
 import sys
 import math
@@ -25,7 +26,6 @@ class ModelTrainer:
     def __init__(self, user):
         self.user = user
         self.initialized_df = self.init_data()
-        # model training params
         self.init_model_training_params()
         self.init_model_saving_params()
         self.init_model_features()
@@ -252,8 +252,10 @@ class ModelTrainer:
             return None, None, None
 
         test_loss, test_acc = network.evaluate(test_seq, test_label)
+        test_acc = round(test_acc, 7)
         Helper.clear_console(f'Acc = {test_acc}')
-        return network, round(test_acc, 7), history
+        self.model, self.test_accuracy, self.history = network, test_acc, history
+        return network, test_acc, history
 
     def set_saving_path(self, path):
         if path != None:
@@ -261,6 +263,20 @@ class ModelTrainer:
         else:
             print("@ModelTrainer.py/set_saving_path() - path == None...\n")
             return None
+
+    def get_training_params_combinations(self):
+        combinations = {
+            'tickers': ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT'],
+            'feature_sets': [self.feature_set1],  # , self.feature_set2]
+            'actv_funcs_all': ['relu', 'tanh', 'sigmoid'],
+            'actv_funcs_last': ['softmax', 'sigmoid'],  # ,'relu'
+            'loss_funcs': ['binary_crossentropy', 'mean_squared_error'],
+            'optimizers': ['rmsprop', 'adam'],
+            'n_pasts': [1],  # , 2, 3]
+            'n_epochs': [4, 7, 10, 15, 20],  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            'layers': [[4], [8], [16], [16, 8], [8, 4]]
+        }
+        return combinations
 
     def run_auto_training(self, saving_path, acc_saving_threshold=0.55):
         '''
@@ -271,26 +287,18 @@ class ModelTrainer:
             print(
                 "ModelTrainer.py/run_auto_test() - missing argument - No saving_path provided...")
 
-        tickers = ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT']
-        feature_sets = [self.feature_set1]  # , self.feature_set2]
-        actv_funcs_all = ['relu', 'tanh', 'sigmoid']
-        actv_funcs_last = ['softmax', 'sigmoid']  # ,'relu'
-        loss_funcs = ['binary_crossentropy', 'mean_squared_error']
-        optimizers = ['rmsprop', 'adam']
-        n_pasts = [1]  # , 2, 3]
-        n_epochs = [4, 7, 10, 15, 20]  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        layers = [[4], [8], [16], [16, 8], [8, 4]]
+        combinations = self.get_training_params_combinations()
 
         model_id = 1
-        for ticker in tickers:
-            for feature_set in feature_sets:
-                for actv_func_all in actv_funcs_all:
-                    for actv_func_last in actv_funcs_last:
-                        for loss_func in loss_funcs:
-                            for optimizer in optimizers:
-                                for n_past in n_pasts:
-                                    for n_epoch in n_epochs:
-                                        for layer in layers:
+        for ticker in combinations.tickers:
+            for feature_set in combinations.feature_sets:
+                for actv_func_all in combinations.actv_funcs_all:
+                    for actv_func_last in combinations.actv_funcs_last:
+                        for loss_func in combinations.loss_funcs:
+                            for optimizer in combinations.optimizers:
+                                for n_past in combinations.n_pasts:
+                                    for n_epoch in combinations.n_epochs:
+                                        for layer in combinations.layers:
                                             self.model_training_params = {
                                                 'layers': layer,
                                                 'ticker': ticker,
@@ -305,7 +313,9 @@ class ModelTrainer:
                                                 'batch_size': self.training_batch_size,
                                                 # 'num_of_layers': 2,
                                             }
-                                            self.model, self.test_accuracy, self.history = self.train_model()
+
+                                            # Train the model based on the current parameters combination - will set -> self.model, self.test_accuracy, self.history
+                                            self.train_model()
 
                                             if self.test_accuracy != None:
                                                 if float(self.test_accuracy) > acc_saving_threshold:
