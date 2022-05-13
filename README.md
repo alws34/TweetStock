@@ -23,7 +23,7 @@ To achieve that, we developed an app that includes:<br>
 ### :hammer_and_wrench: Languages, Tools, Technologies & Environments used in this project :
 
 <div>
-  <img src="https://img.icons8.com/color/30/c-sharp-logo.png" title="C#" **alt="C#" width="40" height="40"/>
+<img src="https://img.icons8.com/color/30/c-sharp-logo.png" title="C#" **alt="C#" width="40" height="40"/>
 <img src="https://img.icons8.com/color/30/python.png" title="Python" **alt="Python" width="40" height="40"/>
 <img src="https://img.icons8.com/color/30/asp.png" title="ASP .NET" **alt="ASP .NET" width="40" height="40"/>
 <img src="https://img.icons8.com/color/30/rest-api.png" title="REST API" **alt="REST API" width="40" height="40"/>

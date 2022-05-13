@@ -1,25 +1,12 @@
-from datetime import datetime, timedelta
-import csv
-from itertools import combinations
 import os
-import sys
-import math
-import json
-
-from pyparsing import NoMatch
-import tensorflow as tf
+#import tensorflow as tf
 import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-import re
-from tensorflow import keras
-from keras import models, layers
-from keras.datasets import mnist
-from tensorflow.keras.utils import to_categorical
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from gc import collect
 import Helper
 import DataHandler
+from pandas import read_csv as pd_read_csv
+from tensorflow import convert_to_tensor as ctt
+from keras import models, layers
+from tensorflow.keras.utils import to_categorical
 
 
 class ModelTrainer:
@@ -54,15 +41,15 @@ class ModelTrainer:
         self.training_batch_size = 8
         self.training_output_dims = 2
         self.model_training_params = {
-            'layers': None,
-            'ticker': None,
-            'features': None,
-            'activation_all': None,
-            'activation_last': None,
-            'loss_func': None,
-            'optimizer': None,
-            'n_past': None,  # num days from the past to predict based on
-            'epochs': None,
+            'layers': [[2]],
+            'ticker': ['TSLA'],
+            'features': self.feature_set1,
+            'activation_all': ['relu'],
+            'activation_last': ['softmax'],
+            'loss_func': ['binary_crossentropy'],
+            'optimizer': ['rmsprop'],
+            'n_past': [1],  # num days from the past to predict based on
+            'epochs': [2],
             'output_dim': self.training_output_dims,
             'batch_size': self.training_batch_size,
             # 'num_of_layers': 2,
@@ -92,15 +79,15 @@ class ModelTrainer:
     def init_paths(self):
         user_paths = Helper.get_user_data_paths(self.user)
         users_csv_name, stocks_csv_name, tweets_csv_name = 'users_with_eng_v5(with_replies).csv', 'stocks_2019.csv', 'tweets_2019.csv'
-        users_path = user_paths['users_path'] + users_csv_name
-        stocks_2019_path = user_paths['stocks_2019_path'] + stocks_csv_name
-        tweets_2019_path = user_paths['tweets_2019_path'] + tweets_csv_name
+        users_path = f"{user_paths['users_path']}{users_csv_name}"
+        stocks_2019_path = f"{user_paths['users_path']}{stocks_csv_name}"
+        tweets_2019_path = f"{user_paths['users_path']}{tweets_csv_name}"
         return {'users_path': users_path, 'stocks_path': stocks_2019_path, 'tweets_path': tweets_2019_path}
 
     def read_dfs_from_paths(self):
         csv_paths = self.init_paths()
-        tweets_df, users_df, stocks_df = pd.read_csv(csv_paths['tweets_path']), pd.read_csv(
-            csv_paths['users_path']), pd.read_csv(csv_paths['stocks_path'])
+        tweets_df, users_df, stocks_df = pd_read_csv(csv_paths['tweets_path']), pd_read_csv(
+            csv_paths['users_path']), pd_read_csv(csv_paths['stocks_path'])
         return tweets_df, users_df, stocks_df
 
     def init_stocks_df(self, stocks_df):
@@ -159,8 +146,6 @@ class ModelTrainer:
         plt.clf()
         acc = self.history.history['accuracy']
         val_acc = self.history.history['val_accuracy']
-        # loss = self.history.history['loss']
-        # val_loss = self.history.history['val_loss']
 
         epochs = range(1, len(acc) + 1)
 
@@ -173,90 +158,87 @@ class ModelTrainer:
         plt.savefig(f'{self.saving_path}{self.model_name}_graph.png')
 
     def save_params(self):
-        with open(f'{self.saving_path}{self.model_name}_params.csv', 'w') as f:
-            for key in self.model_training_params.keys():
-                f.write("%s,%s\n" % (key, self.model_training_params[key]))
+        Helper.save_dict_to_csv(self.model_training_params, self.saving_path, "".join(
+            self.model_name, '_params'))
 
-    def get_dnn_training_df(self):
-        model_params = self.model_training_params
+    def get_dnn_training_df(self, model_params):
         dnn_df = self.initialized_df[model_params['features']].copy()
         dnn_df = dnn_df[dnn_df['ticker_symbol'] == model_params['ticker']]
         return dnn_df.drop(columns=['ticker_symbol'])
 
+    def create_sequences(self, df, rows_at_a_time, target):
+        return DataHandler.mt_create_sequence(df, rows_at_a_time, target)
+
+    def get_tensor_values(self, df):
+        return ctt.convert_to_tensor(df, dtype=ctt.float32)
+
+    def reshape_sequence(self, sequence):
+        '''Convert 3D array to 2D array
+        E.G. shape = (5,6,7) ==> (5,6*7) = (5,42)
+        '''
+        return sequence.reshape(len(sequence), sequence.shape[1]*sequence.shape[2])
+
     def train_model(self):
         '''Generates model according to inserted params'''
-        model_params = self.model_training_params
-        dnn_df = self.get_dnn_training_df()
+        n_past = self.model_training_params['n_past']
+        target = 'price_difference'
 
-        scaled_dnn_df = DataHandler.mt_scale_data(dnn_df)
-        scaled_dnn_df = scaled_dnn_df.drop(columns=['Date'])
+        #----SCALE DATA----#
+        scaled_dnn_df = DataHandler.mt_scale_data(
+            self.get_dnn_training_df(self.model_training_params)).drop(columns=['Date'])
 
-        # train_data,validation_data,test_data = split_data(dnn_df,version=1)
+        #----SPLIT DATA----#
         train_data, validation_data, test_data = DataHandler.mt_split_data(
             scaled_dnn_df, version=2)
 
-        # train_data.shape, test_data.shape
+        #----CREATE SEQUENCES----#
+        train_seq, train_label = self.create_sequences(
+            train_data, n_past, target)
 
-        n_past = model_params['n_past']
-        target = 'price_difference'
-        train_seq, train_label = DataHandler.mt_create_sequence(
-            train_data, rows_at_a_time=n_past, target=target)
-        validation_seq, validation_label = DataHandler.mt_create_sequence(
-            validation_data, rows_at_a_time=n_past, target=target)
-        test_seq, test_label = DataHandler.mt_create_sequence(
-            test_data, rows_at_a_time=n_past, target=target)
+        validation_seq, validation_label = self.create_sequences(
+            validation_data, n_past, target)
 
-        output_dims = model_params['output_dim']
+        test_seq, test_label = self.create_sequences(test_data, n_past, target)
 
-        actv_func = model_params['activation_all']
-
+        #----INITIALIZE NETWORK----#
         network = models.Sequential()
-        # network.add(layers.Dense(128, activation=actv_func, input_shape=(train_seq.shape[2] * train_seq.shape[1],)))
-        for units in model_params['layers']:
-            network.add(layers.Dense(units, activation=actv_func, input_shape=(
-                train_seq.shape[2] * train_seq.shape[1],)))
-        # network.add(layers.Dense(16, activation=actv_func, input_shape=(
-        #     train_seq.shape[2] * train_seq.shape[1],)))
+
+        for units in self.model_training_params['layers']:
+            network.add(layers.Dense(units, activation=self.model_training_params['activation_all'], input_shape=(
+                train_seq.shape[2] * train_seq.shape[1])))
 
         network.add(layers.Dense(
-            output_dims, activation=model_params['activation_last']))
+            self.model_training_params['output_dim'], activation=self.model_training_params['activation_last']))
 
-        network.compile(optimizer=model_params['optimizer'],
-                        loss=model_params['loss_func'], metrics=['accuracy'])
+        network.compile(optimizer=self.model_training_params['optimizer'],
+                        loss=self.model_training_params['loss_func'], metrics=['accuracy'])
 
-        # scaler = MinMaxScaler()
-        train_seq = train_seq.reshape(
-            (len(train_seq), train_seq.shape[2] * train_seq.shape[1]))
-        # train_seq = scaler.fit_transform(train_seq)
-        validation_seq = validation_seq.reshape(
-            (len(validation_seq), validation_seq.shape[2] * validation_seq.shape[1]))
-        # validation_seq = scaler.fit_transform(validation_seq)
-        test_seq = test_seq.reshape(
-            (len(test_seq), test_seq.shape[2] * test_seq.shape[1]))
-        # test_seq = scaler.fit_transform(test_seq)
+        #----RESHAPE SEQUENCES----#
+        train_seq, validation_seq, test_seq = self.reshape_sequence(
+            train_seq), self.reshape_sequence(validation_seq), self.reshape_sequence(test_seq)
 
-        train_seq = tf.convert_to_tensor(train_seq, dtype=tf.float32)
-        validation_seq = tf.convert_to_tensor(validation_seq, dtype=tf.float32)
-        test_seq = tf.convert_to_tensor(test_seq, dtype=tf.float32)
+        #----GET TENSOR VALUES----#
+        train_seq, validation_seq, test_seq = self.get_tensor_values(
+            train_seq), self.get_tensor_values(validation_seq), self.get_tensor_values(test_seq)
 
-        train_label = tf.convert_to_tensor(
-            to_categorical(train_label), dtype=tf.float32)
-        validation_label = tf.convert_to_tensor(
-            to_categorical(validation_label), dtype=tf.float32)
-        test_label = tf.convert_to_tensor(
-            to_categorical(test_label), dtype=tf.float32)
+        train_label, validation_label, test_label = self.get_tensor_values(to_categorical(train_label)), self.get_tensor_values(
+            to_categorical(validation_label)), self.get_tensor_values(to_categorical(test_label))
 
+        #----TRAIN THE MODEL----#
         try:
-            history = network.fit(train_seq, train_label, epochs=model_params['epochs'], batch_size=model_params['batch_size'], validation_data=(
+            history = network.fit(train_seq, train_label, epochs=self.model_training_params['epochs'], batch_size=self.model_training_params['batch_size'], validation_data=(
                 validation_seq, validation_label))
-        except Exception:
+        except Exception as e:
+            Helper.write_to_log(f'{e}')
             return None, None, None
 
+        #----MODEL EVALUATION----#
         test_loss, test_acc = network.evaluate(test_seq, test_label)
         test_acc = round(test_acc, 7)
+
         Helper.clear_console(f'Acc = {test_acc}')
+
         self.model, self.test_accuracy, self.history = network, test_acc, history
-        return network, test_acc, history
 
     def set_saving_path(self, path):
         if path != None:
@@ -329,10 +311,12 @@ class ModelTrainer:
 
 #---------- MAIN -----------#
 if __name__ == '__main__':
-    # availables: 'alon' , 'guy', 'hadar'
-    user = 'alon'
+    # availables: 'alon' , 'guy', 'hadar', 'pi'
+    delimiter, prefix = Helper.get_prefix_path()
+    user = 'pi'
     mt = ModelTrainer(user=user)
 
     try_num = 6
-    save_path = f"D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\{try_num}\\"
-    mt.run_auto_training(acc_saving_threshold=0.55, saving_path=save_path)
+    save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_num}{delimiter}"
+    #mt.run_auto_training(acc_saving_threshold=0.55, saving_path=save_path)
+    mt.train_model()

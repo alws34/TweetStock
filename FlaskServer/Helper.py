@@ -1,26 +1,18 @@
-import os
+from os import system, name as os_name, getcwd
 from datetime import datetime as dt
 
 
 def clear_console(msg=''):
-    os.system('cls')
+    system('cls')
     print(msg, 'At:', get_date_time_stringify(
         '%d-%m-%Y at %H:%M:%S'))
 
 
-def get_OS_type():
-    if os.name == 'nt':  # windows
-        return "windows"
-    elif os.name == 'posix':  # unix
-        return "unix"
-
-
 def get_prefix_path():
-    os_type = get_OS_type()
-    if os_type == "windows":
+    if os_name == 'nt':
         delimiter = '\\'
-        prefix = f'{os.getcwd()}\\FlaskServer\\'
-    elif os_type == "unix":
+        prefix = f'{getcwd()}\\FlaskServer\\'
+    elif os_name == 'posix':
         delimiter = '/'
         prefix = '/home/pi/FinalProject/FlaskServer/'
 
@@ -38,10 +30,9 @@ def get_date_time_stringify(self, format="%d_%m_%Y_%H"):
 def get_ping_command(self, how_many_pings='1', host='1.1.1.1'):
 
     def get_var():
-        os_type = self.get_OS_type()
-        if os_type == "windows":
+        if os_name == 'nt':
             return'n'
-        elif os_type == "unix":
+        elif os_name == 'posix':
             return 'c'
 
     return f'ping -{get_var()} {how_many_pings} {host}'
@@ -83,28 +74,33 @@ def get_models():
 
 
 def get_user_data_paths(user):
-    if user is None:
-        return None
+    delimiter, prefix = get_prefix_path()
     paths = {
-        'guy': {'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',
-                'stocks_2019_path': "/content/drive/MyDrive/Final Project/Data/From the Web/StockMarketData/",
-                'tweets_2019_path': "/content/drive/MyDrive/Final Project/Data/From the Web/TweetsAboutTopCompanies/",
-                'from_the_web': "/content/drive/MyDrive/Final Project/Data/From the Web",
-                'Model_file_path': ''
-                },
+        'guy': {
+            'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',
+            'Networks_Save_Path': ''
+        },
         'alon': {
             'users_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\Self Collected\\",
-            'stocks_2019_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\StockMarketData\\",
-            'tweets_2019_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\TweetsAboutTopCompanies\\",
-            'from_the_web': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\From the Web\\",
-            'Model_file_path': ''
+            'user_path2': 'D:\\Google Drive\\Alon\\לימודים\\Final Project\\Data\\Self Collected\\',
+            'Networks_Save_Path': 'D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\'
         },
-        'hadar': {'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',
-                  'stocks_2019_path': "/content/drive/MyDrive/Final Project/Data/From the Web/StockMarketData/",
-                  'tweets_2019_path': "/content/drive/MyDrive/Final Project/Data/From the Web/TweetsAboutTopCompanies/",
-                  'from_the_web': "/content/drive/MyDrive/Final Project/Data/From the Web",
-                  'Model_file_path': ''
-                  }
+        'pi': {
+            'users_path': f"{prefix}Data/CSVs/Initial_Data/",
+            'Networks_Save_Path': f'{prefix}Data/Networks/'
+        },
+        'hadar': {
+            'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',
+            'Networks_Save_Path': ''
+        }
     }
-    return paths[user]
 
+    if user in paths.keys():
+        return paths[user]
+    return None
+
+
+def save_dict_to_csv(dict, save_path, file_name, mode='w'):
+    with open(f'{save_path}{file_name}.csv', mode) as f:
+        for key in dict.keys():
+            f.write("%s,%s\n" % (key, dict[key]))

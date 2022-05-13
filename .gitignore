@@ -346,3 +346,6 @@ Tensorflow/*.whl
 env/*
 *.img
 FlaskServer/CONFIGS/*
+FlaskServer/Data/CSVs/Initial_Data/stocks_2019.csv
+FlaskServer/Data/CSVs/Initial_Data/tweets_2019.csv
+FlaskServer/Data/CSVs/Initial_Data/users_with_eng_v5(with_replies).csv

@@ -1,7 +1,8 @@
-import pandas as pd
-import numpy as np
-import tensorflow as tf
-import math
+#import pandas as pd
+from pandas import DataFrame as pd_DataFrame, merge as pd_merge, to_datetime as pd_to_datetime
+from numpy import array as np_array, split as np_split
+from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
+from math import log, inf
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import Helper
 '''
@@ -48,12 +49,15 @@ def mt_scale_data(df, target='price_difference', scaling=SCALING):
                     col) else date[1][col]
                 print("@TweetStockModel/scale_df()/to_append=", to_append)
                 dates_dict[col].append(scaler.fit_transform(
-                    np.array(to_append).reshape(-1, 1)).mean())
+                    np_array(to_append).reshape(-1, 1)).mean())
 
-    return pd.DataFrame.from_dict(dates_dict)
+    return pd_DataFrame.from_dict(dates_dict)
 
 
-def mt_split_data(dnn_df, version=1):
+def mt_split_data(dnn_df, version=2):
+    '''
+
+    '''
     if version == 1:
         testing_size = 50
         validation_size = 50
@@ -62,33 +66,35 @@ def mt_split_data(dnn_df, version=1):
         train_data = dnn_df[:training_size]
         validation_data = dnn_df[training_size:training_size+validation_size]
         test_data = dnn_df[training_size+validation_size:]
+
     elif version == 2:
         validation_size = 50
         testing_size = 50
-        train_data, validation_data, test_data = np.split(dnn_df.sample(frac=1, random_state=42), [
+        train_data, validation_data, test_data = np_split(dnn_df.sample(frac=1, random_state=42), [
             int(len(dnn_df)-testing_size-validation_size), int(len(dnn_df)-testing_size)])
+    print('DATA HANDLER: ', type(train_data))
     return train_data, validation_data, test_data
 
 
-def mt_create_sequence(dataset, target, rows_at_a_time=N_PAST):
-    sequences = []
-    labels = []
+def mt_create_sequence(dataset, target, num_of_rows=N_PAST):
+    '''Returns np array'''
+    sequences = labels = []
     start_idx = 0
     if target:
         features_df = dataset.drop(columns=target)
         labels_df = dataset[[target]]
-        # Selecting 50 rows at a time
-        for stop_idx in range(rows_at_a_time, len(dataset)):
+        # Selecting "num_of_rows"
+        for stop_idx in range(num_of_rows, len(dataset)):
             sequences.append(features_df.iloc[start_idx:stop_idx])
             labels.append(labels_df.iloc[stop_idx][0])
             start_idx += 1
     else:
-        # Selecting 50 rows at a time
-        for stop_idx in range(rows_at_a_time, len(dataset)):
+        # Selecting "num_of_rows"
+        for stop_idx in range(num_of_rows, len(dataset)):
             sequences.append(dataset.iloc[start_idx:stop_idx])
             labels.append(dataset.iloc[stop_idx])
             start_idx += 1
-    return (np.array(sequences), np.array(labels))
+    return (np_array(sequences), np_array(labels))
 
 
 def mt_get_price_diff(stocks_df):
@@ -133,7 +139,7 @@ def mt_filter_users(df, follower_threshold=150):
             print('Problem getting eng_score at index', i)
 
     for i in range(len(df)):
-        if df['eng_score'][i] == math.inf or df['followers_count'][i] < follower_threshold:
+        if df['eng_score'][i] == inf or df['followers_count'][i] < follower_threshold:
             to_remove.append(i)
 
     df.drop(to_remove, inplace=True)
@@ -154,7 +160,7 @@ def mt_get_eng_score(users_df, include_followers=True, include_replies=False):
         followers = df['followers_count'][i]
 
         new_replies = replies if include_replies else 0
-        new_followers = math.log(
+        new_followers = log(
             followers, 2) if include_followers else 1
         df['eng_score'][i] = (
             (rts+likes+new_replies)/total_tweets)/new_followers
@@ -186,15 +192,15 @@ def mt_filter_tweets(tweets_df, tweets_stats_threshold=25):
 
 
 def mt_get_merged(tweets_df, users_df, stocks_df, exclude_TSLA=False):
-    ''' Get the merged tweets users and stocks dataframe - returns the merged df '''
+    ''' Get the merged tweets users and stocks pd_DataFrame - returns the merged df '''
     print("---get_merged----")
     # --> merge stocks_2019 with tweets_2019 by ticker and date
-    temp_merged_df = pd.merge(stocks_df, tweets_df, on=[
+    temp_merged_df = pd_merge(stocks_df, tweets_df, on=[
         'Date', 'ticker_symbol'], how='inner')
     # --> and users to it
     temp_users = users_df.copy()
     temp_users.rename(columns={'screen_name': 'writer'}, inplace=True)
-    merged_df = pd.merge(temp_merged_df, temp_users,
+    merged_df = pd_merge(temp_merged_df, temp_users,
                          on=['writer'], how='inner')
     if exclude_TSLA:
         print('with TSLA', len(merged_df))
@@ -208,17 +214,17 @@ def mt_get_merged(tweets_df, users_df, stocks_df, exclude_TSLA=False):
 
 
 def sort_df_by_dates(df, date_col_name='Date', format='%d/%m/%Y'):
-    df[date_col_name] = pd.to_datetime(df[date_col_name], format=format)
+    df[date_col_name] = pd_to_datetime(df[date_col_name], format=format)
     return df.sort_values(by=date_col_name).reset_index(drop=True)
 
 
 #------ TweetStockModel.py -------#
 
 def tsm_create_sequence(dataset):
-    return np.array(dataset)
+    return np_array(dataset)
 
 
-def tsm_get_scale_and_mean(df,feature_set, n_past=N_PAST, scaling=SCALING):
+def tsm_get_scale_and_mean(df, feature_set, n_past=N_PAST, scaling=SCALING):
     def is_scalable_feature(f):
         return f in feature_set or f == 's_compound'
 
@@ -235,8 +241,8 @@ def tsm_get_scale_and_mean(df,feature_set, n_past=N_PAST, scaling=SCALING):
                         col) else df[col]
                 scaler = MinMaxScaler() if scaling == 'min_max' else StandardScaler()
                 df_dict[col].append(scaler.fit_transform(
-                    np.array(f).reshape(-1, 1)).mean())
-        return pd.DataFrame.from_dict(df_dict)
+                    np_array(f).reshape(-1, 1)).mean())
+        return pd_DataFrame.from_dict(df_dict)
     else:
         return "N_past is not 1 @ get_scale_and_mean()"
 
@@ -252,7 +258,7 @@ def tsm_twitter_dict_res_to_df(data):
         print('twitter_dict_res_to_df()', err)
         return None
     # print(temp)
-    return pd.DataFrame.from_dict(temp)
+    return pd_DataFrame.from_dict(temp)
 
 
 def tsm_filter_tweets(tweets, threshold=MIN_TWEET_STATS_SUM):
@@ -274,7 +280,7 @@ def tsm_filter_tweets(tweets, threshold=MIN_TWEET_STATS_SUM):
 
 def tsm_get_single_user_eng_score(user_tweets, user_followers):
     u_tweets = user_tweets
-    u_log_n_followers = math.log(user_followers, 2)
+    u_log_n_followers = log(user_followers, 2)
     u_n_tweets, u_n_rts, u_n_replies, u_n_likes = 0, 0, 0, 0
     for u_tweet in u_tweets:
         u_n_rts += u_tweet['public_metrics']['retweet_count']
@@ -283,9 +289,9 @@ def tsm_get_single_user_eng_score(user_tweets, user_followers):
         u_n_tweets += 1
     #print(u_n_tweets, u_n_rts, u_n_replies, u_n_likes, u_log_n_followers)
     eng = 0
-    if math.log(u_log_n_followers, 2) > 0 and u_n_tweets > 0:
+    if log(u_log_n_followers, 2) > 0 and u_n_tweets > 0:
         eng = (u_n_rts + u_n_replies + u_n_likes) / \
-            math.log(u_log_n_followers, 2)/u_n_tweets
+            log(u_log_n_followers, 2)/u_n_tweets
     return eng
 
 
@@ -304,7 +310,7 @@ def tsm_filter_users(tweets, threshold=MIN_USER_FOLLOWERS):
 
 def tsm_prep_data(df, feature_set):
     # 1 Select features
-    df = tsm_get_scale_and_mean(df,feature_set)
+    df = tsm_get_scale_and_mean(df, feature_set)
     df = df[feature_set]
 
     # 2 Get df mean
@@ -322,7 +328,7 @@ def tsm_prep_data(df, feature_set):
     #scaled_test_seq = scale_seq(test_seq)
 
     # Return preped data
-    return tf.convert_to_tensor(test_seq, dtype=tf.float32), df
+    return ctt(test_seq, dtype=tf_float32), df
 
 
 def tsm_get_tweets_table_dict_result(tweets_df):
@@ -351,4 +357,4 @@ def tsm_get_pred_table_dict_result(prepared_df, prediction, ticker):
         res_dict[col] = []
         for val in prepared_df[col]:
             res_dict[col].append(val)
-    return pd.DataFrame.from_dict(res_dict).to_dict(orient='records')
+    return pd_DataFrame.from_dict(res_dict).to_dict(orient='records')
