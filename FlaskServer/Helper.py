@@ -1,5 +1,10 @@
-from os import system, name as os_name, getcwd
+from os import system, name as os_name, getcwd, path as os_path, mkdir
 from datetime import datetime as dt
+
+
+def create_dir(path):
+    if not os_path.exists(path):
+        mkdir(path)
 
 
 def clear_console(msg=''):

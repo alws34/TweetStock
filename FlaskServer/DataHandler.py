@@ -72,7 +72,6 @@ def mt_split_data(dnn_df, version=2):
         testing_size = 50
         train_data, validation_data, test_data = np_split(dnn_df.sample(frac=1, random_state=42), [
             int(len(dnn_df)-testing_size-validation_size), int(len(dnn_df)-testing_size)])
-    print('DATA HANDLER: ', type(train_data))
     return train_data, validation_data, test_data
 
 

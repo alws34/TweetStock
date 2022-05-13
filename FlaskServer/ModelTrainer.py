@@ -38,12 +38,15 @@ class ModelTrainer:
         Will be used inside the model in order to iterate 
         over every parameter combination.
         """
+        # uncomment for debugging
+        self.init_model_features()
+
         self.training_batch_size = 8
         self.training_output_dims = 2
         self.model_training_params = {
             'layers': [[2]],
             'ticker': ['TSLA'],
-            'features': self.feature_set1,
+            'features': None,
             'activation_all': ['relu'],
             'activation_last': ['softmax'],
             'loss_func': ['binary_crossentropy'],
@@ -273,15 +276,15 @@ class ModelTrainer:
         combinations = self.get_training_params_combinations()
 
         model_id = 1
-        for ticker in combinations.tickers:
-            for feature_set in combinations.feature_sets:
-                for actv_func_all in combinations.actv_funcs_all:
-                    for actv_func_last in combinations.actv_funcs_last:
-                        for loss_func in combinations.loss_funcs:
-                            for optimizer in combinations.optimizers:
-                                for n_past in combinations.n_pasts:
-                                    for n_epoch in combinations.n_epochs:
-                                        for layer in combinations.layers:
+        for ticker in combinations['tickers']:
+            for feature_set in combinations['feature_sets']:
+                for actv_func_all in combinations['actv_funcs_all']:
+                    for actv_func_last in combinations['actv_funcs_last']:
+                        for loss_func in combinations['loss_funcs']:
+                            for optimizer in combinations['loss_funcs']:
+                                for n_past in combinations['n_pasts']:
+                                    for n_epoch in combinations['n_epochs']:
+                                        for layer in combinations['layers']:
                                             self.model_training_params = {
                                                 'layers': layer,
                                                 'ticker': ticker,
@@ -316,7 +319,8 @@ if __name__ == '__main__':
     user = 'pi'
     mt = ModelTrainer(user=user)
 
-    try_num = 6
+    try_num = 'test'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_num}{delimiter}"
-    #mt.run_auto_training(acc_saving_threshold=0.55, saving_path=save_path)
-    mt.train_model()
+    Helper.create_dir(save_path)
+    mt.run_auto_training(acc_saving_threshold=0.55, saving_path=save_path)
+    # mt.train_model()
