@@ -1,4 +1,5 @@
 from os import popen
+import os
 from psutil import virtual_memory, cpu_percent
 from time import sleep
 from datetime import datetime as dt
@@ -9,6 +10,18 @@ def GetStats():
         return f'{measure_temp()}{measure_ram_percent()}{measure_cpu()}'.replace("temp=", "")
     except Exception as e:
         return ""
+
+
+def disk_usage(path='/'):
+    """
+    Return disk usage statistics given path
+    default path is the root folder '/'
+    """
+    st = os.statvfs(path)
+    free = round((st.f_bavail * st.f_frsize)/1024/1024/1024, 2)
+    total = round((st.f_blocks * st.f_frsize)/1024/1024/1024, 2)
+    used = round(((st.f_blocks - st.f_bfree) * st.f_frsize)/1024/1024/1024, 2)
+    return f'Disk Usage:\n\tTotal: {total} GB\n\tUsed: {used} GB\n\tFree: {free} GB'
 
 
 def measure_temp():
@@ -54,7 +67,7 @@ if __name__ == '__main__':
             highest_ram = current_ram
 
         print(
-            f'----------\nIteration {i}:\ntime: {GetDateTimeStringify()}\n{GetStats()}\nHighest ram: {highest_ram}%')
+            f'----------\nIteration {i}:\ntime: {GetDateTimeStringify()}\n{GetStats()}\nHighest ram: {highest_ram}%\n{disk_usage()}')
 
         i += 1
         sleep(1)
