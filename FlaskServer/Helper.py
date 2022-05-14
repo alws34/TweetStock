@@ -1,5 +1,6 @@
 from os import system, name as os_name, getcwd, path as os_path, mkdir
 from datetime import datetime as dt
+#from pandas import DataFrame
 
 
 def create_dir(path):
@@ -100,12 +101,17 @@ def get_user_data_paths(user):
         }
     }
 
-    if user in paths.keys():
-        return paths[user]
-    return None
+    if not user in paths.keys():
+        write_to_log(f'Invalid User Provided: {user}')
+        return None
+    return paths[user]
 
 
 def save_dict_to_csv(dict, save_path, file_name, mode='w'):
     with open(f'{save_path}{file_name}.csv', mode) as f:
         for key in dict.keys():
             f.write("%s,%s\n" % (key, dict[key]))
+
+
+def save_df_to_csv():
+    pass

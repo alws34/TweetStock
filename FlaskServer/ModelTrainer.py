@@ -170,10 +170,10 @@ class ModelTrainer:
         return dnn_df.drop(columns=['ticker_symbol'])
 
     def create_sequences(self, df, rows_at_a_time, target):
-        return DataHandler.mt_create_sequence(df, rows_at_a_time, target)
+        return DataHandler.mt_create_sequence(dataset=df, target=target, num_of_rows=rows_at_a_time)
 
     def get_tensor_values(self, df):
-        return ctt.convert_to_tensor(df, dtype=ctt.float32)
+        return ctt(df, dtype=ctt.float32)
 
     def reshape_sequence(self, sequence):
         '''Convert 3D array to 2D array
@@ -264,6 +264,12 @@ class ModelTrainer:
         }
         return combinations
 
+    def save(self):
+        Helper.create_dir(self.saving_path)
+        self.save_model()
+        self.save_graph()
+        self.save_params()
+
     def run_auto_training(self, saving_path, acc_saving_threshold=0.55):
         '''
         Runs all possible models
@@ -306,9 +312,7 @@ class ModelTrainer:
                                             if self.test_accuracy != None:
                                                 if float(self.test_accuracy) > acc_saving_threshold:
                                                     self.model_name = f"{ticker}_acc_{round(self.test_accuracy, 3)}_npast_{n_past}_epoch_{n_epoch}_opt_{optimizer}_num_{model_id}"
-                                                    self.save_model()
-                                                    self.save_graph()
-                                                    self.save_params()
+                                                    self.save()
                                                     model_id += 1
 
 
@@ -317,10 +321,9 @@ if __name__ == '__main__':
     # availables: 'alon' , 'guy', 'hadar', 'pi'
     delimiter, prefix = Helper.get_prefix_path()
     user = 'pi'
-    mt = ModelTrainer(user=user)
-
     try_num = 'test'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_num}{delimiter}"
-    Helper.create_dir(save_path)
+
+    mt = ModelTrainer(user=user)
     mt.run_auto_training(acc_saving_threshold=0.55, saving_path=save_path)
     # mt.train_model()
