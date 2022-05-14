@@ -24,6 +24,9 @@ SCALING = 'min_max'
 #------ ModelTrainer.py -------#
 
 def mt_scale_data(df, target='price_difference', scaling=SCALING):
+    """
+    Handles data scaling and aggregation (e.g. average) per day of the data
+    """
     def is_scalable_feature(feature):
         return feature != 'Date' and feature != target
 
@@ -47,7 +50,7 @@ def mt_scale_data(df, target='price_difference', scaling=SCALING):
 
                 to_append = date[1][col] * date[1]["Tweet_Sentiment"] if not is_sentiment_feature(
                     col) else date[1][col]
-                print("@TweetStockModel/scale_df()/to_append=", to_append)
+                #print("@TweetStockModel/scale_df()/to_append=", to_append)
                 dates_dict[col].append(scaler.fit_transform(
                     np_array(to_append).reshape(-1, 1)).mean())
 
@@ -77,7 +80,8 @@ def mt_split_data(dnn_df, version=2):
 
 def mt_create_sequence(dataset, target, num_of_rows=N_PAST):
     '''Returns np array'''
-    sequences = labels = []
+    sequences, labels = [], []
+
     start_idx = 0
     if target:
         features_df = dataset.drop(columns=target)
@@ -93,7 +97,7 @@ def mt_create_sequence(dataset, target, num_of_rows=N_PAST):
             sequences.append(dataset.iloc[start_idx:stop_idx])
             labels.append(dataset.iloc[stop_idx])
             start_idx += 1
-    return (np_array(sequences), np_array(labels))
+    return np_array(sequences, dtype='object'), np_array(labels, dtype='object')
 
 
 def mt_get_price_diff(stocks_df):

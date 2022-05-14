@@ -7,13 +7,27 @@ def create_dir(path):
     if not os_path.exists(path):
         mkdir(path)
 
+def write_to_log(msg):
+    with open(f'{get_prefix_path()[1]}/Logs/LOG_{get_date_time_stringify()}', 'a+', encoding='utf-8') as f:
+        f.write(msg)
 
 def clear_console(msg=''):
-    system('cls')
+    clear_cmd = 'cls' if os_name == 'nt' else 'clear' 
+    system(clear_cmd)
     print(msg, 'At:', get_date_time_stringify(
-        '%d-%m-%Y at %H:%M:%S'))
+        '%d-%m-%Y %H:%M:%S'))
+
+#------- Savings --------#
+def save_dict_to_csv(dict, save_path, file_name, mode='w'):
+    with open(f'{save_path}{file_name}.csv', mode) as f:
+        for key in dict.keys():
+            f.write("%s,%s\n" % (key, dict[key]))
 
 
+def save_df_to_csv(df, path, file_name):
+    df.to_csv(f'{path}{file_name}.csv')
+
+#------- Gets ---------#
 def get_prefix_path():
     if os_name == 'nt':
         delimiter = '\\'
@@ -42,11 +56,6 @@ def get_ping_command(self, how_many_pings='1', host='1.1.1.1'):
             return 'c'
 
     return f'ping -{get_var()} {how_many_pings} {host}'
-
-
-def write_to_log(msg):
-    with open(f'{get_prefix_path()[1]}/Logs/LOG_{get_date_time_stringify()}', 'a+', encoding='utf-8') as f:
-        f.write(msg)
 
 
 def get_models():
@@ -93,11 +102,12 @@ def get_user_data_paths(user):
         },
         'pi': {
             'users_path': f"{prefix}Data/CSVs/Initial_Data/",
-            'Networks_Save_Path': f'{prefix}Data/Networks/'
+            'Networks_Save_Path': f'{prefix}Data/Networks/',
+            'initialized_df_path': f'{prefix}Data/CSVs/initialized_df.csv'
         },
         'hadar': {
             'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',
-            'Networks_Save_Path': ''
+            'Networks_Save_Path': '',
         }
     }
 
@@ -107,11 +117,4 @@ def get_user_data_paths(user):
     return paths[user]
 
 
-def save_dict_to_csv(dict, save_path, file_name, mode='w'):
-    with open(f'{save_path}{file_name}.csv', mode) as f:
-        for key in dict.keys():
-            f.write("%s,%s\n" % (key, dict[key]))
 
-
-def save_df_to_csv():
-    pass

@@ -4,28 +4,36 @@ import matplotlib.pyplot as plt
 import Helper
 import DataHandler
 from pandas import read_csv as pd_read_csv
-from tensorflow import convert_to_tensor as ctt
+from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
 from keras import models, layers
 from tensorflow.keras.utils import to_categorical
 
 
 class ModelTrainer:
-    def __init__(self, user):
+    def __init__(self, user, saving_path):
         self.user = user
-        self.initialized_df = self.init_data()
-        self.init_model_training_params()
-        self.init_model_saving_params()
-        self.init_model_features()
+
+        self.initialized_df = self.get_initialized_df()
+        # self.save_df_to_csv(file_name='initialized_df')
+        self.init_model_params(saving_path)
 
     #------------ INITIALIZATION ----------------#
 
-    def init_model_saving_params(self):
+    def init_model_params(self, saving_path):
+        self.init_model_training_params()
+        self.init_model_saving_params(saving_path)
+
+    def init_model_saving_params(self, saving_path):
         """
         Model saving params - 
         Will be initialized later according to the trained model,
         its parameters and the saving path provided in @run_auto_training() method
         """
-        self.saving_path = None
+        if saving_path == None:
+            print("@ModelTrainer.py/init_saving_params() - path == None...\n")
+            return None
+        self.saving_path = saving_path
+
         self.model = None
         self.model_name = None
         self.model_history = None
@@ -38,24 +46,21 @@ class ModelTrainer:
         Will be used inside the model in order to iterate 
         over every parameter combination.
         """
-        # uncomment for debugging
-        self.init_model_features()
-
+        self.feature_set1, self.feature_set2 = self.init_model_features()
         self.training_batch_size = 8
         self.training_output_dims = 2
         self.model_training_params = {
-            'layers': [[2]],
-            'ticker': ['TSLA'],
-            'features': None,
-            'activation_all': ['relu'],
-            'activation_last': ['softmax'],
-            'loss_func': ['binary_crossentropy'],
-            'optimizer': ['rmsprop'],
-            'n_past': [1],  # num days from the past to predict based on
-            'epochs': [2],
+            'layers': [4],
+            'ticker': 'TSLA',
+            'features': self.feature_set1,
+            'activation_all': 'relu',
+            'activation_last': 'softmax',
+            'loss_func': 'binary_crossentropy',
+            'optimizer': 'rmsprop',
+            'n_past': 1,  # num days from the past to predict based on
+            'epochs': 2,
             'output_dim': self.training_output_dims,
             'batch_size': self.training_batch_size,
-            # 'num_of_layers': 2,
         }
 
     def init_model_features(self):
@@ -77,9 +82,9 @@ class ModelTrainer:
         user_features = ['User_Engagement']
         features = stock_features + tweet_features + user_features
         features2 = stock_features + tweet_features2 + user_features
-        self.feature_set1, self.feature_set2 = features, features2
+        return features, features2
 
-    def init_paths(self):
+    def init_df_paths(self):
         user_paths = Helper.get_user_data_paths(self.user)
         users_csv_name, stocks_csv_name, tweets_csv_name = 'users_with_eng_v5(with_replies).csv', 'stocks_2019.csv', 'tweets_2019.csv'
         users_path = f"{user_paths['users_path']}{users_csv_name}"
@@ -88,13 +93,13 @@ class ModelTrainer:
         return {'users_path': users_path, 'stocks_path': stocks_2019_path, 'tweets_path': tweets_2019_path}
 
     def read_dfs_from_paths(self):
-        csv_paths = self.init_paths()
+        csv_paths = self.init_df_paths()
         tweets_df, users_df, stocks_df = pd_read_csv(csv_paths['tweets_path']), pd_read_csv(
             csv_paths['users_path']), pd_read_csv(csv_paths['stocks_path'])
         return tweets_df, users_df, stocks_df
 
     def init_stocks_df(self, stocks_df):
-        print("----init_stocks---- (does nothing at the time)")
+        print("----init_stocks----")
         return DataHandler.mt_get_price_diff(stocks_df)
 
     def init_users_df(self, users_df):
@@ -135,13 +140,27 @@ class ModelTrainer:
                                          'Adjusted Close': 'Stock_Adj_Close',
                                          })
 
-    #---------- AUTOMATED TRAINING ---------#
+    def get_initialized_df(self):
+        '''
+        Helper.get_user_data_paths['initialized_df_path'] = None --> will train new initial merged_df
+        Helper.get_user_data_paths['initialized_df_path'] != None ---> will load from specified path
+        '''
+        user_paths = Helper.get_user_data_paths(self.user)
+        if user_paths is None:
+            return None
+        if 'initialized_df_path' in user_paths.keys():
+            return pd_read_csv(user_paths['initialized_df_path'])
+        else:
+            return self.init_data()
+
+    #---------- MODEL TRAINING ---------#
+
+    def save_df_to_csv(self, file_name):
+        Helper.save_df_to_csv(self.initialized_df,
+                              self.saving_path, file_name)
 
     def save_model(self):
         '''Save the generated model'''
-        if not os.path.exists(self.saving_path):
-            os.mkdir(self.saving_path)
-
         self.model.save(f'{self.saving_path}{self.model_name}.h5')
 
     def save_graph(self):
@@ -162,18 +181,33 @@ class ModelTrainer:
 
     def save_params(self):
         Helper.save_dict_to_csv(self.model_training_params, self.saving_path, "".join(
-            self.model_name, '_params'))
+            (str(self.model_name), '_params')))
 
-    def get_dnn_training_df(self, model_params):
-        dnn_df = self.initialized_df[model_params['features']].copy()
-        dnn_df = dnn_df[dnn_df['ticker_symbol'] == model_params['ticker']]
+    def save(self):
+        Helper.create_dir(self.saving_path)
+        self.save_model()
+        self.save_graph()
+        self.save_params()
+
+    def get_dnn_training_df(self):
+        """
+        Returns self.initialized_df copy to run DNN on,
+        Returned df uis based on currently chosen ticker
+        and model training feature set (likes, comments etc...)
+        """
+        feature_set, chosen_ticker = self.model_training_params[
+            'features'], self.model_training_params['ticker']
+        dnn_df = self.initialized_df[feature_set].copy()
+        dnn_df = dnn_df[dnn_df['ticker_symbol'] == chosen_ticker]
         return dnn_df.drop(columns=['ticker_symbol'])
 
     def create_sequences(self, df, rows_at_a_time, target):
-        return DataHandler.mt_create_sequence(dataset=df, target=target, num_of_rows=rows_at_a_time)
+        sequence, label = DataHandler.mt_create_sequence(
+            dataset=df, target=target, num_of_rows=rows_at_a_time)
+        return sequence, label
 
     def get_tensor_values(self, df):
-        return ctt(df, dtype=ctt.float32)
+        return ctt(df, dtype=tf_float32)
 
     def reshape_sequence(self, sequence):
         '''Convert 3D array to 2D array
@@ -188,7 +222,7 @@ class ModelTrainer:
 
         #----SCALE DATA----#
         scaled_dnn_df = DataHandler.mt_scale_data(
-            self.get_dnn_training_df(self.model_training_params)).drop(columns=['Date'])
+            self.get_dnn_training_df()).drop(columns=['Date'])
 
         #----SPLIT DATA----#
         train_data, validation_data, test_data = DataHandler.mt_split_data(
@@ -207,8 +241,9 @@ class ModelTrainer:
         network = models.Sequential()
 
         for units in self.model_training_params['layers']:
-            network.add(layers.Dense(units, activation=self.model_training_params['activation_all'], input_shape=(
-                train_seq.shape[2] * train_seq.shape[1])))
+            print("test")
+            network.add(layers.Dense(units=units, activation=self.model_training_params['activation_all'], input_shape=(
+                train_seq.shape[2] * train_seq.shape[1],)))
 
         network.add(layers.Dense(
             self.model_training_params['output_dim'], activation=self.model_training_params['activation_last']))
@@ -243,13 +278,7 @@ class ModelTrainer:
 
         self.model, self.test_accuracy, self.history = network, test_acc, history
 
-    def set_saving_path(self, path):
-        if path != None:
-            self.saving_path = path
-        else:
-            print("@ModelTrainer.py/set_saving_path() - path == None...\n")
-            return None
-
+    #------- AUTO TRAINING -------#
     def get_training_params_combinations(self):
         combinations = {
             'tickers': ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT'],
@@ -259,26 +288,16 @@ class ModelTrainer:
             'loss_funcs': ['binary_crossentropy', 'mean_squared_error'],
             'optimizers': ['rmsprop', 'adam'],
             'n_pasts': [1],  # , 2, 3]
-            'n_epochs': [4, 7, 10, 15, 20],  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-            'layers': [[4], [8], [16], [16, 8], [8, 4]]
+            'n_epochs': [5, 10, 15, 20],  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            'layer_sets': [[4], [8], [16], [16, 8], [8, 4]]
         }
         return combinations
 
-    def save(self):
-        Helper.create_dir(self.saving_path)
-        self.save_model()
-        self.save_graph()
-        self.save_params()
-
-    def run_auto_training(self, saving_path, acc_saving_threshold=0.55):
+    def run_auto_training(self, acc_saving_threshold=0.55):
         '''
         Runs all possible models
         runtime: ~13 hours
         '''
-        if self.set_saving_path(path=saving_path) == None:
-            print(
-                "ModelTrainer.py/run_auto_test() - missing argument - No saving_path provided...")
-
         combinations = self.get_training_params_combinations()
 
         model_id = 1
@@ -287,10 +306,10 @@ class ModelTrainer:
                 for actv_func_all in combinations['actv_funcs_all']:
                     for actv_func_last in combinations['actv_funcs_last']:
                         for loss_func in combinations['loss_funcs']:
-                            for optimizer in combinations['loss_funcs']:
+                            for optimizer in combinations['optimizers']:
                                 for n_past in combinations['n_pasts']:
                                     for n_epoch in combinations['n_epochs']:
-                                        for layer in combinations['layers']:
+                                        for layer in combinations['layer_sets']:
                                             self.model_training_params = {
                                                 'layers': layer,
                                                 'ticker': ticker,
@@ -303,7 +322,6 @@ class ModelTrainer:
                                                 'epochs': n_epoch,
                                                 'output_dim': self.training_output_dims,
                                                 'batch_size': self.training_batch_size,
-                                                # 'num_of_layers': 2,
                                             }
 
                                             # Train the model based on the current parameters combination - will set -> self.model, self.test_accuracy, self.history
@@ -322,8 +340,11 @@ if __name__ == '__main__':
     delimiter, prefix = Helper.get_prefix_path()
     user = 'pi'
     try_num = 'test'
+    inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_num}{delimiter}"
 
-    mt = ModelTrainer(user=user)
-    mt.run_auto_training(acc_saving_threshold=0.55, saving_path=save_path)
+    mt = ModelTrainer(user=user, saving_path=save_path,
+                      data_csv_path=inited_df_csv_path)
+    mt.run_auto_training(acc_saving_threshold=0.55)
     # mt.train_model()
+    # mt.save()
