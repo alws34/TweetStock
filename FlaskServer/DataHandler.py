@@ -59,7 +59,7 @@ def mt_scale_data(df, target='price_difference', scaling=SCALING):
     return pd_DataFrame.from_dict(dates_dict)
 
 
-def mt_split_data(np_array_sequence, np_array_labels):
+def mt_split_data(np_array_sequence, np_array_labels, random_state=1234):
     '''
     Returns randomly shuffled numpy_arrays 
     '''
@@ -67,9 +67,9 @@ def mt_split_data(np_array_sequence, np_array_labels):
     testing_size = 50
 
     train_seq, test_seq, train_labels, test_labels = train_test_split(
-        np_array_sequence, np_array_labels, test_size=testing_size/np_array_sequence.shape[0])
+        np_array_sequence, np_array_labels, test_size=testing_size/np_array_sequence.shape[0], random_state=random_state)
     train_seq, validation_seq, train_labels, validation_labels = train_test_split(
-        train_seq, train_labels, test_size=validation_size/train_seq.shape[0])
+        train_seq, train_labels, test_size=validation_size/train_seq.shape[0], random_state=random_state)
 
     # train_data, validation_data, test_data = np_split(dnn_df.sample(frac=1, random_state=42), [
     #     int(len(dnn_df)-testing_size-validation_size), int(len(dnn_df)-testing_size)])
