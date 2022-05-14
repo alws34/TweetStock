@@ -4,6 +4,8 @@ from numpy import array as np_array, split as np_split
 from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
 from math import log, inf
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.model_selection import train_test_split
+
 import Helper
 '''
 This class will be used to coordinate the work between 
@@ -57,25 +59,22 @@ def mt_scale_data(df, target='price_difference', scaling=SCALING):
     return pd_DataFrame.from_dict(dates_dict)
 
 
-def mt_split_data(dnn_df, version=2):
+def mt_split_data(np_array_sequence, np_array_labels):
     '''
-
+    Returns randomly shuffled numpy_arrays 
     '''
-    if version == 1:
-        testing_size = 50
-        validation_size = 50
-        training_size = len(dnn_df) - testing_size - validation_size
+    validation_size = 50
+    testing_size = 50
 
-        train_data = dnn_df[:training_size]
-        validation_data = dnn_df[training_size:training_size+validation_size]
-        test_data = dnn_df[training_size+validation_size:]
+    train_seq, test_seq, train_labels, test_labels = train_test_split(
+        np_array_sequence, np_array_labels, test_size=testing_size/np_array_sequence.shape[0])
+    train_seq, validation_seq, train_labels, validation_labels = train_test_split(
+        train_seq, train_labels, test_size=validation_size/train_seq.shape[0])
 
-    elif version == 2:
-        validation_size = 50
-        testing_size = 50
-        train_data, validation_data, test_data = np_split(dnn_df.sample(frac=1, random_state=42), [
-            int(len(dnn_df)-testing_size-validation_size), int(len(dnn_df)-testing_size)])
-    return train_data, validation_data, test_data
+    # train_data, validation_data, test_data = np_split(dnn_df.sample(frac=1, random_state=42), [
+    #     int(len(dnn_df)-testing_size-validation_size), int(len(dnn_df)-testing_size)])
+
+    return train_seq, train_labels,  validation_seq, validation_labels, test_seq, test_labels
 
 
 def mt_create_sequence(dataset, target, num_of_rows=N_PAST):

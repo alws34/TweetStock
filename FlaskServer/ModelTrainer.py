@@ -201,7 +201,7 @@ class ModelTrainer:
         dnn_df = dnn_df[dnn_df['ticker_symbol'] == chosen_ticker]
         return dnn_df.drop(columns=['ticker_symbol'])
 
-    def create_sequences(self, df, rows_at_a_time, target):
+    def create_sequence(self, df, rows_at_a_time, target):
         sequence, label = DataHandler.mt_create_sequence(
             dataset=df, target=target, num_of_rows=rows_at_a_time)
         return sequence, label
@@ -223,19 +223,28 @@ class ModelTrainer:
         #----SCALE DATA----#
         scaled_dnn_df = DataHandler.mt_scale_data(
             self.get_dnn_training_df()).drop(columns=['Date'])
+#----NEW-----#
+        sequence, labels = self.create_sequence(scaled_dnn_df, n_past, target)
+        train_seq, train_label,  validation_seq, validation_label, test_seq, test_label = DataHandler.mt_split_data(
+            sequence, labels)
+#----End NEW ----#
 
+
+#---OLD----#
         #----SPLIT DATA----#
-        train_data, validation_data, test_data = DataHandler.mt_split_data(
-            scaled_dnn_df, version=2)
+        # train_data, validation_data, test_data = DataHandler.mt_split_data(
+        #     scaled_dnn_df)
+        # print(type(train_data))
+        # #----CREATE SEQUENCES----#
+        # train_seq, train_label = self.create_sequence(
+        #     train_data, n_past, target)
+        # print(type(train_seq))
 
-        #----CREATE SEQUENCES----#
-        train_seq, train_label = self.create_sequences(
-            train_data, n_past, target)
+        # validation_seq, validation_label = self.create_sequence(
+        #     validation_data, n_past, target)
 
-        validation_seq, validation_label = self.create_sequences(
-            validation_data, n_past, target)
-
-        test_seq, test_label = self.create_sequences(test_data, n_past, target)
+        # test_seq, test_label = self.create_sequence(test_data, n_past, target)
+#----- End OLD ----#
 
         #----INITIALIZE NETWORK----#
         network = models.Sequential()
@@ -340,11 +349,10 @@ if __name__ == '__main__':
     delimiter, prefix = Helper.get_prefix_path()
     user = 'pi'
     try_num = 'test'
-    inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
+    #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_num}{delimiter}"
 
-    mt = ModelTrainer(user=user, saving_path=save_path,
-                      data_csv_path=inited_df_csv_path)
+    mt = ModelTrainer(user=user, saving_path=save_path)
     mt.run_auto_training(acc_saving_threshold=0.55)
-    # mt.train_model()
-    # mt.save()
+    #mt.train_model()
+    #mt.save()
