@@ -202,7 +202,7 @@ class ModelTrainer:
         return dnn_df.drop(columns=['ticker_symbol'])
 
     def create_sequence(self, df, rows_at_a_time, target):
-        sequence, label = DataHandler.mt_create_sequence(
+        sequence, label = DataHandler.create_sequence(
             dataset=df, target=target, num_of_rows=rows_at_a_time)
         return sequence, label
 
@@ -231,6 +231,7 @@ class ModelTrainer:
 
 
 #---OLD----#
+        """
         #----SPLIT DATA----#
         # train_data, validation_data, test_data = DataHandler.mt_split_data(
         #     scaled_dnn_df)
@@ -244,6 +245,7 @@ class ModelTrainer:
         #     validation_data, n_past, target)
 
         # test_seq, test_label = self.create_sequence(test_data, n_past, target)
+        """
 #----- End OLD ----#
 
         #----INITIALIZE NETWORK----#
@@ -354,5 +356,5 @@ if __name__ == '__main__':
 
     mt = ModelTrainer(user=user, saving_path=save_path)
     mt.run_auto_training(acc_saving_threshold=0.55)
-    #mt.train_model()
-    #mt.save()
+    # mt.train_model()
+    # mt.save()
