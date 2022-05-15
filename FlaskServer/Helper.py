@@ -7,17 +7,21 @@ def create_dir(path):
     if not os_path.exists(path):
         mkdir(path)
 
+
 def write_to_log(msg):
     with open(f'{get_prefix_path()[1]}/Logs/LOG_{get_date_time_stringify()}', 'a+', encoding='utf-8') as f:
         f.write(msg)
 
+
 def clear_console(msg=''):
-    clear_cmd = 'cls' if os_name == 'nt' else 'clear' 
+    clear_cmd = 'cls' if os_name == 'nt' else 'clear'
     system(clear_cmd)
     print(msg, 'At:', get_date_time_stringify(
-        '%d-%m-%Y %H:%M:%S'))
+        '%d/%m/%Y-%H:%M:%S'))
 
 #------- Savings --------#
+
+
 def save_dict_to_csv(dict, save_path, file_name, mode='w'):
     with open(f'{save_path}{file_name}.csv', mode) as f:
         for key in dict.keys():
@@ -28,6 +32,8 @@ def save_df_to_csv(df, path, file_name):
     df.to_csv(f'{path}{file_name}.csv')
 
 #------- Gets ---------#
+
+
 def get_prefix_path():
     if os_name == 'nt':
         delimiter = '\\'
@@ -115,6 +121,3 @@ def get_user_data_paths(user):
         write_to_log(f'Invalid User Provided: {user}')
         return None
     return paths[user]
-
-
-

@@ -1,25 +1,28 @@
 # import pandas as pd
+#from urllib.request import DataHandler
 from pandas import DataFrame as pd_DataFrame, merge as pd_merge, to_datetime as pd_to_datetime
 from numpy import array as np_array, split as np_split
 from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
 from math import log, inf
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
-
 import Helper
 '''
 This class will be used to coordinate the work between
 the ModelTrainer.py and TweetStockModel.py .
 It will contain every method which is used to handle data.
 '''
-TWITTER_VERSION = 2             # twitter version.
+
+
+'''
+# TWITTER_VERSION = 2             # twitter version.
+# MAX_TWEETS_RESULTS = 100        # max results for first tweets query.
+# MAX_USER_TWEETS_RESULT = 100    # max results for use engagement tweets
+'''
 # days on which the model was train to precict based on.
 N_PAST = 1
-MAX_TWEETS_RESULTS = 100        # max results for first tweets query.
-MAX_USER_TWEETS_RESULT = 100    # max results for use engagement tweets
 TSM_MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
 TSM_MIN_USER_FOLLOWERS = 100        # min user followers num to be included
-
 SCALING = 'min_max'
 
 
@@ -156,17 +159,26 @@ def mt_get_eng_score(users_df, include_followers=True, include_replies=False):
 #------ ModelTrainer.py - seperate -------#
 
 
-def mt_split_data(np_array_sequence, np_array_labels, random_state=1234):
+def mt_split_data(np_array_sequence, np_array_labels, train_random_state=4321, test_random_state=1234):
     '''
-    Returns randomly shuffled numpy_arrays
+    - Returns randomly shuffled numpy_arrays.
+    - Seperation between train_random_state seed and test_random_state seed
+      is used to give the option to shuffle {train_data} + {validation_data} with a random seed
+      and the {test_data} with a constant seed.
     '''
-    validation_size = 50
-    testing_size = 50
+    testing_size, validation_size = 50, 50
 
+    if len(np_array_sequence) < (testing_size + validation_size):
+        Helper.write_to_log(
+            f"DataHandler.py/mt_split_data: sequence is smaller than split sizes... {Helper.get_date_time_stringify(format='%d/%m/%Y-%H:%M:%S')}")
+        return None
+
+    # 1. split {data} to -> {train_data}, {test_data}; len({test_data}) == testing_size
     train_seq, test_seq, train_labels, test_labels = train_test_split(
-        np_array_sequence, np_array_labels, test_size=testing_size/np_array_sequence.shape[0], random_state=random_state)
+        np_array_sequence, np_array_labels, test_size=testing_size/np_array_sequence.shape[0], random_state=test_random_state)
+    # 2. split {train_data} to -> {train_data}, {validation_data}; len({validation_data}) == validation_size
     train_seq, validation_seq, train_labels, validation_labels = train_test_split(
-        train_seq, train_labels, test_size=validation_size/train_seq.shape[0], random_state=random_state)
+        train_seq, train_labels, test_size=validation_size/train_seq.shape[0], random_state=train_random_state)
 
     # train_data, validation_data, test_data = np_split(dnn_df.sample(frac=1, random_state=42), [
     #     int(len(dnn_df)-testing_size-validation_size), int(len(dnn_df)-testing_size)])

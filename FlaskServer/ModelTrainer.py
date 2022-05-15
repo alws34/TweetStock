@@ -7,6 +7,9 @@ from pandas import read_csv as pd_read_csv
 from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
 from keras import models, layers
 from tensorflow.keras.utils import to_categorical
+from random import randint
+
+TEST_RANDOM_STATE = 1234
 
 
 class ModelTrainer:
@@ -61,6 +64,8 @@ class ModelTrainer:
             'epochs': 2,
             'output_dim': self.training_output_dims,
             'batch_size': self.training_batch_size,
+            'train_random_state': randint(10, 9999),
+            'test_random_state': TEST_RANDOM_STATE
         }
 
     def init_model_features(self):
@@ -226,7 +231,7 @@ class ModelTrainer:
 #----NEW-----#
         sequence, labels = self.create_sequence(scaled_dnn_df, n_past, target)
         train_seq, train_label,  validation_seq, validation_label, test_seq, test_label = DataHandler.mt_split_data(
-            sequence, labels)
+            sequence, labels, train_random_state=self.model_training_params['train_random_state'], test_random_state=self.model_training_params['test_random_state'])
 #----End NEW ----#
 
 
@@ -333,6 +338,8 @@ class ModelTrainer:
                                                 'epochs': n_epoch,
                                                 'output_dim': self.training_output_dims,
                                                 'batch_size': self.training_batch_size,
+                                                'train_random_state': randint(10, 9999),
+                                                'test_random_state': TEST_RANDOM_STATE
                                             }
 
                                             # Train the model based on the current parameters combination - will set -> self.model, self.test_accuracy, self.history
