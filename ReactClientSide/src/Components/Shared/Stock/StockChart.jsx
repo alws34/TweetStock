@@ -1,6 +1,6 @@
 import { React, useEffect, useState, useMemo } from "react";
 import Chart from "react-apexcharts";
-import { Button } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { navPaths } from "../../Configs/navPaths";
 
@@ -48,7 +48,7 @@ export default function StockChart(props) {
   };
   const stocksUrl = `https://yahoo-finance-api.vercel.app/${props.stock_ticker}`;
 
-  async function getStocks() {
+  async function fetchStocks() {
     const response = await fetch(stocksUrl);
     return response.json();
   }
@@ -64,7 +64,7 @@ export default function StockChart(props) {
     let timeoutId;
     async function getLatestPrice() {
       try {
-        const data = await getStocks();
+        const data = await fetchStocks();
         const stock = data.chart.result[0];
         if (getStockValidity(stock)) {
           setIsStockValid(false);
@@ -101,7 +101,7 @@ export default function StockChart(props) {
     return () => {
       clearTimeout(timeoutId);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.stock_ticker]);
 
   const direction = useMemo(
@@ -109,29 +109,29 @@ export default function StockChart(props) {
     [prevPrice, price]
   );
 
-  const renderStockButton = () => {
+  const StockButton = () => {
     return (
-      <Button
-        variant="contained"
-        size="medium"
-        onClick={() =>
-          navigate(navPaths["about"], {
-            state: { ticker: props.stock_ticker, data: null },
-          })
-        }
-      >
-        {props.stock_name}
-      </Button>
+      <div style={{ textAlign: "center", marginBottom: "25px" }}>
+        <Button
+          size="medium"
+          color="primary"
+          variant="contained"
+          onClick={() =>
+            navigate(navPaths["about"], {
+              state: { ticker: props.stock_ticker, data: null },
+            })
+          }
+        >
+          more Details
+        </Button>
+      </div>
     );
   };
 
   return (
     <div>
       {isStockValid ? (
-        <div style={{ marginTop: "10px" }}>
-          <div style={{ textAlign: "center" }}>
-            {!props.isAbout && renderStockButton()}
-          </div>
+        <div style={{ marginBottom: "10px" }}>
           <div
             style={{ textAlign: "center" }}
             className={["price", direction].join(" ")}
@@ -139,11 +139,13 @@ export default function StockChart(props) {
             {price}$ {directionEmojis[direction]}
           </div>
           <div style={{ textAlign: "center" }}>
-            {priceTime &&
-              priceTime.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+            <Typography color="primary">
+              {priceTime &&
+                priceTime.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+            </Typography>
           </div>
           <Chart
             options={chart.options}
@@ -152,6 +154,7 @@ export default function StockChart(props) {
             width="100%"
             height={320}
           />
+          {!props.isAbout && <StockButton />}
         </div>
       ) : (
         ""

@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "./Components/Shared/NavBar/NavBar";
 import HomePage from "./Components/Pages/HomePage/HomePage";
 import StockDetailsPage from "./Components/Pages/StockDetailsPage/StockDetailsPage";
@@ -13,7 +13,24 @@ import { getRememberMe } from "./Components/Configs/getLoggedUser";
 import ProfilePage from "./Components/Pages/ProfilePage/ProfilePage";
 import { navPaths } from "./Components/Configs/navPaths";
 
-function App() {
+import { lightTheme, darkTheme } from "./Themes/themes";
+import { Paper, Switch, ThemeProvider } from "@material-ui/core";
+import { createTheme, makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles({
+  root: {
+    padding: "2rem",
+    fontFamily: "roboto",
+    textAlign: "center",
+    margin: "2rem",
+  },
+  typographyCustom: {
+    marginBottom: "1rem",
+  },
+});
+
+export default function App() {
+  const [darkMode, setDarkMode] = useState(true);
   useEffect(() => {
     window.addEventListener("beforeunload", handleTabClosing);
     return () => {
@@ -30,23 +47,35 @@ function App() {
   };
 
   return (
-    <div>
-      <NavBar />
-      <Routes>
-        <Route path={navPaths["home"]} element={<HomePage />} />
-        <Route path={navPaths["about"]} element={<StockDetailsPage />} />
-        <Route path={navPaths["news"]} element={<NewsPage />} />
-        <Route
-          path={navPaths["favorite stocks"]}
-          element={<FavoriteStocksPage />}
-        />
-        <Route path={navPaths["popular tweets"]} element={<PopularTweets />} />
-        <Route path={navPaths["sign up"]} element={<SignUp />} />
-        <Route path={navPaths["sign in"]} element={<SignIn />} />
-        <Route path={navPaths["profile"]} element={<ProfilePage />} />
-      </Routes>
-    </div>
+    // <div>
+    <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
+      <Paper
+        className={useStyles().root}
+        elevation={3}
+        style={{ padding: 0, margin: 0, height: "100vh" }}
+      >
+        <NavBar />
+
+        <Switch checked={darkMode} onChange={() => setDarkMode(!darkMode)} />
+
+        <Routes>
+          <Route path={navPaths["home"]} element={<HomePage />} />
+          <Route path={navPaths["about"]} element={<StockDetailsPage />} />
+          <Route path={navPaths["news"]} element={<NewsPage />} />
+          <Route
+            path={navPaths["favorite stocks"]}
+            element={<FavoriteStocksPage />}
+          />
+          <Route
+            path={navPaths["popular tweets"]}
+            element={<PopularTweets />}
+          />
+          <Route path={navPaths["sign up"]} element={<SignUp />} />
+          <Route path={navPaths["sign in"]} element={<SignIn />} />
+          <Route path={navPaths["profile"]} element={<ProfilePage />} />
+        </Routes>
+      </Paper>
+    </ThemeProvider>
+    // </div>
   );
 }
-
-export default App;
