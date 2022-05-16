@@ -9,10 +9,11 @@ import withReactContent from "sweetalert2-react-content";
 export default function HomePage() {
   const [trendingStocks, setTrendingStocks] = useState(null);
   const MySwal = withReactContent(Swal);
+  const STOCK_GRAPHS_COUNT = 5;
 
   const getTrendingStocks = () => {
     fetch(
-      "https://stock-data-yahoo-finance-alternative.p.rapidapi.com/v1/finance/trending/US?count=10",
+      `https://stock-data-yahoo-finance-alternative.p.rapidapi.com/v1/finance/trending/US?count=${STOCK_GRAPHS_COUNT}`,
       {
         method: "GET",
         headers: {
@@ -23,13 +24,12 @@ export default function HomePage() {
       }
     )
       .then((res) => {
-        console.log("homepage=", res);
+        //console.log("homepage=", res);
         return res.json();
       })
       .then(
         (result) => {
           let stocks = result.finance.result[0].quotes;
-          console.log("fetch apiStock= ", stocks);
           setTrendingStocks(stocks);
         },
         (error) => {

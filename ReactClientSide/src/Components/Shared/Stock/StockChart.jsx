@@ -15,7 +15,7 @@ export default function StockChart(props) {
       data: [],
     },
   ]);
-  const [price, setPrice] = useState(-1);
+  const [price, setPrice] = useState(null);
   const [prevPrice, setPrevPrice] = useState(-1);
   const [priceTime, setPriceTime] = useState(null);
   const directionEmojis = {
@@ -109,24 +109,38 @@ export default function StockChart(props) {
     [prevPrice, price]
   );
 
-  const StockButton = () => {
-    return (
-      <div style={{ textAlign: "center", marginBottom: "25px" }}>
-        <Button
-          size="medium"
-          color="primary"
-          variant="contained"
-          onClick={() =>
-            navigate(navPaths["about"], {
-              state: { ticker: props.stock_ticker, data: null },
-            })
-          }
-        >
-          more Details
-        </Button>
-      </div>
-    );
-  };
+  const StockButton = () => (
+    <div style={{ textAlign: "center", marginBottom: "25px" }}>
+      <Button
+        size="medium"
+        color="primary"
+        variant="contained"
+        onClick={() =>
+          navigate(navPaths["about"], {
+            state: { ticker: props.stock_ticker, data: null },
+          })
+        }
+      >
+        more Details
+      </Button>
+    </div>
+  );
+
+  const Price = () => (
+    <Typography>
+      {price} $ {directionEmojis[direction]}
+    </Typography>
+  );
+
+  const Time = () => (
+    <Typography>
+      {priceTime &&
+        priceTime.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+    </Typography>
+  );
 
   return (
     <div>
@@ -135,17 +149,10 @@ export default function StockChart(props) {
           <div
             style={{ textAlign: "center" }}
             className={["price", direction].join(" ")}
-          >
-            {price}$ {directionEmojis[direction]}
-          </div>
+          ></div>
           <div style={{ textAlign: "center" }}>
-            <Typography color="primary">
-              {priceTime &&
-                priceTime.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-            </Typography>
+            <Price />
+            <Time />
           </div>
           <Chart
             options={chart.options}
