@@ -20,6 +20,7 @@ export default function StockSearchBar(props) {
         onKeyPress={(e) => e.key === "Enter" && fetchNewsByTicker()}
         variant="outlined"
         fullWidth
+        color="primary"
         label="Search Stock News"
       />
       <SearchIcon

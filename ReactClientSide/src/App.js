@@ -20,9 +20,9 @@ import { createTheme, makeStyles } from "@material-ui/core/styles";
 const useStyles = makeStyles({
   root: {
     padding: "2rem",
-    fontFamily: "roboto",
+    //fontFamily: "roboto",
     textAlign: "center",
-    margin: "2rem",
+    //margin: "2rem",
   },
   typographyCustom: {
     marginBottom: "1rem",
@@ -52,7 +52,7 @@ export default function App() {
       <Paper
         className={useStyles().root}
         elevation={3}
-        style={{ padding: 0, margin: 0, height: "100vh" }}
+        style={{ padding: 10, margin: 0, minHeight: "100vh", height: "100%" }}
       >
         <NavBar />
 
