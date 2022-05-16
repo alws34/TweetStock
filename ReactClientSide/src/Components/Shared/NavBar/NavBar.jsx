@@ -95,7 +95,7 @@ export default function NavBar() {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar position="sticky">
       <Container maxWidth="xxl">
         <Toolbar disableGutters>
           <NavBarLogo />

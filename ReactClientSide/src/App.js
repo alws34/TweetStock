@@ -13,13 +13,17 @@ import { getRememberMe } from "./Components/Configs/getLoggedUser";
 import ProfilePage from "./Components/Pages/ProfilePage/ProfilePage";
 import { navPaths } from "./Components/Configs/navPaths";
 
+import IconButton from "@mui/material/IconButton";
 import { lightTheme, darkTheme } from "./Themes/themes";
 import { Paper, Switch, ThemeProvider } from "@material-ui/core";
 import { createTheme, makeStyles } from "@material-ui/core/styles";
+import Brightness4Icon from "@mui/icons-material/Brightness4"; // light theme icon
+import Brightness7Icon from "@mui/icons-material/Brightness7"; // dark theme icon
+import Sticky from "react-sticky-el";
 
 const useStyles = makeStyles({
   root: {
-    padding: "2rem",
+    //padding: "2rem",
     //fontFamily: "roboto",
     textAlign: "center",
     //margin: "2rem",
@@ -37,7 +41,19 @@ export default function App() {
       window.removeEventListener("beforeunload", handleTabClosing);
     };
   });
-
+  const ThemeController = () => {
+    return (
+      <Sticky>
+        <IconButton
+          sx={{ ml: 1 }}
+          onClick={() => setDarkMode(!darkMode)}
+          color="inherit"
+        >
+          {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+        </IconButton>
+      </Sticky>
+    );
+  };
   const handleTabClosing = (event) => {
     event.preventDefault();
     let remember_me = getRememberMe();
@@ -52,11 +68,12 @@ export default function App() {
       <Paper
         className={useStyles().root}
         elevation={3}
-        style={{ padding: 10, margin: 0, minHeight: "100vh", height: "100%" }}
+        style={{ minHeight: "100vh", height: "100%" }}
       >
         <NavBar />
 
-        <Switch checked={darkMode} onChange={() => setDarkMode(!darkMode)} />
+        {/* <Switch checked={darkMode} onChange={() => setDarkMode(!darkMode)} /> */}
+        <ThemeController />
 
         <Routes>
           <Route path={navPaths["home"]} element={<HomePage />} />
