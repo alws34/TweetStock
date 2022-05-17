@@ -16,6 +16,7 @@ export default function StockSearchBar(props) {
     <div className="newsSearchBar">
       <CssBaseline />
       <TextField
+        style={{ border: "1px solid", borderRadius: "5px" }}
         id="outlined-basic"
         onChange={inputHandler}
         onKeyPress={(e) => e.key === "Enter" && fetchNewsByTicker()}

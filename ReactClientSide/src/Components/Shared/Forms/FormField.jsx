@@ -16,6 +16,7 @@ export default function FormField(props) {
         defaultValue={props.fieldValue}
         inputProps={props.inputProps}
         fullWidth
+        style={{ border: "1px solid", borderRadius: "5px" }}
         {...props.sx}
       />
     </Grid>
