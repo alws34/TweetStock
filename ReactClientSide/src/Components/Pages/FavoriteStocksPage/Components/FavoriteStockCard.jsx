@@ -104,10 +104,10 @@ export default function FavoriteStockCard(props) {
   };
 
   return (
-    <Card className="favoriteStockCard">
-      <CardActionArea className="favoriteCardContentWrapper" onClick={navigateToStockDetailsPage}>
+    <Card className="favoriteStockCard" sx={{borderRadius: '7.5px'}}>
+      <CardActionArea onClick={navigateToStockDetailsPage}>
         <CardImage />
-        <CardContent>
+        <CardContent className="favoriteCardContentWrapper">
           <CardHeader />
           <CardDetails />
         </CardContent>
