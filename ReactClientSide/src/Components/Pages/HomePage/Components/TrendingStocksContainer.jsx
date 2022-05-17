@@ -1,5 +1,6 @@
 import React from "react";
 import StockChart from "../../../Shared/Stock/StockChart";
+import "../HomePageStyles.css";
 
 export default function TrendingStocksContainer(props) {
   const StockChartsContainer = (props) => {
@@ -17,7 +18,9 @@ export default function TrendingStocksContainer(props) {
   };
 
   return props.hasOwnProperty("trendingStocks") ? (
-    <StockChartsContainer stocks={props.trendingStocks} />
+    <div className="stockChartsContainer">
+      <StockChartsContainer stocks={props.trendingStocks} />
+    </div>
   ) : (
     ""
   );

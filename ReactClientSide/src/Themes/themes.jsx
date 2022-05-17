@@ -6,6 +6,11 @@ export const darkTheme = createTheme({
     mode: "dark",
     primary: blueGrey,
   },
+  components: {
+    text: {
+      style: { color: "" },
+    },
+  },
 });
 
 export const lightTheme = createTheme({

@@ -124,7 +124,7 @@ export default function SignIn() {
             noValidate
             sx={{ mt: 1 }}
           >
-            <TextField
+            {/* <TextField
               margin="normal"
               required
               fullWidth
@@ -145,7 +145,34 @@ export default function SignIn() {
               id="password"
               autoComplete="current-password"
               defaultValue={pass}
+            /> */}
+
+            <FormField
+              xs={12}
+              label="Email Address"
+              autoComplete="email"
+              fieldName="email"
+              inputProps={{
+                pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
+              }}
+              sx={{ required: true, margin: "normal" }}
             />
+
+            <FormField
+              xs={12}
+              label="Password"
+              autoComplete="new-password"
+              fieldName="password"
+              inputProps={{
+                minlength: 6,
+              }}
+              sx={{
+                type: "password",
+                required: true,
+                margin: "normal",
+              }}
+            />
+
             <FormControlLabel
               control={
                 <Checkbox

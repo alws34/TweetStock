@@ -3,6 +3,8 @@ import Chart from "react-apexcharts";
 import { Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { navPaths } from "../../Configs/navPaths";
+import ReadMoreIcon from "@mui/icons-material/ReadMore";
+import { blueGrey } from "@mui/material/colors";
 
 const round = (number) => {
   return number ? +number.toFixed(2) : null;
@@ -34,10 +36,14 @@ export default function StockChart(props) {
       },
       title: {
         text: `$${props.stock_ticker.toUpperCase()} Graph`,
-        align: "left",
+        align: "center",
+        style: { fontSize: "28px", fontWeight: "bold", color: "" },
       },
       xaxis: {
         type: "datetime",
+        tooltip: {
+          enabled: true,
+        },
       },
       yaxis: {
         tooltip: {
@@ -110,9 +116,9 @@ export default function StockChart(props) {
   );
 
   const StockButton = () => (
-    <div style={{ textAlign: "center", marginBottom: "25px" }}>
+    <div style={{ textAlign: "center", marginBottom: "vh" }}>
       <Button
-        size="medium"
+        size="small"
         color="primary"
         variant="contained"
         onClick={() =>
@@ -121,8 +127,24 @@ export default function StockChart(props) {
           })
         }
       >
-        more Details
+        <ReadMoreIcon>details</ReadMoreIcon>
       </Button>
+    </div>
+  );
+
+  const QuickInfo = () => (
+    <div
+      style={{
+        textAlign: "center",
+        display: "flex",
+        justifyContent: "space-around",
+        marginBottom: "1vh",
+        //flexDirection: "column",
+      }}
+    >
+      <Time />
+      <Price />
+      {!props.isAbout && <StockButton />}
     </div>
   );
 
@@ -142,30 +164,32 @@ export default function StockChart(props) {
     </Typography>
   );
 
-  return (
-    <div>
-      {isStockValid ? (
-        <div style={{ marginBottom: "10px" }}>
-          <div
-            style={{ textAlign: "center" }}
-            className={["price", direction].join(" ")}
-          ></div>
-          <div style={{ textAlign: "center" }}>
-            <Price />
-            <Time />
-          </div>
-          <Chart
-            options={chart.options}
-            series={series}
-            type="candlestick"
-            width="100%"
-            height={320}
-          />
-          {!props.isAbout && <StockButton />}
-        </div>
-      ) : (
-        ""
-      )}
+  return isStockValid ? (
+    <div
+      style={{
+        margin: "auto",
+        marginTop: "1vh",
+        borderBottom: "0.6px solid",
+        borderTop: "0.6px solid",
+        padding: "1vw",
+        borderRadius: "7.5px",
+        maxWidth: "1250px",
+      }}
+    >
+      <div
+        style={{ textAlign: "center" }}
+        className={["price", direction].join(" ")}
+      ></div>
+      <Chart
+        options={chart.options}
+        series={series}
+        type="candlestick"
+        width="100%"
+        height={320}
+      />
+      <QuickInfo />
     </div>
+  ) : (
+    ""
   );
 }
