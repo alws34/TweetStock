@@ -14,7 +14,7 @@ export default function NewsCard(props) {
   const newsData = props.newsData;
 
   return (
-    <Box className="newsCard">
+    <Box className="newsCard" sx={{ border: 1 }}>
       {/* <Card sx={{ bgcolor: "" }} variant="outlined"> */}
       <React.Fragment>
         <Container className="newsCardDetailsContainer">

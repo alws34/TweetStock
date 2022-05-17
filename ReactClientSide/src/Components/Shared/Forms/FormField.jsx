@@ -1,10 +1,14 @@
 import React from "react";
-import { Grid, TextField } from "@mui/material";
+import { Grid } from "@mui/material";
+import TextField from "@material-ui/core/TextField";
+import CssBaseline from "@material-ui/core/CssBaseline";
 
 export default function FormField(props) {
   return (
     <Grid item xs={props.xs} sm={props.sm}>
+      <CssBaseline />
       <TextField
+        variant="filled"
         autoComplete={props.autoComplete}
         name={props.fieldName}
         id={props.fieldName}

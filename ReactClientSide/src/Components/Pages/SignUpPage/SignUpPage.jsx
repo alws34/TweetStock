@@ -132,7 +132,7 @@ export default function SignUp() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
+    // <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box className="formContainer">
@@ -213,6 +213,6 @@ export default function SignUp() {
         </Box>
         <Copyright sx={{ mt: 5 }} />
       </Container>
-    </ThemeProvider>
+    // </ThemeProvider>
   );
 }

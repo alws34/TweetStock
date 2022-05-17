@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import TextField from "@mui/material/TextField";
+import TextField from "@material-ui/core/TextField";
 import SearchIcon from "@mui/icons-material/Search";
+import CssBaseline from "@material-ui/core/CssBaseline";
 
 export default function StockSearchBar(props) {
   const [ticker, setTicker] = useState("");
@@ -13,13 +14,13 @@ export default function StockSearchBar(props) {
   };
   return (
     <div className="newsSearchBar">
+      <CssBaseline />
       <TextField
         id="outlined-basic"
         onChange={inputHandler}
         onKeyPress={(e) => e.key === "Enter" && fetchNewsByTicker()}
-        variant="outlined"
+        variant="filled"
         fullWidth
-        //color="primary"
         label="Search Stock News"
       />
       <SearchIcon

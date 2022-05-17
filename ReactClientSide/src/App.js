@@ -41,6 +41,7 @@ export default function App() {
       window.removeEventListener("beforeunload", handleTabClosing);
     };
   });
+  
   const ThemeController = () => {
     return (
       <Sticky>
@@ -54,6 +55,7 @@ export default function App() {
       </Sticky>
     );
   };
+
   const handleTabClosing = (event) => {
     event.preventDefault();
     let remember_me = getRememberMe();
