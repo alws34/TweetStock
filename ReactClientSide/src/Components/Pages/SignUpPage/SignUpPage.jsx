@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import "../../Shared/Forms/FormStyles.css";
 import CountrySelect from "../../Shared/UserDetails/CountrySelect";
 import Camera from "../../Shared/Camera/Camera";
@@ -26,13 +26,27 @@ const MySwal = withReactContent(Swal);
 
 const default_profile_img =
   "https://www.pngkit.com/png/full/126-1262807_instagram-default-profile-picture-png.png";
-const theme = createTheme();
+// const theme = createTheme();
 
 export default function SignUp() {
   const navigate = useNavigate();
   let user = {};
   const [img, setImg] = useState(null);
+  //const [encodeImg, setEncodeImg] = useState("");
   const [country, setCountry] = useState(null);
+  // const webRef = useRef(null);
+
+  // const showImage = () => {
+  //   let imgBefore = btoa(webRef.current.getScreenshot(), "Base64");
+  //   setEncodeImg(imgBefore);
+  //   let imgAfter = atob(imgBefore, "Base64");
+  //   setImg(imgAfter);
+  //   setImg(webRef.current.getScreenshot());
+  //   console.log(imgBefore);
+  //   console.log(imgAfter);
+  //   console.log(webRef.current.getScreenshot())
+  //   console.log("shoot");
+  // };
 
   const getCountry = (countryProp) => {
     setCountry(countryProp);
@@ -133,86 +147,86 @@ export default function SignUp() {
 
   return (
     // <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box className="formContainer">
-          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h4">
-            Sign up
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-            <Grid container spacing={2}>
-              <FormField
-                xs={12}
-                sm={6}
-                label="First Name"
-                autoComplete="given-name"
-                fieldName="firstName"
-                fieldValue={user.FirstName}
-                inputProps={{
-                  minlength: 2,
-                  maxlength: 15,
-                }}
-                sx={{
-                  autoFocus: true,
-                  required: true,
-                }}
-              />
-              <FormField
-                xs={12}
-                sm={6}
-                label="Last Name"
-                autoComplete="family-name"
-                fieldName="lastName"
-                fieldValue={user.LastName}
-                inputProps={{
-                  minlength: 2,
-                  maxlength: 15,
-                }}
-                sx={{ required: true }}
-              />
-              <FormField
-                xs={12}
-                label="Email Address"
-                autoComplete="email"
-                fieldName="email"
-                fieldValue={user.Email}
-                inputProps={{
-                  pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
-                }}
-                sx={{ required: true }}
-              />
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <Box className="formContainer">
+        <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <Typography component="h1" variant="h4">
+          Sign up
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          <Grid container spacing={2}>
+            <FormField
+              xs={12}
+              sm={6}
+              label="First Name"
+              autoComplete="given-name"
+              fieldName="firstName"
+              fieldValue={user.FirstName}
+              inputProps={{
+                minlength: 2,
+                maxlength: 15,
+              }}
+              sx={{
+                autoFocus: true,
+                required: true,
+              }}
+            />
+            <FormField
+              xs={12}
+              sm={6}
+              label="Last Name"
+              autoComplete="family-name"
+              fieldName="lastName"
+              fieldValue={user.LastName}
+              inputProps={{
+                minlength: 2,
+                maxlength: 15,
+              }}
+              sx={{ required: true }}
+            />
+            <FormField
+              xs={12}
+              label="Email Address"
+              autoComplete="email"
+              fieldName="email"
+              fieldValue={user.Email}
+              inputProps={{
+                pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
+              }}
+              sx={{ required: true }}
+            />
 
-              <FormField
-                xs={12}
-                label="Password"
-                autoComplete="new-password"
-                fieldName="password"
-                inputProps={{
-                  minlength: 6,
-                }}
-                sx={{
-                  type: "password",
-                  required: true,
-                }}
-              />
+            <FormField
+              xs={12}
+              label="Password"
+              autoComplete="new-password"
+              fieldName="password"
+              inputProps={{
+                minlength: 6,
+              }}
+              sx={{
+                type: "password",
+                required: true,
+              }}
+            />
 
-              <Grid item xs={12}>
-                <CountrySelect id="country" sendToForm={getCountry} />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Camera img={img} setParentImg={setImg} />
-                <br />
-              </Grid>
+            <Grid item xs={12}>
+              <CountrySelect id="country" sendToForm={getCountry} />
             </Grid>
-            <ButtonsContainer />
-          </Box>
+
+            <Grid item xs={12}>
+              <Camera img={img} setParentImg={setImg} />
+              <br />
+            </Grid>
+          </Grid>
+          <ButtonsContainer />
         </Box>
-        <Copyright sx={{ mt: 5 }} />
-      </Container>
+      </Box>
+      <Copyright sx={{ mt: 5 }} />
+    </Container>
     // </ThemeProvider>
   );
 }

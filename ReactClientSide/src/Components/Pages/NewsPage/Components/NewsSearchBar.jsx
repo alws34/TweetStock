@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import TextField from "@material-ui/core/TextField";
 import SearchIcon from "@mui/icons-material/Search";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import { grey } from "@mui/material/colors";
 
 export default function StockSearchBar(props) {
   const [ticker, setTicker] = useState("");
@@ -25,11 +26,12 @@ export default function StockSearchBar(props) {
         label="Search Stock News"
       />
       <SearchIcon
-        style={{ marginTop: 14 }}
+        //fontSize="5vw"
+        style={{ margin: "auto", marginLeft: "0.8vw", fontSize: "5vw" }}
         onClick={fetchNewsByTicker}
         onMouseEnter={(e) => {
-          e.target.style.background = "text.secondary"; //"rgb(239, 239, 245)";
-          e.target.style.borderRadius = "20px";
+          e.target.style.background = grey[400];
+          e.target.style.borderRadius = "5px";
         }}
         onMouseLeave={(e) => {
           e.target.style.background = "none";

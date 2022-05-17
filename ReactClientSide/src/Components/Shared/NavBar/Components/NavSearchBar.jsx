@@ -42,16 +42,6 @@ export default function NavSearchBar(props) {
   };
   return (
     <Search sx={{ paddingLeft: 0.5, marginLeft: 2 }}>
-      <SearchIcon
-        onClick={() => props.onSubmit(searchQuery)}
-        onMouseEnter={(e) => {
-          e.target.style.background = "rgb(255, 255, 255, 0.5)";
-          e.target.style.borderRadius = "5px";
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.background = "none";
-        }}
-      />
       <StyledInputBase
         id="navSearch"
         placeholder="Search Stock…"
@@ -61,6 +51,16 @@ export default function NavSearchBar(props) {
         sx={{ input: { paddingLeft: 0 } }}
         onChange={inputHandler}
         onKeyPress={(e) => e.key === "Enter" && props.onSubmit(searchQuery)}
+      />
+      <SearchIcon
+        onClick={() => props.onSubmit(searchQuery)}
+        onMouseEnter={(e) => {
+          e.target.style.background = "rgb(255, 255, 255, 0.5)";
+          e.target.style.borderRadius = "5px";
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.background = "none";
+        }}
       />
     </Search>
   );
