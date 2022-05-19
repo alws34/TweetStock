@@ -16,8 +16,8 @@ const blobToBase64 = async (blobFile) => {
 };
 
 const compressFile = async (blobFile) => {
-  // compress a file (blob) to a desired quality (0...100) - will also convert to base64
-  const quality = 80; // 0...100
+  // compress a file (blob) to a desired quality [0...100] - will also convert to base64
+  const quality = 80; // [0...100]
   const format = "JPEG"; // Can be either JPEG, PNG or WEBP.
   const outputType = "base64"; // Can be either base64, blob or file. (Default type is base64)
   return new Promise((resolve) => {
