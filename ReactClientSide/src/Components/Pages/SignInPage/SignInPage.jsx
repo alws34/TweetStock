@@ -120,29 +120,6 @@ export default function SignIn() {
             noValidate
             sx={{ mt: 1 }}
           >
-            {/* <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              defaultValue={user_email}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              defaultValue={user_pass}
-            /> */}
-
             <FormField
               xs={12}
               label="Email Address"
@@ -211,3 +188,26 @@ export default function SignIn() {
     </ThemeProvider>
   );
 }
+
+/* <TextField
+  margin="normal"
+  required
+  fullWidth
+  id="email"
+  label="Email Address"
+  name="email"
+  autoComplete="email"
+  autoFocus
+  defaultValue={user_email}
+/>
+<TextField
+  margin="normal"
+  required
+  fullWidth
+  name="password"
+  label="Password"
+  type="password"
+  id="password"
+  autoComplete="current-password"
+  defaultValue={user_pass}
+/> */
