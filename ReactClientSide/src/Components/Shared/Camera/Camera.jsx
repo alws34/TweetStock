@@ -4,12 +4,29 @@ import { Button } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import { styled } from "@mui/material/styles";
 import "./Camera.css";
+
+const blobToBase64 = async (blobFile) => {
+  return new Promise((resolve, _) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blobFile);
+  });
+};
+
 export default function Camera(props) {
   const img = props.img;
   const webRef = useRef(null);
   const Input = styled("input")({
     display: "none",
   });
+
+  const setImage = (blobFile) => {
+    console.log(blobFile);
+    blobToBase64(blobFile).then((base64File) => {
+      console.log(base64File);
+      props.setParentImg(base64File);
+    });
+  };
 
   return (
     <div className="camera">
@@ -28,7 +45,10 @@ export default function Camera(props) {
           fullWidth
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
-          onClick={() => props.setParentImg(webRef.current.getScreenshot())}
+          onClick={() => {
+            console.log(webRef.current.getScreenshot());
+            return props.setParentImg(webRef.current.getScreenshot());
+          }}
         >
           <CameraAltIcon>Shoot</CameraAltIcon>
         </Button>
@@ -37,11 +57,10 @@ export default function Camera(props) {
         <Input
           accept="image/*"
           id="contained-button-file"
-          multiple
           type="file"
           onChange={(event) => {
-            //console.log(event.target.files[0]);
-            props.setParentImg(URL.createObjectURL(event.target.files[0]));
+            let blobFile = event.target.files[0];
+            setImage(blobFile);
           }}
         />
         <Button fullWidth variant="contained" component="span">
