@@ -155,6 +155,7 @@ export default function SignIn() {
                 required: true,
                 margin: "normal",
                 defaultValue: default_user_email,
+                autoFocus: true,
               }}
             />
 
