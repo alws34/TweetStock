@@ -35,22 +35,18 @@ export default function SignIn() {
 
   const { state } = useLocation();
   console.log("state", state);
-  const user_email = state ? state.email : null;
-  const pass = state ? state.pass : null;
+  const default_user_email = state ? state.email : null;
+  const default_user_pass = state ? state.pass : null;
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const u = {
-      email: data.get("email"),
-      password: data.get("password"),
-    };
-    getUser(u);
+    fetchUser(data.get("email"), data.get("password"));
   };
 
-  const getUser = (u) => {
+  const fetchUser = (user_email, user_pass) => {
     // Fetch the user from DB
-    fetch(apiUrlUsers + `/?email=${u.email}&password=${u.password}`, {
+    fetch(apiUrlUsers + `/?email=${user_email}&password=${user_pass}`, {
       method: "GET",
       headers: new Headers({
         "Content-Type": "application/json; charset=UTF-8",
@@ -144,7 +140,7 @@ export default function SignIn() {
               type="password"
               id="password"
               autoComplete="current-password"
-              defaultValue={pass}
+              defaultValue={user_pass}
             /> */}
 
             <FormField
@@ -155,7 +151,11 @@ export default function SignIn() {
               inputProps={{
                 pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
               }}
-              sx={{ required: true, margin: "normal" }}
+              sx={{
+                required: true,
+                margin: "normal",
+                defaultValue: default_user_email,
+              }}
             />
 
             <FormField
@@ -170,6 +170,7 @@ export default function SignIn() {
                 type: "password",
                 required: true,
                 margin: "normal",
+                defaultValue: default_user_pass,
               }}
             />
 

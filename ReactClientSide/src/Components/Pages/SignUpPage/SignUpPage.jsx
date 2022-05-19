@@ -16,6 +16,7 @@ import {
   Box,
   Typography,
   Container,
+  Link,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -117,34 +118,26 @@ export default function SignUp() {
     postUser(user);
   };
 
-  const ButtonsContainer = () => {
-    return (
-      <div className="buttonsContainer">
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-          color="success"
-        >
-          Sign Up
-        </Button>
-        <Grid container justifyContent="flex-end">
-          <Grid item>
-            <Button
-              onClick={() => navigate(navPaths["sign in"])}
-              fullWidth
-              variant="contained"
-              color="secondary"
-            >
-              Sign In page
-            </Button>
-          </Grid>
+  const ButtonsContainer = () => (
+    <div className="buttonsContainer">
+      <Button
+        type="submit"
+        fullWidth
+        variant="contained"
+        sx={{ mt: 3, mb: 2 }}
+        color="success"
+      >
+        Sign Up
+      </Button>
+      <Grid container>
+        <Grid item>
+          <Button onClick={() => navigate(navPaths["sign in"])} variant="body2">
+            <Link>Already have an account? Sign In</Link>
+          </Button>
         </Grid>
-      </div>
-    );
-  };
-
+      </Grid>
+    </div>
+  );
   return (
     // <ThemeProvider theme={theme}>
     <Container component="main" maxWidth="xs">

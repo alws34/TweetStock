@@ -72,7 +72,7 @@ export default function ProfilePage() {
             MySwal.fire({
               position: "center",
               icon: "success",
-              title: "Profile Updated Saved!",
+              title: "Profile Updated!",
               showConfirmButton: false,
               timer: 800,
             });
