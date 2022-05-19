@@ -104,8 +104,6 @@ export default function ProfilePage() {
 
     const data = new FormData(event.currentTarget);
 
-    let pass = data.get("password").length !== 0 ? data.get("password") : "-1";
-    console.log("pass", pass);
     updated_user = {
       Id: user.Id,
       FirstName:
@@ -117,13 +115,13 @@ export default function ProfilePage() {
           ? data.get("lastName")
           : user.LastName,
       Email: user.Email,
-      Password: pass,
+      Password: data.get("password").length !== 0 ? data.get("password") : "-1",
       // address: country,
       Picture: img ? img : default_profile_img,
     };
     user = updated_user;
 
-    Swal.fire({
+    MySwal.fire({
       title: "Do you want to save the changes?",
       showDenyButton: true,
       showCancelButton: true,
@@ -134,7 +132,7 @@ export default function ProfilePage() {
       if (result.isConfirmed) {
         updateUser();
       } else if (result.isDenied) {
-        Swal.fire("Changes are not saved", "", "info");
+        MySwal.fire("Changes are not saved", "", "info");
       }
     });
   };
