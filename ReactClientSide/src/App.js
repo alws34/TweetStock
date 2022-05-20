@@ -10,13 +10,14 @@ import FavoriteStocksPage from "./Components/Pages/FavoriteStocksPage/FavoriteSt
 import PopularTweets from "./Components/Pages/PopularTweetsPage/PopularTweetsPage";
 import { Routes, Route } from "react-router-dom";
 import { getRememberMe } from "./Components/Configs/getLoggedUser";
+import "./Components/Configs/Global";
 import ProfilePage from "./Components/Pages/ProfilePage/ProfilePage";
 import { navPaths } from "./Components/Configs/navPaths";
 
 import IconButton from "@mui/material/IconButton";
-import { lightTheme, darkTheme } from "./Themes/themes";
-import { Paper, Switch, ThemeProvider } from "@material-ui/core";
-import { createTheme, makeStyles } from "@material-ui/core/styles";
+import { lightTheme, darkTheme, Theme } from "./Themes/Themes";
+import { Paper, ThemeProvider } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import Brightness4Icon from "@mui/icons-material/Brightness4"; // light theme icon
 import Brightness7Icon from "@mui/icons-material/Brightness7"; // dark theme icon
 import Sticky from "react-sticky-el";
@@ -34,22 +35,21 @@ const useStyles = makeStyles({
 });
 
 export default function App() {
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(global.config.isDarkTheme);
   useEffect(() => {
     window.addEventListener("beforeunload", handleTabClosing);
     return () => {
       window.removeEventListener("beforeunload", handleTabClosing);
     };
   });
-  
+  const toggleTheme = () => {
+    global.config.isDarkTheme = !darkMode;
+    setDarkMode(!darkMode);
+  };
   const ThemeController = () => {
     return (
       <Sticky>
-        <IconButton
-          sx={{ ml: 1 }}
-          onClick={() => setDarkMode(!darkMode)}
-          color="inherit"
-        >
+        <IconButton sx={{ ml: 1 }} onClick={toggleTheme} color="inherit">
           {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
         </IconButton>
       </Sticky>

@@ -85,7 +85,7 @@ export default function StockDetailsPage() {
               <StockChart
                 stock_name={stockData.displayName}
                 stock_ticker={ticker}
-                isAbout={true}
+                hideInfoPanel={true}
               />
             </Col>
             <Col
