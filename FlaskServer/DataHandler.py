@@ -158,9 +158,9 @@ def mt_get_eng_score(users_df, include_followers=True, include_replies=False):
 
 
 def mt_transform_features_to_log(dnn_df):
-    dnn_df['Tweet_Likes'] = [log(tweet_likes, 2)
+    dnn_df['Tweet_Likes'] = [log(tweet_likes, 2) if tweet_likes != 0 else 0.0
                              for tweet_likes in dnn_df['Tweet_Likes']]
-    return dnn_df['Tweet_Likes']
+    return dnn_df
 
 #------ ModelTrainer.py - seperate -------#
 

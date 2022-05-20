@@ -206,11 +206,10 @@ class ModelTrainer:
         dnn_df = dnn_df[dnn_df['ticker_symbol'] == chosen_ticker]
         return dnn_df.drop(columns=['ticker_symbol'])
 
-    def transform_features_to_log(dnn_df):
-        print(dnn_df['Tweet_Likes'])
+    def transform_features_to_log(self, dnn_df):
+        # print(dnn_df['Tweet_Likes'])
         dnn_df = DataHandler.mt_transform_features_to_log(dnn_df)
-        print(dnn_df['Tweet_Likes'])
-
+        # print(dnn_df['Tweet_Likes'])
         return dnn_df
 
     def create_sequence(self, df, rows_at_a_time, target):
@@ -232,9 +231,12 @@ class ModelTrainer:
         n_past = self.model_training_params['n_past']
         target = 'price_difference'
 
+        #----GET DATA----#
+        dnn_df = self.transform_features_to_log(self.get_dnn_training_df())
+
         #----SCALE DATA----#
         scaled_dnn_df = DataHandler.mt_scale_data(
-            self.transform_features_to_log(self.get_dnn_training_df())).drop(columns=['Date'])
+            dnn_df).drop(columns=['Date'])
 
 #----NEW-----#
         sequence, labels = self.create_sequence(scaled_dnn_df, n_past, target)
