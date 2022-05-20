@@ -156,6 +156,12 @@ def mt_get_eng_score(users_df, include_followers=True, include_replies=False):
         #   df['eng_score'][i] = ((rts+likes+replies)/total_tweets) if include_replies else ((rts+likes)/total_tweets)
     return df
 
+
+def mt_transform_features_to_log(dnn_df):
+    dnn_df['Tweet_Likes'] = [log(tweet_likes, 2)
+                             for tweet_likes in dnn_df['Tweet_Likes']]
+    return dnn_df['Tweet_Likes']
+
 #------ ModelTrainer.py - seperate -------#
 
 

@@ -206,6 +206,13 @@ class ModelTrainer:
         dnn_df = dnn_df[dnn_df['ticker_symbol'] == chosen_ticker]
         return dnn_df.drop(columns=['ticker_symbol'])
 
+    def transform_features_to_log(dnn_df):
+        print(dnn_df['Tweet_Likes'])
+        dnn_df = DataHandler.mt_transform_features_to_log(dnn_df)
+        print(dnn_df['Tweet_Likes'])
+
+        return dnn_df
+
     def create_sequence(self, df, rows_at_a_time, target):
         sequence, label = DataHandler.create_sequence(
             dataset=df, target=target, num_of_rows=rows_at_a_time)
@@ -227,7 +234,8 @@ class ModelTrainer:
 
         #----SCALE DATA----#
         scaled_dnn_df = DataHandler.mt_scale_data(
-            self.get_dnn_training_df()).drop(columns=['Date'])
+            self.transform_features_to_log(self.get_dnn_training_df())).drop(columns=['Date'])
+
 #----NEW-----#
         sequence, labels = self.create_sequence(scaled_dnn_df, n_past, target)
         train_seq, train_label,  validation_seq, validation_label, test_seq, test_label = DataHandler.mt_split_data(
