@@ -2,7 +2,7 @@ import { React, useEffect, useState, useMemo } from "react";
 import Chart from "react-apexcharts";
 import StockChartPanel from "./Components/StockChartPanel";
 import "../../Configs/Global";
-
+import "./StockChartStyles.css";
 const round = (number) => {
   return number ? +number.toFixed(2) : null;
 };
@@ -17,76 +17,34 @@ export default function StockChart(props) {
   const [prevPrice, setPrevPrice] = useState(-1);
   const [priceTime, setPriceTime] = useState(null);
   const [isStockValid, setIsStockValid] = useState(true);
+
   console.log(global.config.theme);
-  // useEffect(() => {
-  //   console.log(global.config.isDarkTheme);
-  //   setTheme(global.config.isDarkTheme ? "dark" : "light");
-  // }, [global.config.isDarkTheme]);
 
-  let chart = {
-    options: {
-      // responsive: [
-      //   {
-      //     breakpoint: 500,
-      //     options: {
-      //       title: {
-      //         align: "left",
-      //       },
-      //       // theme: {
-      //       //   mode: theme,
-      //       // },
-      //     },
-      //   },
-      // ],
-
-      theme: {
-        mode: global.config.theme,
-        palette: "palette1",
-        // monochrome: {
-        //   enabled: false,
-        //   color: "#255aee",
-        //   shadeTo: theme,
-        //   shadeIntensity: 0.65,
-        // },
+  const chart_options = {
+    theme: {
+      mode: global.config.theme,
+      //palette: "palette1",
+    },
+    chart: {
+      height: 350,
+      toolbar: {
+        show: true,
       },
-      chart: {
-        type: "candlestick",
-        height: 350,
-        toolbar: {
-          show: true,
-        },
-        // animations: {
-        //   enabled: true,
-        //   easing: "easeinout",
-        //   speed: 10000,
-        //   animateGradually: {
-        //     enabled: true,
-        //     delay: 150,
-        //   },
-        //   dynamicAnimation: {
-        //     enabled: true,
-        //     speed: 350,
-        //   },
-        // },
+    },
+    title: {
+      text: `$${props.stock_ticker.toUpperCase()} Graph`,
+      align: "left",
+      style: { fontSize: "28px", fontWeight: "bold", color: "" },
+    },
+    xaxis: {
+      type: "datetime",
+      tooltip: {
+        enabled: true,
       },
-      title: {
-        text: `$${props.stock_ticker.toUpperCase()} Graph`,
-        align: "left",
-        style: { fontSize: "28px", fontWeight: "bold", color: "" },
-      },
-      xaxis: {
-        type: "datetime",
-        tooltip: {
-          enabled: true,
-        },
-      },
-      yaxis: {
-        tooltip: {
-          enabled: true,
-        },
-      },
-      sx: {
-        borderRadius: "10px",
+    },
+    yaxis: {
+      tooltip: {
+        enabled: true,
       },
     },
   };
@@ -111,11 +69,10 @@ export default function StockChart(props) {
         fetch(stocksUrl)
           .then((res) => res.json())
           .then((data) => {
-            console.log(data);
+            //console.log(data);
             const stock = data.chart.result[0];
 
             if (isInvalidStock(stock)) setIsStockValid(false);
-
             setPrevPrice(price);
             setPrice(stock.meta.regularMarketPrice.toFixed(2));
             setPriceTime(new Date(stock.meta.regularMarketTime * 1000));
@@ -150,7 +107,7 @@ export default function StockChart(props) {
       clearTimeout(timeoutId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.stock_ticker]);
+  }, [props.stock_ticker, global.config.theme]);
 
   const direction = useMemo(
     () => (prevPrice < price ? "up" : prevPrice > price ? "down" : ""),
@@ -161,20 +118,22 @@ export default function StockChart(props) {
     <div
       style={{
         margin: "auto",
-        marginTop: "1vh",
-        borderBottom: "0.6px solid",
-        borderTop: "0.6px solid",
-        padding: "1vw",
+        marginTop: "2.5vh",
+        marginBottom: "2.5vh",
+        borderBottom: "1.5px solid",
+        borderTop: "1.5px solid",
         borderRadius: "7.5px",
+        padding: "3vw",
         maxWidth: "1250px",
       }}
+      className={"chartContainer"}
     >
       <div
         style={{ textAlign: "center" }}
         className={["price", direction].join(" ")}
       ></div>
       <Chart
-        options={chart.options}
+        options={chart_options}
         series={series}
         type="candlestick"
         width="100%"
@@ -242,3 +201,69 @@ export default function StockChart(props) {
 //       })}
 //   </Typography>
 // );
+
+//   options: {
+//     // responsive: [
+//     //   {
+//     //     breakpoint: 500,
+//     //     options: {
+//     //       title: {
+//     //         align: "left",
+//     //       },
+//     //       // theme: {
+//     //       //   mode: theme,
+//     //       // },
+//     //     },
+//     //   },
+//     // ],
+//     theme: {
+//       mode: global.config.theme,
+//       palette: "palette1",
+//       // monochrome: {
+//       //   enabled: false,
+//       //   color: "#255aee",
+//       //   shadeTo: theme,
+//       //   shadeIntensity: 0.65,
+//       // },
+//     },
+//     chart: {
+//       type: "candlestick",
+//       height: 350,
+//       toolbar: {
+//         show: true,
+//       },
+//       // animations: {
+//       //   enabled: true,
+//       //   easing: "easeinout",
+//       //   speed: 10000,
+//       //   animateGradually: {
+//       //     enabled: true,
+//       //     delay: 150,
+//       //   },
+//       //   dynamicAnimation: {
+//       //     enabled: true,
+//       //     speed: 350,
+//       //   },
+//       // },
+//     },
+//     title: {
+//       text: `$${props.stock_ticker.toUpperCase()} Graph`,
+//       align: "left",
+//       style: { fontSize: "28px", fontWeight: "bold", color: "" },
+//     },
+//     xaxis: {
+//       type: "datetime",
+//       tooltip: {
+//         enabled: true,
+//       },
+//     },
+//     yaxis: {
+//       tooltip: {
+//         enabled: true,
+//       },
+//     },
+//     // sx: {
+//     //   borderRadius: "10px",
+//     // },
+//   },
+// };

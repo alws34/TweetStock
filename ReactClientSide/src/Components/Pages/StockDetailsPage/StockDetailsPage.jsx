@@ -25,14 +25,14 @@ export default function StockDetailsPage() {
 
   const fetchFlaskStockPrediction = (ticker) => {
     // GET
-    console.log("FETCHING FROM FLASK", ticker);
+    //console.log("FETCHING FROM FLASK", ticker);
     fetch(apiUrlFlask + `/getPrediction?ticker=${ticker}`)
       .then((res) => {
-        console.log("Flask!", res);
+        //console.log("Flask!", res);
         return res.json();
       })
       .then((res) => {
-        console.log("Flask!", res);
+        //console.log("Flask!", res);
         setFlaskResponse(res);
       });
   };
@@ -55,7 +55,7 @@ export default function StockDetailsPage() {
       })
       .then(
         (result) => {
-          console.log("fetch apiStock= ", result.quoteResponse.result[0]);
+          //console.log("fetch apiStock= ", result.quoteResponse.result[0]);
           let s = result.quoteResponse.result[0];
           setStockData(s);
         },
@@ -67,22 +67,22 @@ export default function StockDetailsPage() {
 
   useEffect(() => {
     console.clear();
-    console.log("use effect", ticker);
+    //console.log("use effect", ticker);
     data ? setStockData(data) : fetchStockDetails();
 
-    fetchFlaskStockPrediction(ticker);
+    //fetchFlaskStockPrediction(ticker);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticker, data, global.config.isDarkTheme]);
+  }, [ticker, data]);
 
   return (
     <div className="container-fluid">
-      <PageHeader text={`$${ticker.toUpperCase()} Details`} />
+      <PageHeader text={`${ticker.toUpperCase()} Details`} />
       {stockData === undefined || stockData === null ? (
         <LoadingCircle />
       ) : (
         <div>
           <Row xs={1} md={2}>
-            <Col style={{ flexGrow: 0, marginTop: 30 }}>
+            <Col style={{ flexGrow: 0, marginTop: 10 }}>
               <StockChart
                 stock_name={stockData.displayName}
                 stock_ticker={ticker}
@@ -92,7 +92,7 @@ export default function StockDetailsPage() {
             <Col
               xs={1}
               md={2}
-              style={{ width: "50%", flexGrow: 1, marginTop: 20 }}
+              style={{ width: "50%", flexGrow: 1, marginTop: 15 }}
             >
               <div>
                 <StockDetails stockData={stockData} />

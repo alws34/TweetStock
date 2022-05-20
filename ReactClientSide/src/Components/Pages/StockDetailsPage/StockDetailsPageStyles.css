@@ -7,7 +7,7 @@
 }
 /*----------------------------------*/
 
-/* ----PredictionWithTweets ---- */
+/* ----PredictionWithTweets---- */
 .predictionWithTweets .predictionContainer {
   display: flex;
   justify-content: center;
@@ -29,7 +29,7 @@
 .predictionWithTweets .tweetsAndTableContainer > div > div {
   margin: 0px;
 }
-/*----------------------------------*/
+/*--------PredictionWithTweets END---------*/
 
 /* ----POPUP STOCK CHAT---- */
 #popup-root .popup-content {
@@ -66,4 +66,11 @@
 }
 .popup-content {
   -webkit-animation: anvil 0.3s cubic-bezier(0.38, 0.1, 0.36, 0.9) forwards;
-} /*----------------------------------*/
+}
+/*----------POPUP STOCK CHAT END------------*/
+
+/*------------STOCK DETAILS----------*/
+.stockDetailsContainer {
+  margin-top: 5vh;
+}
+/*---------STOCK DETAILS END-------------*/

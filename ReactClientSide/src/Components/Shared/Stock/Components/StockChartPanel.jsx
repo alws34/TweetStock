@@ -49,7 +49,7 @@ export default function StockChartPanel(props) {
         textAlign: "center",
         display: "flex",
         justifyContent: "space-around",
-        marginBottom: "1vh",
+
         //flexDirection: "column",
       }}
     >
