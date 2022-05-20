@@ -13,6 +13,7 @@ import { Row, Col } from "react-bootstrap";
 import "reactjs-popup/dist/index.css";
 import LoggedUserFeatures from "./Components/LoggedUserFeatures";
 import PredictionWithTweets from "./Components/PredictionWithTweets";
+import "../../Configs/Global";
 
 export default function StockDetailsPage() {
   const [stockData, setStockData] = useState(null);
@@ -71,7 +72,7 @@ export default function StockDetailsPage() {
 
     fetchFlaskStockPrediction(ticker);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticker, data]);
+  }, [ticker, data, global.config.isDarkTheme]);
 
   return (
     <div className="container-fluid">

@@ -17,8 +17,7 @@ export default function StockChart(props) {
   const [prevPrice, setPrevPrice] = useState(-1);
   const [priceTime, setPriceTime] = useState(null);
   const [isStockValid, setIsStockValid] = useState(true);
-  const theme = global.config.isDarkTheme ? "dark" : "light";
-  console.log(theme);
+  console.log(global.config.theme);
   // useEffect(() => {
   //   console.log(global.config.isDarkTheme);
   //   setTheme(global.config.isDarkTheme ? "dark" : "light");
@@ -41,7 +40,7 @@ export default function StockChart(props) {
       // ],
 
       theme: {
-        mode: theme,
+        mode: global.config.theme,
         palette: "palette1",
         // monochrome: {
         //   enabled: false,
@@ -51,24 +50,24 @@ export default function StockChart(props) {
         // },
       },
       chart: {
-        type: "line",
+        type: "candlestick",
         height: 350,
         toolbar: {
           show: true,
         },
-        animations: {
-          enabled: true,
-          easing: "easeinout",
-          speed: 10000,
-          animateGradually: {
-            enabled: true,
-            delay: 150,
-          },
-          dynamicAnimation: {
-            enabled: true,
-            speed: 350,
-          },
-        },
+        // animations: {
+        //   enabled: true,
+        //   easing: "easeinout",
+        //   speed: 10000,
+        //   animateGradually: {
+        //     enabled: true,
+        //     delay: 150,
+        //   },
+        //   dynamicAnimation: {
+        //     enabled: true,
+        //     speed: 350,
+        //   },
+        // },
       },
       title: {
         text: `$${props.stock_ticker.toUpperCase()} Graph`,

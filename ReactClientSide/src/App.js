@@ -35,7 +35,7 @@ const useStyles = makeStyles({
 });
 
 export default function App() {
-  const [darkMode, setDarkMode] = useState(global.config.isDarkTheme);
+  const [darkMode, setDarkMode] = useState(global.config.theme);
   useEffect(() => {
     window.addEventListener("beforeunload", handleTabClosing);
     return () => {
@@ -43,7 +43,7 @@ export default function App() {
     };
   });
   const toggleTheme = () => {
-    global.config.isDarkTheme = !darkMode;
+    global.config.theme = !darkMode ? "dark" : "light";
     setDarkMode(!darkMode);
   };
   const ThemeController = () => {
