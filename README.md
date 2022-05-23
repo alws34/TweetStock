@@ -2,21 +2,21 @@
 
 ### About This Project:
 
-This is our final project in our B.Sc in computer science at Ruppin Academic Center.
-[Live WebSite](https://proj.ruppin.ac.il/bgroup57/test2/tar1/build/)
+This is our final project in computer science B.Sc at Ruppin Academic Center :israel:.
+You can view here the [Live WebApp](https://proj.ruppin.ac.il/bgroup57/test2/tar1/build/)
 <br>
-In this project we are trying to predict stock price changes for the end of the trading day - for specific stocks, based on chatter analysis from twitter.<br><br>
+In this project we are trying to predict stock price changes, for the end of the current trading day - (for specific stocks), based on chatter analysis from twitter.<br><br>
 The stocks that we monitor are: Tesla (tsla), Amazon (amzn), Apple (aapl),Microsoft (msft) and Google (goog & googl).<br><br>
 To achieve that, we developed an app that includes:<br>
 
 - A Front-End web application (Using ReactJS) for the end user, where the user can see live stocks data(using yahoo finance api and several other api services), save favorite stocks ("watch list") and also see our final prediction for the day, for the spcified stocks.<br>
-- And a Back-End that consists of two seperate pieces:<br>
-  1. ASP.NET server side (Using C# and an SQL Data Base)- that communicates with the front end.<br>
-  2. A Raspberry Pi - bases Python server - where all data digestion, calculations, computations and modeling takes place on.
+- A Back-End that consists of two seperate pieces:<br>
+  1. ASP.NET server (Using C# and an SQL Database)- that is in charge of the sql database communication (e.g. user authentication).<br>
+  2. A Raspberry Pi Python service (previously was a Flask Server) - where all data digestion, calculations, computations ,model training and Model-running takes place on.
      using this RPi, we created two steps in order to get a prediction:<br>
-     1. Training a DNN model for each of our stocks - based on data we gatehred and digested from Twitter, Kaggle and yahoo finance (all twitter chatter and financial data is from 2019).<br>
-     2. Creating a worker that will periodically request stocks related chatter from twitter's api, digest it, and insert the processed data into the model - and feed the results and the tweets this prediction is based on, to the SQL server so the client can get the "verdict" in a quick and efficient way.<br>
-        The worker runs only for trading days
+     1. <b>Training a DNN model</b> for each of our stocks - based on data we gatehred and digested from Twitter, Kaggle and yahoo finance (all twitter chatter [for the sentiment analysis] and financial data is from 2019).<br>
+     2. Creating a worker (a service) that will periodically request stocks related chatter from twitter's api, digest it, and insert the processed data into the selected model, and feed the results + related data to a FireBase DB, so the client side can get the "verdict" in a quick and efficient way.<br>
+        The worker runs only on open-market-days
 
 <!--About This Project -->
 
@@ -52,7 +52,7 @@ To achieve that, we developed an app that includes:<br>
 <img src="https://pandas.pydata.org/static/img/pandas_secondary.svg" title="Pandas" **alt="Pandas" width="40" height="40"/>
 <img src="https://img.icons8.com/color/344/tensorflow.png" title="TensorFlow" **alt="TensorFlow" width="40" height="40"/>
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Scikit_learn_logo_small.svg/1200px-Scikit_learn_logo_small.svg.png" title="SkLearn"**alt="SkLearn" width="40" height="40"/> 
-<img src="https://img.icons8.com/ios/452/flask.png" title="Flask" **alt="Flask" width="40" height="40"/>
+<!-- <img src="https://img.icons8.com/ios/452/flask.png" title="Flask" **alt="Flask" width="40" height="40"/> -->
 <img src="https://matplotlib.org/stable/_static/logo2.svg" title="MatPlotLib" **alt="MatPlotLib" width="40" height="40"/>
 </div>
 <!-- END My skills -->
