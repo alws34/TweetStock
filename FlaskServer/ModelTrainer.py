@@ -367,7 +367,7 @@ if __name__ == '__main__':
     # availables: 'alon' , 'guy', 'hadar', 'pi'
     delimiter, prefix = Helper.get_prefix_path()
     user = 'pi'
-    try_folder_name = '4'
+    try_folder_name = '2'
     #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}"
 

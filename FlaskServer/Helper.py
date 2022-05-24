@@ -49,11 +49,11 @@ def get_date_time():
     return dt.now()
 
 
-def get_date_time_stringify(self, format="%d_%m_%Y_%H"):
+def get_date_time_stringify(format="%d_%m_%Y_%H"):
     return get_date_time().strftime(format)
 
 
-def get_ping_command(self, how_many_pings='1', host='1.1.1.1'):
+def get_ping_command(how_many_pings='1', host='1.1.1.1'):
 
     def get_var():
         if os_name == 'nt':
