@@ -313,7 +313,7 @@ class ModelTrainer:
             'actv_funcs_last': ['softmax', 'sigmoid'],  # ,'relu'
             'loss_funcs': ['binary_crossentropy', 'mean_squared_error'],
             'optimizers': ['rmsprop', 'adam'],
-            'n_pasts': [1],  # , 2, 3]
+            'n_pasts': [3, 5, 7],  # [1]
             'n_epochs': [5, 10, 15, 20],  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             'layer_sets': [[4], [8], [16], [16, 8], [8, 4]]
         }
@@ -367,7 +367,7 @@ if __name__ == '__main__':
     # availables: 'alon' , 'guy', 'hadar', 'pi'
     delimiter, prefix = Helper.get_prefix_path()
     user = 'pi'
-    try_folder_name = '2'
+    try_folder_name = '3'
     #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}"
 
