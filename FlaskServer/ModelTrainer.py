@@ -10,6 +10,7 @@ from tensorflow.keras.utils import to_categorical
 from random import randint
 
 TEST_RANDOM_STATE = 1234
+DEFAULT_RETRAINING_ITERATIONS = 100
 
 
 class ModelTrainer:
@@ -21,6 +22,13 @@ class ModelTrainer:
         self.init_model_params(saving_path)
 
     #------------ INITIALIZATION ----------------#
+
+    def init_features_from_csv(self, features_csv_path, str_array_features_in_csv=['features', 'layers']):
+        features_csv = DataHandler.load_csv(features_csv_path)
+        for str_array in str_array_features_in_csv:
+            features_csv[str_array] = DataHandler.str_to_array(
+                features_csv[str_array])
+        self.model_training_params = features_csv
 
     def init_model_params(self, saving_path):
         self.init_model_training_params()
@@ -164,12 +172,22 @@ class ModelTrainer:
         Helper.save_df_to_csv(self.initialized_df,
                               self.saving_path, file_name)
 
-    def save_model(self):
-        '''Save the generated model'''
-        self.model.save(f'{self.saving_path}{self.model_name}.h5')
+    def save_model(self, saving_path=None, model_name=None):
+        '''Save the generated model.
+        saving_path and model_name can be None - will default to self.saving_path and self.model_name'''
+        if saving_path is None:
+            saving_path = self.saving_path
+        if model_name is None:
+            model_name = self.model_name
+        self.model.save(f'{saving_path}{model_name}.h5')
 
-    def save_graph(self):
-        '''Save Model's Graph'''
+    def save_graph(self, saving_path=None, model_name=None):
+        '''Save Model's Graph.
+        saving_path and model_name can be None - will default to self.saving_path and self.model_name'''
+        if saving_path is None:
+            saving_path = self.saving_path
+        if model_name is None:
+            model_name = self.model_name
         plt.clf()
         acc = self.history.history['accuracy']
         val_acc = self.history.history['val_accuracy']
@@ -182,14 +200,29 @@ class ModelTrainer:
         plt.xlabel('Epochs')
         plt.ylabel('Acc')
         plt.legend()
-        plt.savefig(f'{self.saving_path}{self.model_name}_graph.png')
+        plt.savefig(f'{saving_path}{model_name}_graph.png')
 
-    def save_params(self):
-        Helper.save_dict_to_csv(self.model_training_params, self.saving_path, "".join(
-            (str(self.model_name), '_params')))
+    def save_params(self, saving_path=None, model_name=None):
+        '''Saves Model's training parameters.
+        saving_path and model_name can be None - will default to self.saving_path and self.model_name'''
+        if saving_path is None:
+            saving_path = self.saving_path
+        if model_name is None:
+            model_name = self.model_name
+        file_name = "".join((str(model_name), '_params'))
+        Helper.save_dict_to_csv(
+            self.model_training_params, saving_path, file_name)
 
-    def save(self):
+    def save(self, model_name=None):
+        '''Saves model+graph+training_parameters.
+        saving_path and model_name can be None - will default to self.saving_path and self.model_name'''
         Helper.create_dir(self.saving_path)
+        if model_name is not None:
+            self.model_name = model_name
+        if self.model_name is None:
+            print(
+                "Must either init self.model_name or provide a saving name for the file in order to save")
+            return None
         self.save_model()
         self.save_graph()
         self.save_params()
@@ -304,7 +337,61 @@ class ModelTrainer:
 
         self.model, self.test_accuracy, self.history = network, test_acc, history
 
+    def generate_random_state(self):
+        return randint(10, 9999)
+
+    def regenerate_new_random_state(self, previous_rand_states=[]):
+        if previous_rand_states is [] or not isinstance(previous_rand_states, []):
+            print('previous_rand_states MUST BE a NONE EMPTY ARRAY')
+            return None
+        while True:
+            new_rand_state = self.generate_random_state()
+            if new_rand_state not in previous_rand_states:
+                return new_rand_state
+
+    def retrain_model(self, model_params_path=None, new_test_rand=False, iterations=DEFAULT_RETRAINING_ITERATIONS):
+        """ Currently WORKS ON 1 MODEL FOR EACH STOCK 
+        (in order to implement sevaral- 
+         we will need to include the name of the model file to save it in the final dictionary)"""
+        if model_params_path is None:
+            print("must provide model_params_path!!")
+            return None
+
+        self.init_features_from_csv(features_csv_path=model_params_path)
+        train_previous_rand_states = [
+            self.model_training_params['train_rand_state']]
+        test_previous_rand_states = [
+            self.model_training_params['test_rand_state']]
+        accuracies = []
+
+        # Retrain [iterations] amount of times
+        for i in range(len(iterations)):
+            # generate new and unique random state (one that was not in our previous testing)
+            new_train_rand_state = self.regenerate_new_random_state(
+                train_previous_rand_states)
+            self.model_training_params['train_random_state'] = new_train_rand_state
+            train_previous_rand_states.append(new_train_rand_state)
+            if new_test_rand:
+                new_test_rand_state = self.regenerate_new_random_state(
+                    test_previous_rand_states)
+                self.model_training_params['train_random_state'] = new_test_rand_state
+                test_previous_rand_states.append(new_test_rand_state)
+
+            # train
+            self.train_model()
+            # keep track of accuracies to get the average
+            accuracies.append(self.test_accuracy)
+
+            # save
+            self.model_name = f'{self.ticker}_Acc={self.test_accuracy}_#{i+1}'
+            self.save()
+
+        # get average accuracy
+        average_acc = DataHandler.get_array_average(accuracies)
+        return average_acc
+
     #------- AUTO TRAINING -------#
+
     def get_training_params_combinations(self):
         combinations = {
             'tickers': ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT'],
@@ -348,7 +435,7 @@ class ModelTrainer:
                                                 'epochs': n_epoch,
                                                 'output_dim': self.training_output_dims,
                                                 'batch_size': self.training_batch_size,
-                                                'train_random_state': randint(10, 9999),
+                                                'train_random_state': self.generate_random_state(),
                                                 'test_random_state': TEST_RANDOM_STATE
                                             }
 
@@ -361,6 +448,18 @@ class ModelTrainer:
                                                     self.save()
                                                     model_id += 1
 
+    def run_auto_retraining(self, iterations_for_each_stock=DEFAULT_RETRAINING_ITERATIONS):
+        # fill in with model param paths for each stock!
+        models_params_paths = ['', '', '', '', '']
+
+        average_accuracies = {}
+        for params_path in models_params_paths:
+            average_acc = self.retrain_model(
+                model_params_path=params_path, new_test_rand=False, iterations=iterations_for_each_stock)
+            average_accuracies[self.ticker] = average_acc
+        Helper.save_dict_to_csv(
+            dict=average_accuracies, save_path=self.saving_path, file_name="Average_Retraining_Accuracies")
+
 
 #---------- MAIN -----------#
 if __name__ == '__main__':
@@ -372,6 +471,9 @@ if __name__ == '__main__':
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}"
 
     mt = ModelTrainer(user=user, saving_path=save_path)
-    mt.run_auto_training(acc_saving_threshold=0.55)
-    # mt.train_model()
-    # mt.save()
+
+    # Train model
+    # mt.run_auto_training(acc_saving_threshold=0.55)
+
+    # Retrain model
+    # mt.run_auto_retraining(iterations_for_each_stock=DEFAULT_RETRAINING_ITERATIONS)

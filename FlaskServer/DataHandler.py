@@ -6,6 +6,7 @@ from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
 from math import log, inf
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
+from csv import reader as csv_reader
 import Helper
 '''
 This class will be used to coordinate the work between
@@ -435,3 +436,35 @@ def create_sequence(dataset, target=None, num_of_rows=N_PAST):
         labels.append(labels_dataset.iloc[stop_idx][0])
     return np_array(sequences, dtype='object'), np_array(labels, dtype='object')
     """
+
+
+# LOAD FEATURES CSV - used only by ModelTrainer.py
+def str_to_array(array_shaped_str):
+    """
+    Recieves an array shaped str and returns it in a form of array
+    it will remove [, ], ', " charachters from the string and transorm it to array
+    """
+    array_shaped_str = array_shaped_str.replace(
+        '[', '').replace(']', '').replace("'", "").replace('"', '')
+    return array_shaped_str.split(',')
+
+
+def load_csv(path, csv_delimiter='|'):
+    '''
+    Loads a csv file from a given file,
+    params: csv_path, csv_delimiter(default='|')
+    returns it in a form of dictionary. 
+    '''
+    dictobj = {}
+    try:
+        with open(path, mode='r') as infile:
+            reader = csv_reader(infile, delimiter=csv_delimiter)
+            return dict((rows[0], rows[1]) for rows in reader)
+    except Exception as err:
+        print(err)
+        return None
+# END LOAD FEATURES CSV
+
+
+def get_array_average(arr):
+    return sum(arr) / len(arr)
