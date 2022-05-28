@@ -182,10 +182,10 @@ def mt_split_data(np_array_sequence, np_array_labels, train_random_state=4321, t
 
     # 1. split {data} to -> {train_data}, {test_data}; len({test_data}) == testing_size
     train_seq, test_seq, train_labels, test_labels = train_test_split(
-        np_array_sequence, np_array_labels, test_size=testing_size/np_array_sequence.shape[0], random_state=test_random_state)
+        np_array_sequence, np_array_labels, test_size=testing_size/np_array_sequence.shape[0], random_state=int(test_random_state))
     # 2. split {train_data} to -> {train_data}, {validation_data}; len({validation_data}) == validation_size
     train_seq, validation_seq, train_labels, validation_labels = train_test_split(
-        train_seq, train_labels, test_size=validation_size/train_seq.shape[0], random_state=train_random_state)
+        train_seq, train_labels, test_size=validation_size/train_seq.shape[0], random_state=int(train_random_state))
 
     # train_data, validation_data, test_data = np_split(dnn_df.sample(frac=1, random_state=42), [
     #     int(len(dnn_df)-testing_size-validation_size), int(len(dnn_df)-testing_size)])
@@ -404,7 +404,7 @@ def create_sequence(dataset, target=None, num_of_rows=N_PAST):
     #     return None
 
     if target == None:
-        for stop_idx in range(num_of_rows, len(dataset)):
+        for stop_idx in range(int(num_of_rows), len(dataset)):
             sequences.append(dataset.iloc[start_idx:stop_idx])
             start_idx += 1
         return np_array(sequences, dtype='object')
@@ -413,7 +413,7 @@ def create_sequence(dataset, target=None, num_of_rows=N_PAST):
     features_dataset = dataset.drop(columns=target)
     labels_dataset = dataset[[target]]
     # Selecting "num_of_rows"
-    for stop_idx in range(num_of_rows, len(dataset)):
+    for stop_idx in range(int(num_of_rows), len(dataset)):
         sequences.append(features_dataset.iloc[start_idx:stop_idx])
         labels.append(labels_dataset.iloc[stop_idx][0])
         start_idx += 1
@@ -444,9 +444,22 @@ def str_to_array(array_shaped_str):
     Recieves an array shaped str and returns it in a form of array
     it will remove [, ], ', " charachters from the string and transorm it to array
     """
-    array_shaped_str = array_shaped_str.replace(
-        '[', '').replace(']', '').replace("'", "").replace('"', '')
-    return array_shaped_str.split(',')
+    return remove_str_chars(array_shaped_str,  ['[', ']', "'", '"', ' ']).split(',')
+
+
+def remove_str_chars(str, chars):
+    for char in chars:
+        str = str.replace(char, '')
+    return str
+
+
+def replace_str_chars(str, tuples_lst):
+    '''
+    example of @lst: lst = [ ( ']', '' ), ( ';', '|' ) ]
+    '''
+    for tuple in tuples_lst:
+        str = str.replace(tuple[0], tuple[1])
+    return str
 
 
 def load_csv(path, csv_delimiter='|'):
@@ -459,7 +472,8 @@ def load_csv(path, csv_delimiter='|'):
     try:
         with open(path, mode='r') as infile:
             reader = csv_reader(infile, delimiter=csv_delimiter)
-            return dict((rows[0], rows[1]) for rows in reader)
+            return dict((rows[0], int(rows[1])) if rows[1].isdigit() else (rows[0], rows[1]) for rows in reader)
+
     except Exception as err:
         print(err)
         return None

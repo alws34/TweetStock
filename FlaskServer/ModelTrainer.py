@@ -5,7 +5,8 @@ import Helper
 import DataHandler
 from pandas import read_csv as pd_read_csv
 from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
-from keras import models, layers
+from keras.layers import Dense
+from keras.models import Sequential
 from tensorflow.keras.utils import to_categorical
 from random import randint
 
@@ -261,7 +262,7 @@ class ModelTrainer:
 
     def train_model(self):
         '''Generates model according to inserted params'''
-        n_past = self.model_training_params['n_past']
+        n_past = int(self.model_training_params['n_past'])
         target = 'price_difference'
 
         #----GET DATA----#
@@ -297,14 +298,14 @@ class ModelTrainer:
 #----- End OLD ----#
 
         #----INITIALIZE NETWORK----#
-        network = models.Sequential()
+        network = Sequential()
 
         for units in self.model_training_params['layers']:
             print("test")
-            network.add(layers.Dense(units=units, activation=self.model_training_params['activation_all'], input_shape=(
+            network.add(Dense(units=int(units), activation=self.model_training_params['activation_all'], input_shape=(
                 train_seq.shape[2] * train_seq.shape[1],)))
 
-        network.add(layers.Dense(
+        network.add(Dense(
             self.model_training_params['output_dim'], activation=self.model_training_params['activation_last']))
 
         network.compile(optimizer=self.model_training_params['optimizer'],
@@ -341,7 +342,7 @@ class ModelTrainer:
         return randint(10, 9999)
 
     def regenerate_new_random_state(self, previous_rand_states=[]):
-        if previous_rand_states is [] or not isinstance(previous_rand_states, []):
+        if previous_rand_states is [] or not isinstance(previous_rand_states, type([])):
             print('previous_rand_states MUST BE a NONE EMPTY ARRAY')
             return None
         while True:
@@ -359,13 +360,13 @@ class ModelTrainer:
 
         self.init_features_from_csv(features_csv_path=model_params_path)
         train_previous_rand_states = [
-            self.model_training_params['train_rand_state']]
+            self.model_training_params['train_random_state']]
         test_previous_rand_states = [
-            self.model_training_params['test_rand_state']]
+            self.model_training_params['test_random_state']]
         accuracies = []
 
         # Retrain [iterations] amount of times
-        for i in range(len(iterations)):
+        for i in range(iterations):
             # generate new and unique random state (one that was not in our previous testing)
             new_train_rand_state = self.regenerate_new_random_state(
                 train_previous_rand_states)
@@ -374,7 +375,7 @@ class ModelTrainer:
             if new_test_rand:
                 new_test_rand_state = self.regenerate_new_random_state(
                     test_previous_rand_states)
-                self.model_training_params['train_random_state'] = new_test_rand_state
+                self.model_training_params['test_random_state'] = new_test_rand_state
                 test_previous_rand_states.append(new_test_rand_state)
 
             # train
@@ -383,7 +384,7 @@ class ModelTrainer:
             accuracies.append(self.test_accuracy)
 
             # save
-            self.model_name = f'{self.ticker}_Acc={self.test_accuracy}_#{i+1}'
+            self.model_name = f'{self.model_training_params["ticker"]}_Acc={self.test_accuracy}_#{i+1}'
             self.save()
 
         # get average accuracy
@@ -448,17 +449,20 @@ class ModelTrainer:
                                                     self.save()
                                                     model_id += 1
 
-    def run_auto_retraining(self, iterations_for_each_stock=DEFAULT_RETRAINING_ITERATIONS):
+    def run_auto_retraining(self, iterations_for_each_stock=DEFAULT_RETRAINING_ITERATIONS, new_test_rand=False):
         # fill in with model param paths for each stock!
-        models_params_paths = ['', '', '', '', '']
+        root_dir = '/home/pi/FinalProject/FlaskServer/Data/Networks/'
+        models_params_paths = ['/home/pi/FinalProject/FlaskServer/Data/Networks/test/AAPL_acc_0.64_npast_1_epoch_5_opt_adam_num_1118_params.csv',
+                               '/home/pi/FinalProject/FlaskServer/Data/Networks/test/AMZN_acc_0.58_npast_1_epoch_15_opt_adam_num_284_params.csv']
 
         average_accuracies = {}
         for params_path in models_params_paths:
             average_acc = self.retrain_model(
-                model_params_path=params_path, new_test_rand=False, iterations=iterations_for_each_stock)
-            average_accuracies[self.ticker] = average_acc
+                model_params_path=params_path, new_test_rand=new_test_rand, iterations=iterations_for_each_stock)
+            average_accuracies[self.model_training_params["ticker"]
+                               ] = average_acc
         Helper.save_dict_to_csv(
-            dict=average_accuracies, save_path=self.saving_path, file_name="Average_Retraining_Accuracies")
+            dict=average_accuracies, save_path=self.saving_path, file_name="1_Average_Retraining_Accuracies")
 
 
 #---------- MAIN -----------#
@@ -466,7 +470,7 @@ if __name__ == '__main__':
     # availables: 'alon' , 'guy', 'hadar', 'pi'
     delimiter, prefix = Helper.get_prefix_path()
     user = 'pi'
-    try_folder_name = '3'
+    try_folder_name = 'test'
     #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}"
 
@@ -476,4 +480,4 @@ if __name__ == '__main__':
     # mt.run_auto_training(acc_saving_threshold=0.55)
 
     # Retrain model
-    # mt.run_auto_retraining(iterations_for_each_stock=DEFAULT_RETRAINING_ITERATIONS)
+    mt.run_auto_retraining(iterations_for_each_stock=3, new_test_rand=True)
