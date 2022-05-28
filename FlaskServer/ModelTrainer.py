@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import Helper
 import DataHandler
+import glob
 from pandas import read_csv as pd_read_csv
 from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
 from keras.layers import Dense
@@ -214,10 +215,13 @@ class ModelTrainer:
         Helper.save_dict_to_csv(
             self.model_training_params, saving_path, file_name)
 
-    def save(self, model_name=None):
+    def save(self, saving_path=None, model_name=None):
         '''Saves model+graph+training_parameters.
         saving_path and model_name can be None - will default to self.saving_path and self.model_name'''
-        Helper.create_dir(self.saving_path)
+        if saving_path is None:
+            saving_path = self.saving_path
+
+        Helper.create_dir(saving_path)
         if model_name is not None:
             self.model_name = model_name
         if self.model_name is None:
@@ -365,6 +369,8 @@ class ModelTrainer:
             self.model_training_params['test_random_state']]
         accuracies = []
 
+        # self.saving_path = f'{model_params_path}{}'
+
         # Retrain [iterations] amount of times
         for i in range(iterations):
             # generate new and unique random state (one that was not in our previous testing)
@@ -451,18 +457,38 @@ class ModelTrainer:
 
     def run_auto_retraining(self, iterations_for_each_stock=DEFAULT_RETRAINING_ITERATIONS, new_test_rand=False):
         # fill in with model param paths for each stock!
-        root_dir = '/home/pi/FinalProject/FlaskServer/Data/Networks/'
-        models_params_paths = ['/home/pi/FinalProject/FlaskServer/Data/Networks/test/AAPL_acc_0.64_npast_1_epoch_5_opt_adam_num_1118_params.csv',
-                               '/home/pi/FinalProject/FlaskServer/Data/Networks/test/AMZN_acc_0.58_npast_1_epoch_15_opt_adam_num_284_params.csv']
+        root_dir = '/home/pi/FinalProject/FlaskServer/SelectedModels'
+        models_params_paths = ['AAPL', 'AMZN',
+                               'GOOG', 'MSFT', 'TSLA']  # 'GOOGL',
+        delimiter, prefix = Helper.get_prefix_path()
 
         average_accuracies = {}
         for params_path in models_params_paths:
-            average_acc = self.retrain_model(
-                model_params_path=params_path, new_test_rand=new_test_rand, iterations=iterations_for_each_stock)
-            average_accuracies[self.model_training_params["ticker"]
-                               ] = average_acc
-        Helper.save_dict_to_csv(
-            dict=average_accuracies, save_path=self.saving_path, file_name="1_Average_Retraining_Accuracies")
+            ticker_dir_path = f'{root_dir}{delimiter}{params_path}'
+            csv_params_paths = self.get_files_path(
+                ticker_dir_path, extension="csv")
+
+            for csv_param_path in csv_params_paths:
+                model_dir_num = self.get_retraining_saving_dir_name(
+                    csv_param_path)
+                self.saving_path = f'{ticker_dir_path}{delimiter}{model_dir_num}{delimiter}'
+                average_acc = self.retrain_model(
+                    model_params_path=csv_param_path, new_test_rand=new_test_rand, iterations=iterations_for_each_stock)
+
+                average_accuracies[model_dir_num] = average_acc
+
+            Helper.save_dict_to_csv(
+                dict=average_accuracies, save_path=f'{ticker_dir_path}{delimiter}', file_name="1_Average_Retraining_Accuracies")
+
+    def get_files_path(self, model_params_path, extension="*"):
+        '''
+        Returns a list of files (full paths) from given directory
+        '''
+        delimiter, prefix = Helper.get_prefix_path()
+        return glob.glob(f"{model_params_path}{delimiter}*.{extension}")
+
+    def get_retraining_saving_dir_name(self, file_path):
+        return os.path.basename(file_path).split('_')[-2]
 
 
 #---------- MAIN -----------#
@@ -480,4 +506,4 @@ if __name__ == '__main__':
     # mt.run_auto_training(acc_saving_threshold=0.55)
 
     # Retrain model
-    mt.run_auto_retraining(iterations_for_each_stock=3, new_test_rand=True)
+    mt.run_auto_retraining(iterations_for_each_stock=100, new_test_rand=True)

@@ -1,0 +1,12 @@
+layers|[16, 8]
+ticker|AAPL
+features|['Date', 'ticker_symbol', 'price_difference', 'Tweet_Sentiment', 'Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes', 'User_Engagement']
+activation_all|relu
+activation_last|softmax
+num_of_layers|2
+loss_func|mean_squared_error
+optimizer|rmsprop
+n_past|1
+output_dim|2
+epochs|20
+batch_size|8
