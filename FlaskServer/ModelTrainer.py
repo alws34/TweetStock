@@ -212,8 +212,8 @@ class ModelTrainer:
         if model_name is None:
             model_name = self.model_name
         file_name = "".join((str(model_name), '_params'))
-        Helper.save_dict_to_csv(
-            self.model_training_params, saving_path, file_name)
+        Helper.save_delimited_dict(
+            self.model_training_params, f'{saving_path}{file_name}.csv')
 
     def save(self, saving_path=None, model_name=None):
         '''Saves model+graph+training_parameters.
@@ -506,4 +506,7 @@ if __name__ == '__main__':
     # mt.run_auto_training(acc_saving_threshold=0.55)
 
     # Retrain model
-    mt.run_auto_retraining(iterations_for_each_stock=100, new_test_rand=True)
+    #mt.run_auto_retraining(iterations_for_each_stock=100, new_test_rand=True)
+
+    mt.train_model()
+    mt.save(saving_path='/home/pi/FinalProject/FlaskServer/Data/Networks/test', model_name='testeeeett')

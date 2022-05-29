@@ -29,10 +29,10 @@ def save_dict_to_csv(dict, save_path, file_name, mode='w'):
             f.write("%s,%s\n" % (key, dict[key]))
 
 
-def save_dict_to_tsv(dict, save_path, mode='w', delimiter='|'):
+def save_delimited_dict(dict, save_path, mode='w', delimiter='|'):
     print(dict)
     with open(save_path, mode) as myfile:
-        tsv_writer = csv.writer(myfile,delimiter=delimiter)
+        tsv_writer = csv.writer(myfile, delimiter=delimiter)
         for key in dict.keys():
             tsv_writer.writerow([key, dict[key]])
 

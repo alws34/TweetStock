@@ -5,9 +5,11 @@ import glob
 
 filelist = []
 
+
 def get_files_path(model_params_path, extension="*"):
     delimiter = '/'
     return glob.glob(f"{model_params_path}{delimiter}*.{extension}")
+
 
 def build_dict(arr):
     dic = {}
@@ -27,7 +29,7 @@ def read_and_change():
         for idx, row in enumerate(reader):
             reader[idx] = row.replace(',', '|', 1)
 
-        Helper.save_dict_to_tsv(dict=build_dict(
+        Helper.save_delimited_dict(dict=build_dict(
             reader), save_path=file)
 
 
