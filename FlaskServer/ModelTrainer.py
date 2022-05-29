@@ -506,7 +506,8 @@ if __name__ == '__main__':
     # mt.run_auto_training(acc_saving_threshold=0.55)
 
     # Retrain model
-    #mt.run_auto_retraining(iterations_for_each_stock=100, new_test_rand=True)
+    mt.run_auto_retraining(iterations_for_each_stock=100, new_test_rand=True)
 
-    mt.train_model()
-    mt.save(saving_path='/home/pi/FinalProject/FlaskServer/Data/Networks/test', model_name='testeeeett')
+    # run single train iteration
+    # mt.train_model()
+    # mt.save(saving_path='/home/pi/FinalProject/FlaskServer/Data/Networks/test', model_name='testeeeett')
