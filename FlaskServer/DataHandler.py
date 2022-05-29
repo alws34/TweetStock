@@ -473,7 +473,6 @@ def load_csv(path, csv_delimiter='|'):
         with open(path, mode='r') as infile:
             reader = csv_reader(infile, delimiter=csv_delimiter)
             return dict((rows[0], int(rows[1])) if rows[1].isdigit() else (rows[0], rows[1]) for rows in reader)
-
     except Exception as err:
         print(err)
         return None

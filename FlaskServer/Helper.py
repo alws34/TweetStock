@@ -1,5 +1,6 @@
 from os import system, name as os_name, getcwd, path as os_path, mkdir
 from datetime import datetime as dt
+import csv
 #from pandas import DataFrame
 
 
@@ -26,6 +27,14 @@ def save_dict_to_csv(dict, save_path, file_name, mode='w'):
     with open(f'{save_path}{file_name}.csv', mode) as f:
         for key in dict.keys():
             f.write("%s,%s\n" % (key, dict[key]))
+
+
+def save_dict_to_tsv(dict, save_path, mode='w', delimiter='|'):
+    print(dict)
+    with open(save_path, mode) as myfile:
+        tsv_writer = csv.writer(myfile,delimiter=delimiter)
+        for key in dict.keys():
+            tsv_writer.writerow([key, dict[key]])
 
 
 def save_df_to_csv(df, path, file_name):
