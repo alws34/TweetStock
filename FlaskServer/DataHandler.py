@@ -221,6 +221,8 @@ def mt_get_price_diff(stocks_df):
     temp_stocks['price_difference'] = [
         0.0 for i in range(len(temp_stocks))]
 
+    temp = {}
+
     for i in range(1, len(temp_stocks)):
         # Next Close - Today Close
         # today = float(temp_stocks['Close'][i])
@@ -230,13 +232,20 @@ def mt_get_price_diff(stocks_df):
 
         price_diff = float(temp_stocks['Close'][i]) - \
             float(temp_stocks['Open'][i])
-        # temp_stocks['price_difference'][i] = price_diff
+        temp[i] = price_diff
+        #temp_stocks['price_difference'][i] = price_diff
+
         temp_stocks['price_difference'][i] = 1 if price_diff >= 0 else 0
+
         # if (price_diff>=0): temp_stocks['price_difference'][i] = 1
         # else: temp_stocks['price_difference'][i] = 0
 
     temp_stocks.drop([0], inplace=True)
     temp_stocks.reset_index(drop=True, inplace=True)
+
+    Helper.save_dict_to_csv(
+        temp, '/home/pi/FinalProject/FlaskServer/Data/Networks/test/', 'price_diff')
+
     return temp_stocks
 
 

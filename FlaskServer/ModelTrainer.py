@@ -271,7 +271,7 @@ class ModelTrainer:
 
         #----GET DATA----#
         dnn_df = self.transform_features_to_log(self.get_dnn_training_df())
-
+        #Helper.save_df_to_csv(dnn_df, f'{self.saving_path}','dnn_df')
         #----SCALE DATA----#
         scaled_dnn_df = DataHandler.mt_scale_data(
             dnn_df).drop(columns=['Date'])
@@ -318,6 +318,14 @@ class ModelTrainer:
         #----RESHAPE SEQUENCES----#
         train_seq, validation_seq, test_seq = self.reshape_sequence(
             train_seq), self.reshape_sequence(validation_seq), self.reshape_sequence(test_seq)
+
+        import pandas as pd
+        Helper.save_df_to_csv(pd.DataFrame(train_seq),
+                              f'{self.saving_path}', 'train1')
+        Helper.save_df_to_csv(
+            pd.DataFrame(validation_seq), f'{self.saving_path}', 'validation1')
+        Helper.save_df_to_csv(pd.DataFrame(test_seq),
+                              f'{self.saving_path}', 'test1')
 
         #----GET TENSOR VALUES----#
         train_seq, validation_seq, test_seq = self.get_tensor_values(
@@ -490,6 +498,12 @@ class ModelTrainer:
     def get_retraining_saving_dir_name(self, file_path):
         return os.path.basename(file_path).split('_')[-2]
 
+    def set_model_name(self, name):
+        self.model_name = name
+
+    def set_model_epochs(self, epochs):
+        self.model_training_params['epochs'] = epochs
+
 
 #---------- MAIN -----------#
 if __name__ == '__main__':
@@ -504,9 +518,18 @@ if __name__ == '__main__':
 
     # Train model
     # mt.run_auto_training(acc_saving_threshold=0.55)
-
+    
+    #Train specific model
+    #mt.init_features_from_csv(
+    #   "/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/npast3/AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
+    # mt.set_model_epochs(25)
+    # mt.set_model_name("TEST3")
+    # mt.train_model()
+    # mt.save()
+    
+    
     # Retrain model
-    mt.run_auto_retraining(iterations_for_each_stock=100, new_test_rand=True)
+    mt.run_auto_retraining(iterations_for_each_stock=1, new_test_rand=True)
 
     # run single train iteration
     # mt.train_model()

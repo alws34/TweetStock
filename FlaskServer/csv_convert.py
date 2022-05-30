@@ -33,6 +33,9 @@ def read_and_change():
             reader), save_path=file)
 
 
-filelist = get_files_path(
-    '/home/pi/FinalProject/FlaskServer/Data/Networks/test/SELECTED MODELS - 25.05/npast = 1/AAPL', 'csv')
+for ticker in ['AAPL', 'TSLA', 'AMZN', 'MSFT', 'GOOG']:
+    for path in get_files_path(
+            f'/home/pi/FinalProject/FlaskServer/SelectedModels/{ticker}', 'csv'):
+        filelist.append(path)
+
 read_and_change()
