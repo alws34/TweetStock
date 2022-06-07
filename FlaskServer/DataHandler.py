@@ -64,15 +64,17 @@ def mt_scale_data(df, target='price_difference', scaling=SCALING):
 
     def is_sentiment_feature(feature):
         return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
+
     columns = df.columns
     df = df.groupby(by=['Date'])
     dates_dict = {}
     for col in columns:
         dates_dict[col] = []
-
+    counter = 0
     for date in df:
         dates_dict['Date'].append(date[0])
         dates_dict[target].append(date[1][target].iloc[0])
+
         for col in columns:
             if is_scalable_feature(col):
                 if scaling == 'min_max':
@@ -83,9 +85,20 @@ def mt_scale_data(df, target='price_difference', scaling=SCALING):
                 to_append = date[1][col] * date[1]["Tweet_Sentiment"] if not is_sentiment_feature(
                     col) else date[1][col]
                 # print("@TweetStockModel/scale_df()/to_append=", to_append)
-                dates_dict[col].append(scaler.fit_transform(
-                    np_array(to_append).reshape(-1, 1)).mean())
 
+                np_to_append = np_array(to_append)
+
+                reshaped_np_to_append = np_to_append.reshape(-1, 1)
+
+                scaled_to_append = scaler.fit_transform(reshaped_np_to_append)
+
+                mean_scaled_to_append = scaled_to_append.mean()
+
+                dates_dict[col].append(mean_scaled_to_append)
+
+                if counter == 38:
+                    print(counter)
+        counter += 1
     return pd_DataFrame.from_dict(dates_dict)
 
 

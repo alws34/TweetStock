@@ -215,7 +215,7 @@ class ModelTrainer:
         Helper.save_delimited_dict(
             self.model_training_params, f'{saving_path}{file_name}.csv')
 
-    def save(self, saving_path=None, model_name=None):
+    def save(self, saving_path=None, model_name=None, append_accuracy=False):
         '''Saves model+graph+training_parameters.
         saving_path and model_name can be None - will default to self.saving_path and self.model_name'''
         if saving_path is None:
@@ -228,6 +228,8 @@ class ModelTrainer:
             print(
                 "Must either init self.model_name or provide a saving name for the file in order to save")
             return None
+        if append_accuracy:
+            self.model_name += f'_{self.test_accuracy}'
         self.save_model()
         self.save_graph()
         self.save_params()
@@ -263,6 +265,59 @@ class ModelTrainer:
         E.G. shape = (5,6,7) ==> (5,6*7) = (5,42)
         '''
         return sequence.reshape(len(sequence), sequence.shape[1]*sequence.shape[2])
+
+    def train_model_from_comparison_example(self):
+        '''Generates model according to inserted params'''
+        n_past = int(self.model_training_params['n_past'])
+        target = 'price_difference'
+
+        #----GET DATA----#
+        dnn_df = self.transform_features_to_log(self.get_dnn_training_df())
+        #Helper.save_df_to_csv(dnn_df, f'{self.saving_path}','dnn_df')
+        #----SCALE DATA----#
+        scaled_dnn_df = DataHandler.mt_scale_data(
+            dnn_df).drop(columns=['Date'])
+
+        #----NEW-----#
+        sequence, labels = self.create_sequence(scaled_dnn_df, n_past, target)
+        train_seq, train_label,  validation_seq, validation_label, test_seq, test_label = DataHandler.mt_split_data(
+            sequence, labels, train_random_state=self.model_training_params['train_random_state'], test_random_state=self.model_training_params['test_random_state'])
+        #----End NEW ----#
+        train_seq, validation_seq, test_seq = self.reshape_sequence(
+            train_seq), self.reshape_sequence(validation_seq), self.reshape_sequence(test_seq)
+
+        train_seq, validation_seq, test_seq = self.get_tensor_values(
+            train_seq), self.get_tensor_values(validation_seq), self.get_tensor_values(test_seq)
+
+        train_label, validation_label, test_label = self.get_tensor_values(to_categorical(train_label)), self.get_tensor_values(
+            to_categorical(validation_label)), self.get_tensor_values(to_categorical(test_label))
+
+        # Build the model
+        from tensorflow import keras
+        from tensorflow.keras import layers
+        model_layers = []
+        for units in self.model_training_params['layers']:
+            model_layers.append(layers.Dense(
+                units, activation=self.model_training_params['activation_all']))
+
+        model_layers.append(layers.Dense(
+            self.model_training_params['output_dim'], activation=self.model_training_params['activation_last']))
+
+        model = keras.Sequential(model_layers)
+        model.compile(optimizer=self.model_training_params['optimizer'],
+                      loss=self.model_training_params['loss_func'], metrics=['accuracy'])
+
+        history = model.fit(train_seq,
+                            train_label,
+                            epochs=self.model_training_params['epochs'],
+                            batch_size=self.model_training_params['batch_size'],
+                            validation_data=(validation_seq, validation_label))
+
+        test_loss, test_acc = model.evaluate(test_seq, test_label)
+        test_acc = round(test_acc, 7)
+
+        self.model, self.test_accuracy, self.history = model, test_acc, history
+###################################
 
     def train_model(self):
         '''Generates model according to inserted params'''
@@ -319,13 +374,13 @@ class ModelTrainer:
         train_seq, validation_seq, test_seq = self.reshape_sequence(
             train_seq), self.reshape_sequence(validation_seq), self.reshape_sequence(test_seq)
 
-        import pandas as pd
-        Helper.save_df_to_csv(pd.DataFrame(train_seq),
-                              f'{self.saving_path}', 'train1')
-        Helper.save_df_to_csv(
-            pd.DataFrame(validation_seq), f'{self.saving_path}', 'validation1')
-        Helper.save_df_to_csv(pd.DataFrame(test_seq),
-                              f'{self.saving_path}', 'test1')
+        # import pandas as pd
+        # Helper.save_df_to_csv(pd.DataFrame(train_seq),
+        #                       f'{self.saving_path}', 'train1')
+        # Helper.save_df_to_csv(
+        #     pd.DataFrame(validation_seq), f'{self.saving_path}', 'validation1')
+        # Helper.save_df_to_csv(pd.DataFrame(test_seq),
+        #                       f'{self.saving_path}', 'test1')
 
         #----GET TENSOR VALUES----#
         train_seq, validation_seq, test_seq = self.get_tensor_values(
@@ -509,7 +564,7 @@ class ModelTrainer:
 if __name__ == '__main__':
     # availables: 'alon' , 'guy', 'hadar', 'pi'
     delimiter, prefix = Helper.get_prefix_path()
-    user = 'pi'
+    user = 'alon'
     try_folder_name = 'test'
     #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}"
@@ -518,18 +573,24 @@ if __name__ == '__main__':
 
     # Train model
     # mt.run_auto_training(acc_saving_threshold=0.55)
-    
-    #Train specific model
-    #mt.init_features_from_csv(
-    #   "/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/npast3/AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
-    # mt.set_model_epochs(25)
-    # mt.set_model_name("TEST3")
-    # mt.train_model()
-    # mt.save()
-    
-    
+
+    # Train specific model
+    mt.init_features_from_csv(
+        "C:\\Users\\alws3\\Desktop\\AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
+    mt.set_model_epochs(25)
+
+    # Training our model
+    mt.set_model_name("TEST_ours")
+    mt.train_model()
+    mt.save(append_accuracy=True)
+
+    # training example model
+    mt.set_model_name("TEST_Example")
+    mt.train_model_from_comparison_example()
+    mt.save(append_accuracy=True)
+
     # Retrain model
-    mt.run_auto_retraining(iterations_for_each_stock=1, new_test_rand=True)
+    #mt.run_auto_retraining(iterations_for_each_stock=1, new_test_rand=True)
 
     # run single train iteration
     # mt.train_model()

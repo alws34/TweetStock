@@ -10,7 +10,7 @@ def create_dir(path):
 
 
 def write_to_log(msg):
-    with open(f'{get_prefix_path()[1]}/Logs/LOG_{get_date_time_stringify()}', 'a+', encoding='utf-8') as f:
+    with open(f'{get_prefix_path()[1]}\\Logs\\LOG_{get_date_time_stringify()}', 'a+', encoding='utf-8') as f:
         f.write(msg)
 
 
@@ -46,7 +46,7 @@ def save_df_to_csv(df, path, file_name):
 def get_prefix_path():
     if os_name == 'nt':
         delimiter = '\\'
-        prefix = f'{getcwd()}\\FlaskServer\\'
+        prefix = f'{getcwd()}\\'
     elif os_name == 'posix':
         delimiter = '/'
         prefix = '/home/pi/FinalProject/FlaskServer/'
@@ -111,9 +111,10 @@ def get_user_data_paths(user):
             'Networks_Save_Path': ''
         },
         'alon': {
-            'users_path': "D:\GoogleDrive\Alon\לימודים\Final Project\Data\Self Collected\\",
+            'users_path': "D:\\Google Drive\\Alon\\לימודים\\Final Project\\Data\\Self Collected\\",
             'user_path2': 'D:\\Google Drive\\Alon\\לימודים\\Final Project\\Data\\Self Collected\\',
-            'Networks_Save_Path': 'D:\\GoogleDrive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\'
+            'Networks_Save_Path': 'D:\\Google Drive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\',
+            'initialized_df_path': r'D:\Google Drive\Alon\לימודים\TweetStockApp\FlaskServer\Data\CSVs\initialized_df.csv'
         },
         'pi': {
             'users_path': f"{prefix}Data/CSVs/Initial_Data/",
