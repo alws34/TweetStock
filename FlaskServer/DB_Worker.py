@@ -27,7 +27,6 @@ def clear_table(table_name, date):
 def post_to_FireBase(tables_dict, date):
     try:
         for table_name, table_dict in tables_dict.items():
-
             for stock_name, stock_dict in table_dict.items():
                 if type(stock_dict) == dict:
                     db.child(date).child(table_name).child(
