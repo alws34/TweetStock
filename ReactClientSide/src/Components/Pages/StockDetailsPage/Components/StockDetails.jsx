@@ -4,6 +4,10 @@ import { Row, Col } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../../Configs/Global";
 
+const numberWithCommas = (x) => {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
 export default function StockDetails(props) {
   const Item = (props) => {
     const { sx, ...other } = props;
@@ -47,8 +51,12 @@ export default function StockDetails(props) {
     "Open:": data.regularMarketOpen,
     "Close:": data.regularMarketPrice,
     "High:": data.regularMarketDayHigh,
-    "Volume:": data.regularMarketVolume,
-    "Average Volume:": data.averageDailyVolume3Month,
+    "Volume (M):": `${Math.round(data.regularMarketVolume / 1000000).toFixed(
+      3
+    )} M`,
+    "Average Volume (M):": `${(data.averageDailyVolume3Month / 1000000).toFixed(
+      3
+    )} M`,
     "Region:": data.region,
   };
   const lines2 = {
@@ -57,9 +65,13 @@ export default function StockDetails(props) {
     "52 Week Range:": data.fiftyTwoWeekRange,
     "Bid:": data.bid,
     "Ask:": data.ask,
-    "Market Cap:": data.marketCap,
+    "Market Cap (M):": `${numberWithCommas(
+      (data.marketCap / 1000000).toFixed(3)
+    )} M`,
     "ESP:": data.epsTrailingTwelveMonths,
-    "Price Now:": data.postMarketPrice ? data.postMarketPrice : "",
+    "Price Now:": data.postMarketPrice
+      ? data.postMarketPrice
+      : data.regularMarketPrice,
   };
 
   return (
