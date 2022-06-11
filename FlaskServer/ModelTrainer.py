@@ -1,6 +1,7 @@
 import os
 #import tensorflow as tf
 import matplotlib.pyplot as plt
+from numpy import append
 import Helper
 import DataHandler
 import glob
@@ -215,11 +216,13 @@ class ModelTrainer:
         Helper.save_delimited_dict(
             self.model_training_params, f'{saving_path}{file_name}.csv')
 
-    def save(self, saving_path=None, model_name=None):
+    def save(self, saving_path=None, model_name=None, append_accuracy=False):
         '''Saves model+graph+training_parameters.
         saving_path and model_name can be None - will default to self.saving_path and self.model_name'''
         if saving_path is None:
             saving_path = self.saving_path
+        if append_accuracy and self.test_accuracy is not None:
+            self.model_name = f'{self.model_name}_{round(self.test_accuracy,3)}' 
 
         Helper.create_dir(saving_path)
         if model_name is not None:
@@ -518,18 +521,17 @@ if __name__ == '__main__':
 
     # Train model
     # mt.run_auto_training(acc_saving_threshold=0.55)
-    
-    #Train specific model
-    #mt.init_features_from_csv(
-    #   "/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/npast3/AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
-    # mt.set_model_epochs(25)
-    # mt.set_model_name("TEST3")
-    # mt.train_model()
-    # mt.save()
-    
-    
+
+    # Train specific model
+    mt.init_features_from_csv(
+        "/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/npast3/AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
+    mt.set_model_epochs(400)
+    mt.set_model_name("400_EPOCHS")
+    mt.train_model()
+    mt.save(append_accuracy=True)
+
     # Retrain model
-    mt.run_auto_retraining(iterations_for_each_stock=1, new_test_rand=True)
+    #mt.run_auto_retraining(iterations_for_each_stock=1, new_test_rand=True)
 
     # run single train iteration
     # mt.train_model()
