@@ -24,8 +24,11 @@ It will contain every method which is used to handle data.
 N_PAST = 1
 TSM_MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
 TSM_MIN_USER_FOLLOWERS = 100        # min user followers num to be included
+# SCALING
 SCALING = 'min_max'
-
+X_MAX = 100
+X_MIN = 100
+X_RANGE = X_MAX - X_MIN
 
 #--------- ModelTrainer.py - to combine ----------#
 # COMBINED METHODS
@@ -55,7 +58,21 @@ def mt_create_sequence(dataset, target, num_of_rows=N_PAST):
 """
 
 
-def mt_scale_data(df, target='price_difference', scaling=SCALING):
+
+def mt_scale_data(df, target='price_difference'):
+    def is_scalable_feature(feature):
+        return feature != 'Date' and feature != target
+
+    def is_sentiment_feature(feature):
+        return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
+    # Start scaling
+    
+    for col in df.columns:
+        scaler = MinMaxScaler()
+
+
+
+def mt_scale_data_old(df, target='price_difference', scaling=SCALING):
     """
     Handles data scaling and aggregation (e.g. average) per day of the data
     """
@@ -64,15 +81,17 @@ def mt_scale_data(df, target='price_difference', scaling=SCALING):
 
     def is_sentiment_feature(feature):
         return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
+
     columns = df.columns
     df = df.groupby(by=['Date'])
     dates_dict = {}
     for col in columns:
         dates_dict[col] = []
-
+    #counter = 0
     for date in df:
         dates_dict['Date'].append(date[0])
         dates_dict[target].append(date[1][target].iloc[0])
+
         for col in columns:
             if is_scalable_feature(col):
                 if scaling == 'min_max':
@@ -83,9 +102,20 @@ def mt_scale_data(df, target='price_difference', scaling=SCALING):
                 to_append = date[1][col] * date[1]["Tweet_Sentiment"] if not is_sentiment_feature(
                     col) else date[1][col]
                 # print("@TweetStockModel/scale_df()/to_append=", to_append)
-                dates_dict[col].append(scaler.fit_transform(
-                    np_array(to_append).reshape(-1, 1)).mean())
 
+                np_to_append = np_array(to_append)
+
+                reshaped_np_to_append = np_to_append.reshape(-1, 1)
+
+                scaled_to_append = scaler.fit_transform(reshaped_np_to_append)
+
+                mean_scaled_to_append = scaled_to_append.mean()
+
+                dates_dict[col].append(mean_scaled_to_append)
+
+        #         if counter == 38:
+        #             print(counter)
+        # counter += 1
     return pd_DataFrame.from_dict(dates_dict)
 
 
