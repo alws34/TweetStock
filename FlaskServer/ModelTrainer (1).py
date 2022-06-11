@@ -580,7 +580,7 @@ if __name__ == '__main__':
     # Train specific model
     mt.init_features_from_csv(
         "C:\\Users\\alws3\\Desktop\\AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
-    mt.set_model_epochs(25)
+    mt.set_model_epochs(200)
 
     # Training our model
     mt.set_model_name("TEST_ours")
