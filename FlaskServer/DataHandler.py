@@ -24,8 +24,11 @@ It will contain every method which is used to handle data.
 N_PAST = 1
 TSM_MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
 TSM_MIN_USER_FOLLOWERS = 100        # min user followers num to be included
+# SCALING
 SCALING = 'min_max'
-
+X_MAX = 100
+X_MIN = 100
+X_RANGE = X_MAX - X_MIN
 
 #--------- ModelTrainer.py - to combine ----------#
 # COMBINED METHODS
@@ -55,7 +58,21 @@ def mt_create_sequence(dataset, target, num_of_rows=N_PAST):
 """
 
 
-def mt_scale_data(df, target='price_difference', scaling=SCALING):
+
+def mt_scale_data(df, target='price_difference'):
+    def is_scalable_feature(feature):
+        return feature != 'Date' and feature != target
+
+    def is_sentiment_feature(feature):
+        return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
+    # Start scaling
+    
+    for col in df.columns:
+        scaler = MinMaxScaler()
+
+
+
+def mt_scale_data_old(df, target='price_difference', scaling=SCALING):
     """
     Handles data scaling and aggregation (e.g. average) per day of the data
     """
@@ -70,7 +87,7 @@ def mt_scale_data(df, target='price_difference', scaling=SCALING):
     dates_dict = {}
     for col in columns:
         dates_dict[col] = []
-    counter = 0
+    #counter = 0
     for date in df:
         dates_dict['Date'].append(date[0])
         dates_dict[target].append(date[1][target].iloc[0])
@@ -96,9 +113,9 @@ def mt_scale_data(df, target='price_difference', scaling=SCALING):
 
                 dates_dict[col].append(mean_scaled_to_append)
 
-                if counter == 38:
-                    print(counter)
-        counter += 1
+        #         if counter == 38:
+        #             print(counter)
+        # counter += 1
     return pd_DataFrame.from_dict(dates_dict)
 
 
