@@ -222,7 +222,7 @@ class ModelTrainer:
         if saving_path is None:
             saving_path = self.saving_path
         if append_accuracy and self.test_accuracy is not None:
-            self.model_name = f'{self.model_name}_{round(self.test_accuracy,3)}' 
+            self.model_name = f'{self.model_name}_{round(self.test_accuracy,3)}'
 
         Helper.create_dir(saving_path)
         if model_name is not None:
@@ -473,9 +473,9 @@ class ModelTrainer:
             'actv_funcs_last': ['softmax', 'sigmoid'],  # ,'relu'
             'loss_funcs': ['binary_crossentropy', 'mean_squared_error'],
             'optimizers': ['rmsprop', 'adam'],
-            'n_pasts': [3, 5, 7],  # [1]
-            'n_epochs': [5, 10, 15, 20],  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-            'layer_sets': [[4], [8], [16], [16, 8], [8, 4]]
+            'n_pasts': [1, 3],
+            'n_epochs': [10, 15, 20],  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            'layer_sets': [[16], [8, 4]]  # [[4], [8], [16], [16, 8], [8, 4]]
         }
         return combinations
 
@@ -567,7 +567,7 @@ class ModelTrainer:
 if __name__ == '__main__':
     # availables: 'alon' , 'guy', 'hadar', 'pi'
     delimiter, prefix = Helper.get_prefix_path()
-    user = 'alon'
+    user = 'pi'
     try_folder_name = 'test'
     #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}"
@@ -578,8 +578,8 @@ if __name__ == '__main__':
     # mt.run_auto_training(acc_saving_threshold=0.55)
 
     # Train specific model
-    mt.init_features_from_csv(
-        "C:\\Users\\alws3\\Desktop\\AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
+    # mt.init_features_from_csv(
+    #     "C:\\Users\\alws3\\Desktop\\AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
     mt.set_model_epochs(200)
 
     # Training our model

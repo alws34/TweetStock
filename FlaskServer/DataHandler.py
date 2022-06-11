@@ -26,9 +26,13 @@ TSM_MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
 TSM_MIN_USER_FOLLOWERS = 100        # min user followers num to be included
 # SCALING
 SCALING = 'min_max'
-X_MAX = 100
-X_MIN = 100
-X_RANGE = X_MAX - X_MIN
+SCALING_PARAMS = {
+    "Tweet_Comments": (0, 565),
+    "Tweet_Retweets": (0,990),
+    "Tweet_Likes": (0, 988),
+    "User_Engagement": (0, 1000)
+}
+
 
 #--------- ModelTrainer.py - to combine ----------#
 # COMBINED METHODS
@@ -72,50 +76,43 @@ def mt_scale_data(df, target='price_difference'):
 
 
 
-def mt_scale_data_old(df, target='price_difference', scaling=SCALING):
+def mt_scale_data_old(df, target='price_difference'):
     """
     Handles data scaling and aggregation (e.g. average) per day of the data
     """
     def is_scalable_feature(feature):
-        return feature != 'Date' and feature != target
+        return feature != 'Date' and feature != target and feature != "Tweet_Sentiment" and feature != "Positivity" and feature != "Neutral" and feature != "Negativity"
 
-    def is_sentiment_feature(feature):
-        return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
-
-    columns = df.columns
     df = df.groupby(by=['Date'])
     dates_dict = {}
-    for col in columns:
+    for col in df.columns:
         dates_dict[col] = []
-    #counter = 0
     for date in df:
         dates_dict['Date'].append(date[0])
         dates_dict[target].append(date[1][target].iloc[0])
 
-        for col in columns:
-            if is_scalable_feature(col):
-                if scaling == 'min_max':
-                    scaler = MinMaxScaler()
-                elif scaling == 'standard':
-                    scaler = StandardScaler()
+        sentiment_col = np_array(date[1]["Tweet_Sentiment"]).reshape(-1,1)
+        for col_name in df.columns:
+            if is_scalable_feature(col_name):
+                current_col = np_array(date[1][col_name]).reshape(-1,1)
+                scaler = MinMaxScaler()
+                scaler.fit(SCALING_PARAMS[col_name])
+                scaled_current_col = scaler.transform(current_col)
+                
+                scaled_current_col *= sentiment_col
 
-                to_append = date[1][col] * date[1]["Tweet_Sentiment"] if not is_sentiment_feature(
-                    col) else date[1][col]
-                # print("@TweetStockModel/scale_df()/to_append=", to_append)
+                
 
-                np_to_append = np_array(to_append)
+                # to_append = current_col * sentiment_col if not is_sentiment_feature(
+                #     col) else current_col
+                
+                # reshaped_np_to_append = np_array(
+                #     scaled_current_col).reshape(-1, 1)
 
-                reshaped_np_to_append = np_to_append.reshape(-1, 1)
+                #scaled_to_append = scaler.transform(reshaped_np_to_append)
 
-                scaled_to_append = scaler.fit_transform(reshaped_np_to_append)
+                dates_dict[col_name].append(scaled_current_col.mean())
 
-                mean_scaled_to_append = scaled_to_append.mean()
-
-                dates_dict[col].append(mean_scaled_to_append)
-
-        #         if counter == 38:
-        #             print(counter)
-        # counter += 1
     return pd_DataFrame.from_dict(dates_dict)
 
 
