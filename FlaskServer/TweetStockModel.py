@@ -271,18 +271,22 @@ class TweetStockModel:
 
         # filter tweets
         tweets = DataHandler.tsm_filter_tweets(tweets)
-        if len(tweets) == 0:
+        l = len(tweets)
+        if l == 0:
             print("Filtered all tweets @filter_tweets()")
             return None, None
+
         # get user engagement
         tweets = self.fetch_users_with_eng_by_tweets(tweets)
         if tweets == None:
             print("Couldnt get use engagement @get_user_engagement()")
             return None, None
+
         # filter users
         tweets = DataHandler.tsm_filter_users(
             tweets, threshold=MIN_USER_FOLLOWERS)
-        if len(tweets) == 0:
+        l = len(tweets)
+        if l == 0:
             print("Filtered all users @filter_users()")
             return None, None
         # Transform from dictionary to df for easier data handling
@@ -308,7 +312,8 @@ class TweetStockModel:
 
 if __name__ == "__main__":
     model = TweetStockModel(
-        model_path=f'/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
+        # model_path=f'/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
+        model_path='/home/pi/FinalProject/FlaskServer/Data/Networks/4/TSLA_acc_0.62_npast_1_epoch_10_opt_rmsprop_num_3.h5',
         model_ticker="AAPL",
         features_version=1)
     pred_table_dict, tweets_table_dict = model.get_prediction()

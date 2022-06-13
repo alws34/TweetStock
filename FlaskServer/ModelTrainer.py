@@ -574,23 +574,26 @@ if __name__ == '__main__':
 
     mt = ModelTrainer(user=user, saving_path=save_path)
 
+    df = mt.init_data()
+
+    Helper.save_df_to_csv(df=df,path='/home/pi/FinalProject/FlaskServer/Data/CSVs/',file_name='new_initialized_df')
     # Train model
     # mt.run_auto_training(acc_saving_threshold=0.55)
 
     # Train specific model
     # mt.init_features_from_csv(
     #     "C:\\Users\\alws3\\Desktop\\AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
-    mt.set_model_epochs(200)
+    #mt.set_model_epochs(200)
 
     # Training our model
-    mt.set_model_name("TEST_ours")
-    mt.train_model()
-    mt.save(append_accuracy=True)
+    # mt.set_model_name("TEST_ours")
+    # mt.train_model()
+    # mt.save(append_accuracy=True)
 
-    # training example model
-    mt.set_model_name("TEST_Example")
-    mt.train_model_from_comparison_example()
-    mt.save(append_accuracy=True)
+    # # training example model
+    # mt.set_model_name("TEST_Example")
+    # mt.train_model_from_comparison_example()
+    # mt.save(append_accuracy=True)
 
     # Retrain model
     #mt.run_auto_retraining(iterations_for_each_stock=1, new_test_rand=True)
