@@ -467,15 +467,15 @@ class ModelTrainer:
 
     def get_training_params_combinations(self):
         combinations = {
-            'tickers': ['TSLA', 'AMZN', 'GOOG', 'GOOGL', 'AAPL', 'MSFT'],
+            'tickers': ['TSLA', 'AMZN', 'GOOG', 'AAPL', 'MSFT'],
             'feature_sets': [self.feature_set1],  # , self.feature_set2]
             'actv_funcs_all': ['relu', 'tanh', 'sigmoid'],
             'actv_funcs_last': ['softmax', 'sigmoid'],  # ,'relu'
             'loss_funcs': ['binary_crossentropy', 'mean_squared_error'],
             'optimizers': ['rmsprop', 'adam'],
             'n_pasts': [1, 3],
-            'n_epochs': [10, 15, 20],  # [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-            'layer_sets': [[16], [8, 4]]  # [[4], [8], [16], [16, 8], [8, 4]]
+            'n_epochs': [10, 20, 50],
+            'layer_sets': [[16], [8, 4]]
         }
         return combinations
 
@@ -568,22 +568,23 @@ if __name__ == '__main__':
     # availables: 'alon' , 'guy', 'hadar', 'pi'
     delimiter, prefix = Helper.get_prefix_path()
     user = 'pi'
-    try_folder_name = 'test'
+    try_folder_name = 'final_23_06'
     #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}"
 
     mt = ModelTrainer(user=user, saving_path=save_path)
 
-    df = mt.init_data()
+    #df = mt.init_data()
+    #Helper.save_df_to_csv(
+      #  df=df, path='/home/pi/FinalProject/FlaskServer/Data/CSVs/', file_name='new_initialized_df')
 
-    Helper.save_df_to_csv(df=df,path='/home/pi/FinalProject/FlaskServer/Data/CSVs/',file_name='new_initialized_df')
     # Train model
-    # mt.run_auto_training(acc_saving_threshold=0.55)
+    mt.run_auto_training(acc_saving_threshold=0.6)
 
     # Train specific model
     # mt.init_features_from_csv(
     #     "C:\\Users\\alws3\\Desktop\\AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
-    #mt.set_model_epochs(200)
+    # mt.set_model_epochs(200)
 
     # Training our model
     # mt.set_model_name("TEST_ours")

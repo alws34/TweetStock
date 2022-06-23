@@ -105,6 +105,7 @@ def get_models():
 
 def get_user_data_paths(user):
     delimiter, prefix = get_prefix_path()
+    initialized_df_csv_file = 'new_initialized_df.csv'
     paths = {
         'guy': {
             'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',
@@ -114,12 +115,12 @@ def get_user_data_paths(user):
             'users_path': "D:\\Google Drive\\Alon\\לימודים\\Final Project\\Data\\Self Collected\\",
             'user_path2': 'D:\\Google Drive\\Alon\\לימודים\\Final Project\\Data\\Self Collected\\',
             'Networks_Save_Path': 'D:\\Google Drive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\',
-            'initialized_df_path': r'D:\Google Drive\Alon\לימודים\TweetStockApp\FlaskServer\Data\CSVs\initialized_df.csv'
+            'initialized_df_path': f'D:\\Google Drive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\CSVs\\{initialized_df_csv_file}'
         },
         'pi': {
             'users_path': f"{prefix}Data/CSVs/Initial_Data/",
             'Networks_Save_Path': f'{prefix}Data/Networks/',
-            'initialized_df_path': f'{prefix}Data/CSVs/initialized_df.csv'
+            'initialized_df_path': f'{prefix}Data/CSVs/{initialized_df_csv_file}'
         },
         'hadar': {
             'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',

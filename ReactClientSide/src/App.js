@@ -37,6 +37,7 @@ const useStyles = makeStyles({
 export default function App() {
   const [darkMode, setDarkMode] = useState(global.config.theme);
   useEffect(() => {
+    document.title = "TweetStock";
     window.addEventListener("beforeunload", handleTabClosing);
     return () => {
       window.removeEventListener("beforeunload", handleTabClosing);

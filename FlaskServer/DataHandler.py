@@ -26,18 +26,41 @@ TSM_MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
 TSM_MIN_USER_FOLLOWERS = 100        # min user followers num to be included
 # SCALING
 SCALING = 'min_max'
+# MT_SCALING_PARAMS = {
+#     "Tweet_Comments": (0, 565),
+#     "Tweet_Retweets": (0, 990),
+#     "Tweet_Likes": (0, 988)  # ,
+#     # "User_Engagement": (0, 1000)
+# }
 MT_SCALING_PARAMS = {
-    "Tweet_Comments": (0, 565),
-    "Tweet_Retweets": (0, 990),
-    "Tweet_Likes": (0, 988),
-    "User_Engagement": (0, 1000)
+    "Tweet_Comments": [[0], [10]],
+    "Tweet_Retweets": [[0], [10]],
+    "Tweet_Likes": [[0], [10]],
+    "User_Engagement": [[0], [0.64]]
 }
 TSM_SCALING_PARAMS = {
-    "Tweet_Comments": (0, 565),
-    "Tweet_Retweets": (0, 990),
-    "Tweet_Likes": (0, 988),
-    "User_Engagement": (0, 1000)
+    "Tweet_Comments": [[0], [10]],  # 565],
+    "Tweet_Retweets": [[0], [10]],  # 990],
+    "Tweet_Likes": [[0], [10]],  # 988]  # ,
+    "User_Engagement": [[0], [0.64]]
 }
+# log2
+ENGAGEMENT_SCALING_PARAMS = {
+    'eng_total_retweets': [[0.0], [19.32]],
+    'eng_total_likes': [[0.0], [22.35]],
+    'eng_total_replies': [[0.0], [16.8]],
+    'followers_count': [[0.0], [24.5]],
+    'eng_tweets_length': [[0.0], [100.0]]
+}
+# log3
+# ENGAGEMENT_SCALING_PARAMS = {
+#     'eng_total_retweets': (0.0, 12.188),
+#     'eng_total_likes': (0.0, 14.1),
+#     'eng_total_replies': (0.0, 10.6),
+#     'followers_count': (0.0, 15.47),
+#     'eng_tweets_length': (0.0, 100.0)
+# }
+
 INCLUDE_REPLIES = True
 
 #--------- ModelTrainer.py - to combine ----------#
@@ -84,30 +107,48 @@ def mt_scale_data(df, target='price_difference'):
     """
     Handles data scaling and aggregation (e.g. average) per day of the data
     """
-    def is_scalable_feature(feature):
-        return feature not in ['Date', target, "Tweet_Sentiment", "Positivity", "Neutral", "Negativity"]
+    NONE_MULTIPLIABLE_FEATURES = [
+        'Date', target, "Tweet_Sentiment", "Positivity", "Neutral", "Negativity"]
 
+    def is_multipliable_feature(feature):
+        return feature not in NONE_MULTIPLIABLE_FEATURES
+
+    def is_scalable_feature(feature):
+        # and feature not in ['User_Engagement']
+        return feature not in NONE_MULTIPLIABLE_FEATURES
+
+    df_cols = df.columns
     df = df.groupby(by=['Date'])
     dates_dict = {}
-    for col in df.columns:
+    for col in df_cols:
         dates_dict[col] = []
+
     for date in df:
         dates_dict['Date'].append(date[0])
         dates_dict[target].append(date[1][target].iloc[0])
 
         sentiment_col = np_array(date[1]["Tweet_Sentiment"]).reshape(-1, 1)
-        for col_name in df.columns:
+        dates_dict['Tweet_Sentiment'].append(sentiment_col.mean())
+        for col_name in df_cols:
+            current_col = np_array(date[1][col_name]).reshape(-1, 1)
             if is_scalable_feature(col_name):
-                current_col = np_array(date[1][col_name]).reshape(-1, 1)
                 scaler = MinMaxScaler()
                 scaler.fit(MT_SCALING_PARAMS[col_name])
-                scaled_current_col = scaler.transform(current_col)
+                current_col = scaler.transform(current_col)
 
-                scaled_current_col *= sentiment_col
+                # x_min, x_max = MT_SCALING_PARAMS[col_name][0], MT_SCALING_PARAMS[col_name][1]
 
-                dates_dict[col_name].append(scaled_current_col.mean())
-
-    return pd_DataFrame.from_dict(dates_dict)
+                # current_col = [((x-x_min) / (x_max-x_min))
+                #                for x in current_col]
+            if is_multipliable_feature(col_name):
+                current_col *= sentiment_col
+                dates_dict[col_name].append((current_col.mean()))
+            if col_name == 'User_Engagement':
+                print("hi")
+    t = pd_DataFrame.from_dict(dates_dict)
+    Helper.save_df_to_csv(
+        t, '/home/pi/FinalProject/FlaskServer/Data/Networks/', 'ScaledData.csv')
+    return t
 
 
 def mt_filter_users(df, follower_threshold=150):
@@ -156,15 +197,12 @@ def mt_filter_tweets(tweets_df, tweets_stats_threshold=25):
     return temp_tweets
 
 
-def calc_eng_score(n_rts, n_likes, n_replies, n_followers, n_tweets):
-    log_n_rts = log(n_rts + 1, 2)
-    log_n_likes = log(n_likes + 1, 2)
-    log_n_replies = log(n_replies + 1, 2)
-    log_n_followers = log(n_followers + 1, 2)
-
+def calc_eng_score(scaled_log_n_rts, scaled_log_n_likes, scaled_log_n_replies, scaled_log_n_followers, n_tweets, ):
     eng = 0
-    if n_followers > 0 and n_tweets > 0:
-        eng = ((log_n_rts+log_n_likes+log_n_replies)/log_n_followers)/n_tweets
+    # Engagement score calculation
+    if scaled_log_n_followers > 0 and n_tweets > 0:
+        eng = ((scaled_log_n_rts+scaled_log_n_likes +
+               scaled_log_n_replies)/scaled_log_n_followers)/n_tweets
     return eng
 
 
@@ -172,6 +210,24 @@ def mt_get_eng_score(users_df, include_replies=INCLUDE_REPLIES):
     ''' gets users df and returns the df with the engagement score calculated.
         df should have the following columns:  '''
     df = users_df.copy()
+
+    col_names = ['eng_total_retweets', 'eng_total_likes',
+                 'eng_total_replies', 'followers_count', 'eng_tweets_length']
+    saving = {}
+
+    for col_name in col_names:
+        # log taking
+        if col_name != 'eng_tweets_length':
+            df[col_name] = [log(i+1, 2) for i in df[col_name]]
+            # min max scaling
+            x_min, x_max = ENGAGEMENT_SCALING_PARAMS[col_name][0], ENGAGEMENT_SCALING_PARAMS[col_name][1]
+            # debuggimng
+            # x_min, x_max = df[col_name].min(), df[col_name].max()
+            # saving[col_name] = (x_min, x_max)
+            # END debugging
+            df[col_name] = [((x - x_min) / (x_max - x_min))
+                            for x in df[col_name]]
+
     for i in range(len(df)):
         rts = df['eng_total_retweets'][i]
         likes = df['eng_total_likes'][i]
@@ -183,13 +239,17 @@ def mt_get_eng_score(users_df, include_replies=INCLUDE_REPLIES):
             replies = 0
 
         df['eng_score'][i] = calc_eng_score(
-            n_rts=rts, n_likes=likes, n_replies=replies, n_followers=followers, n_tweets=total_tweets)
+            scaled_log_n_rts=rts, scaled_log_n_likes=likes, scaled_log_n_replies=replies, scaled_log_n_followers=followers, n_tweets=total_tweets)
     return df
 
 
 def mt_transform_features_to_log(dnn_df):
-    dnn_df['Tweet_Likes'] = [log(tweet_likes, 2) if tweet_likes != 0 else 0.0
-                             for tweet_likes in dnn_df['Tweet_Likes']]
+    #test = {}
+    for col_name in ['Tweet_Likes', 'Tweet_Comments', 'Tweet_Retweets']:
+        dnn_df[col_name] = [log(i+1, 2) for i in dnn_df[col_name]]
+
+        #test[col_name] = (dnn_df[col_name].min(), dnn_df[col_name].max())
+
     return dnn_df
 
 #------ ModelTrainer.py - seperate -------#
