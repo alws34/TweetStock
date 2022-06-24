@@ -575,8 +575,7 @@ if __name__ == '__main__':
     mt = ModelTrainer(user=user, saving_path=save_path)
 
     #df = mt.init_data()
-    #Helper.save_df_to_csv(
-      #  df=df, path='/home/pi/FinalProject/FlaskServer/Data/CSVs/', file_name='new_initialized_df')
+    #Helper.save_df_to_csv(df=df, path='/home/pi/FinalProject/FlaskServer/Data/CSVs/', file_name='new_initialized_df')
 
     # Train model
     mt.run_auto_training(acc_saving_threshold=0.6)

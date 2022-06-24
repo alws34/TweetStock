@@ -60,6 +60,14 @@ ENGAGEMENT_SCALING_PARAMS = {
 #     'followers_count': (0.0, 15.47),
 #     'eng_tweets_length': (0.0, 100.0)
 # }
+# log3-followers| log2-else
+# ENGAGEMENT_SCALING_PARAMS = {
+#     'eng_total_retweets': [[0.0], [19.32]],
+#     'eng_total_likes': [[0.0], [22.35]],
+#     'eng_total_replies': [[0.0], [16.8]],
+#     'followers_count': [[0.0], [15.5]],
+#     'eng_tweets_length': [[0.0], [100.0]]
+# }
 
 INCLUDE_REPLIES = True
 
@@ -107,48 +115,41 @@ def mt_scale_data(df, target='price_difference'):
     """
     Handles data scaling and aggregation (e.g. average) per day of the data
     """
-    NONE_MULTIPLIABLE_FEATURES = [
+    NONE_SCALABLE_MULTIPLIABLE_FEATURES = [
         'Date', target, "Tweet_Sentiment", "Positivity", "Neutral", "Negativity"]
 
-    def is_multipliable_feature(feature):
-        return feature not in NONE_MULTIPLIABLE_FEATURES
-
-    def is_scalable_feature(feature):
-        # and feature not in ['User_Engagement']
-        return feature not in NONE_MULTIPLIABLE_FEATURES
+    def is_scalable_multipliable_feature(feature):
+        return feature not in NONE_SCALABLE_MULTIPLIABLE_FEATURES
 
     df_cols = df.columns
-    df = df.groupby(by=['Date'])
     dates_dict = {}
     for col in df_cols:
         dates_dict[col] = []
 
+    df = df.groupby(by=['Date'])
     for date in df:
-        dates_dict['Date'].append(date[0])
-        dates_dict[target].append(date[1][target].iloc[0])
-
         sentiment_col = np_array(date[1]["Tweet_Sentiment"]).reshape(-1, 1)
-        dates_dict['Tweet_Sentiment'].append(sentiment_col.mean())
+        curr_day_avg_sentiment = sentiment_col.mean()
+        curr_day = date[0]
+        curr_day_target = date[1][target].iloc[0]
+        dates_dict['Tweet_Sentiment'].append(curr_day_avg_sentiment)
+        dates_dict['Date'].append(curr_day)
+        dates_dict[target].append(curr_day_target)
         for col_name in df_cols:
-            current_col = np_array(date[1][col_name]).reshape(-1, 1)
-            if is_scalable_feature(col_name):
+            curr_day_col = np_array(date[1][col_name]).reshape(-1, 1)
+            if is_scalable_multipliable_feature(col_name):
+                curr_day_col *= sentiment_col
+
                 scaler = MinMaxScaler()
                 scaler.fit(MT_SCALING_PARAMS[col_name])
-                current_col = scaler.transform(current_col)
+                curr_day_col = scaler.transform(curr_day_col)
 
-                # x_min, x_max = MT_SCALING_PARAMS[col_name][0], MT_SCALING_PARAMS[col_name][1]
-
-                # current_col = [((x-x_min) / (x_max-x_min))
-                #                for x in current_col]
-            if is_multipliable_feature(col_name):
-                current_col *= sentiment_col
-                dates_dict[col_name].append((current_col.mean()))
-            if col_name == 'User_Engagement':
-                print("hi")
-    t = pd_DataFrame.from_dict(dates_dict)
-    Helper.save_df_to_csv(
-        t, '/home/pi/FinalProject/FlaskServer/Data/Networks/', 'ScaledData.csv')
-    return t
+                dates_dict[col_name].append(curr_day_col.mean())
+            # if col_name == 'User_Engagement':
+            #     print("hi")
+    new_df = pd_DataFrame.from_dict(dates_dict)
+    #Helper.save_df_to_csv(new_df, '/home/pi/FinalProject/FlaskServer/Data/Networks/', 'ScaledData.csv')
+    return new_df
 
 
 def mt_filter_users(df, follower_threshold=150):
@@ -218,15 +219,20 @@ def mt_get_eng_score(users_df, include_replies=INCLUDE_REPLIES):
     for col_name in col_names:
         # log taking
         if col_name != 'eng_tweets_length':
-            df[col_name] = [log(i+1, 2) for i in df[col_name]]
-            # min max scaling
-            x_min, x_max = ENGAGEMENT_SCALING_PARAMS[col_name][0], ENGAGEMENT_SCALING_PARAMS[col_name][1]
+            df[col_name] = [log(x+1, 2) for x in df[col_name]]
+
             # debuggimng
-            # x_min, x_max = df[col_name].min(), df[col_name].max()
-            # saving[col_name] = (x_min, x_max)
+            """
+            x_min, x_max = df[col_name].min(), df[col_name].max()
+            saving[col_name] = (x_min, x_max)
+            """
             # END debugging
-            df[col_name] = [((x - x_min) / (x_max - x_min))
-                            for x in df[col_name]]
+
+            # min max scaling
+            scaler = MinMaxScaler()
+            scaler.fit(ENGAGEMENT_SCALING_PARAMS[col_name])
+            df[col_name] = scaler.transform(
+                np_array(df[col_name]).reshape(-1, 1))
 
     for i in range(len(df)):
         rts = df['eng_total_retweets'][i]
@@ -240,6 +246,7 @@ def mt_get_eng_score(users_df, include_replies=INCLUDE_REPLIES):
 
         df['eng_score'][i] = calc_eng_score(
             scaled_log_n_rts=rts, scaled_log_n_likes=likes, scaled_log_n_replies=replies, scaled_log_n_followers=followers, n_tweets=total_tweets)
+
     return df
 
 
