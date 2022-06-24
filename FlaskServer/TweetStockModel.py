@@ -23,7 +23,6 @@ MIN_USER_FOLLOWERS = 100        # min user followers num to be included
 
 delimiter, prefix = Helper.get_prefix_path()
 
-
 class TweetStockModel:
     def __init__(self, model_path, model_ticker, features_version, ip='No_IP', id=0):
         self.id = id
