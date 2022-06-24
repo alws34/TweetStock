@@ -1,17 +1,14 @@
-import os
 import json
-import pandas as pd
-import numpy as np
-import tweepy
-import math
-import sklearn
-import tensorflow as tf
+from pandas import set_option as pd_set_option
+#import numpy as np
+from tweepy import OAuthHandler as tweepy_OAuthHandler, API as tweepy_API
+#import tensorflow as tf
 from keras.models import load_model
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer  # sentiment score
-from TwitterAPI import TwitterAPI, TwitterOAuth, TwitterRequestError, TwitterConnectionError, TwitterPager
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from TwitterAPI import TwitterAPI, TwitterRequestError#,TwitterOAuth,  TwitterConnectionError, TwitterPager
+#from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from datetime import datetime as dt, timedelta
-from pathlib import Path
+from pathlib import Path as pathlib_Path
 import Helper
 import DataHandler
 
@@ -35,12 +32,12 @@ class TweetStockModel:
         self.features_version = features_version
         self.feature_set = self.get_feature_set(features_version)
 
-        self.model_path = Path(model_path)
+        self.model_path = pathlib_Path(model_path)
         self.model = load_model(model_path)
 
         self.sentiment_analyzer = SentimentIntensityAnalyzer()
         self.twitter = self.connect_to_twitter()
-        pd.set_option('display.max_columns', None)
+        pd_set_option('display.max_columns', None)
 
     def get_feature_set(self, features_version):
         '''
@@ -68,9 +65,9 @@ class TweetStockModel:
             return TwitterAPI(consumer_key, consumer_secret, access_token,
                               access_token_secret, api_version='2')
         elif version == 1:
-            auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+            auth = tweepy_OAuthHandler(consumer_key, consumer_secret)
             auth.set_access_token(access_token, access_token_secret)
-            return tweepy.API(auth)
+            return tweepy_API(auth)
 
     def get_twitter_config(self):
         with open(f'{prefix}CONFIGS/twitterconfig.json', 'r') as json_file:
@@ -270,7 +267,7 @@ class TweetStockModel:
             return None, None
 
         # filter tweets
-        tweets = DataHandler.tsm_filter_tweets(tweets)
+        #tweets = DataHandler.tsm_filter_tweets(tweets)
         l = len(tweets)
         if l == 0:
             print("Filtered all tweets @filter_tweets()")
@@ -283,8 +280,7 @@ class TweetStockModel:
             return None, None
 
         # filter users
-        tweets = DataHandler.tsm_filter_users(
-            tweets, threshold=MIN_USER_FOLLOWERS)
+        # tweets = DataHandler.tsm_filter_users(tweets, threshold=MIN_USER_FOLLOWERS)
         l = len(tweets)
         if l == 0:
             print("Filtered all users @filter_users()")

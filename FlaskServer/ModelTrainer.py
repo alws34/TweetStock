@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from numpy import append
 import Helper
 import DataHandler
-import glob
+from glob import glob
 from pandas import read_csv as pd_read_csv
 from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
 from keras.layers import Dense
@@ -249,11 +249,6 @@ class ModelTrainer:
         dnn_df = dnn_df[dnn_df['ticker_symbol'] == chosen_ticker]
         return dnn_df.drop(columns=['ticker_symbol'])
 
-    def transform_features_to_log(self, dnn_df):
-        # print(dnn_df['Tweet_Likes'])
-        dnn_df = DataHandler.mt_transform_features_to_log(dnn_df)
-        # print(dnn_df['Tweet_Likes'])
-        return dnn_df
 
     def create_sequence(self, df, rows_at_a_time, target):
         sequence, label = DataHandler.create_sequence(
@@ -275,7 +270,7 @@ class ModelTrainer:
         target = 'price_difference'
 
         #----GET DATA----#
-        dnn_df = self.transform_features_to_log(self.get_dnn_training_df())
+        dnn_df = DataHandler.mt_transform_features_to_log(self.get_dnn_training_df())
         #Helper.save_df_to_csv(dnn_df, f'{self.saving_path}','dnn_df')
         #----SCALE DATA----#
         scaled_dnn_df = DataHandler.mt_scale_data(
@@ -328,7 +323,7 @@ class ModelTrainer:
         target = 'price_difference'
 
         #----GET DATA----#
-        dnn_df = self.transform_features_to_log(self.get_dnn_training_df())
+        dnn_df = DataHandler.mt_transform_features_to_log(self.get_dnn_training_df())
         #Helper.save_df_to_csv(dnn_df, f'{self.saving_path}','dnn_df')
         #----SCALE DATA----#
         scaled_dnn_df = DataHandler.mt_scale_data(
@@ -551,7 +546,7 @@ class ModelTrainer:
         Returns a list of files (full paths) from given directory
         '''
         delimiter, prefix = Helper.get_prefix_path()
-        return glob.glob(f"{model_params_path}{delimiter}*.{extension}")
+        return glob(f"{model_params_path}{delimiter}*.{extension}")
 
     def get_retraining_saving_dir_name(self, file_path):
         return os.path.basename(file_path).split('_')[-2]

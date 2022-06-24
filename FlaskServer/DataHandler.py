@@ -33,25 +33,36 @@ SCALING = 'min_max'
 #     # "User_Engagement": (0, 1000)
 # }
 MT_SCALING_PARAMS = {
-    "Tweet_Comments": [[0], [10]],
-    "Tweet_Retweets": [[0], [10]],
-    "Tweet_Likes": [[0], [10]],
-    "User_Engagement": [[0], [0.64]]
+    "Tweet_Comments": [[0.0], [10.0]],
+    "Tweet_Retweets": [[0.0], [10.0]],
+    "Tweet_Likes": [[0.0], [10.0]],
+    "User_Engagement": [[0.0], [0.64]]
 }
 TSM_SCALING_PARAMS = {
-    "Tweet_Comments": [[0], [10]],  # 565],
-    "Tweet_Retweets": [[0], [10]],  # 990],
-    "Tweet_Likes": [[0], [10]],  # 988]  # ,
-    "User_Engagement": [[0], [0.64]]
+    "reply_count": [[0.0], [10.0]],  # 565],
+    "retweet_count": [[0.0], [10.0]],  # 990],
+    "like_count": [[0.0], [10.0]],  # 988]  # ,
+    "User_Engagement": [[0.0], [0.64]]
 }
+
 # log2
-ENGAGEMENT_SCALING_PARAMS = {
+MT_ENGAGEMENT_SCALING_PARAMS = {
     'eng_total_retweets': [[0.0], [19.32]],
     'eng_total_likes': [[0.0], [22.35]],
     'eng_total_replies': [[0.0], [16.8]],
     'followers_count': [[0.0], [24.5]],
     'eng_tweets_length': [[0.0], [100.0]]
 }
+TSM_ENGAGEMENT_SCALING_PARAMS = {
+    "reply_count": [[0.0], [19.32]],
+    "retweet_count": [[0.0], [22.35]],
+    "like_count": [[0.0], [16.8]],
+    'follower_count': [[0.0], [24.5]],
+    'eng_tweets_length': [[0.0], [100.0]]
+}
+
+# ENGAGEMENT_SCALING_PARAMS - other versions
+"""
 # log3
 # ENGAGEMENT_SCALING_PARAMS = {
 #     'eng_total_retweets': (0.0, 12.188),
@@ -68,7 +79,7 @@ ENGAGEMENT_SCALING_PARAMS = {
 #     'followers_count': [[0.0], [15.5]],
 #     'eng_tweets_length': [[0.0], [100.0]]
 # }
-
+"""
 INCLUDE_REPLIES = True
 
 #--------- ModelTrainer.py - to combine ----------#
@@ -97,18 +108,6 @@ def mt_create_sequence(dataset, target, num_of_rows=N_PAST):
             start_idx += 1
         return np_array(sequences, dtype='object')
 """
-
-
-# def mt_scale_data_old(df, target='price_difference'):
-#     def is_scalable_feature(feature):
-#         return feature != 'Date' and feature != target
-
-#     def is_sentiment_feature(feature):
-#         return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
-#     # Start scaling
-
-#     for col in df.columns:
-#         scaler = MinMaxScaler()
 
 
 def mt_scale_data(df, target='price_difference'):
@@ -221,7 +220,7 @@ def mt_get_eng_score(users_df, include_replies=INCLUDE_REPLIES):
         if col_name != 'eng_tweets_length':
             df[col_name] = [log(x+1, 2) for x in df[col_name]]
 
-            # debuggimng
+            # debugging
             """
             x_min, x_max = df[col_name].min(), df[col_name].max()
             saving[col_name] = (x_min, x_max)
@@ -230,7 +229,7 @@ def mt_get_eng_score(users_df, include_replies=INCLUDE_REPLIES):
 
             # min max scaling
             scaler = MinMaxScaler()
-            scaler.fit(ENGAGEMENT_SCALING_PARAMS[col_name])
+            scaler.fit(MT_ENGAGEMENT_SCALING_PARAMS[col_name])
             df[col_name] = scaler.transform(
                 np_array(df[col_name]).reshape(-1, 1))
 
@@ -251,12 +250,8 @@ def mt_get_eng_score(users_df, include_replies=INCLUDE_REPLIES):
 
 
 def mt_transform_features_to_log(dnn_df):
-    #test = {}
     for col_name in ['Tweet_Likes', 'Tweet_Comments', 'Tweet_Retweets']:
-        dnn_df[col_name] = [log(i+1, 2) for i in dnn_df[col_name]]
-
-        #test[col_name] = (dnn_df[col_name].min(), dnn_df[col_name].max())
-
+        dnn_df[col_name] = [log(x+1, 2) for x in dnn_df[col_name]]
     return dnn_df
 
 #------ ModelTrainer.py - seperate -------#
@@ -358,8 +353,10 @@ def tsm_create_sequence(dataset):
 """
 
 
-def tsm_get_scale_and_mean_new(df, feature_set, n_past, scaling):
-    pass
+def tsm_transform_features_to_log(df):
+    for col_name in ['n_replies', 'n_retweets', 'n_likes']:
+        df[col_name] = [log(x+1, 2) for x in df[col_name]]
+    return df
 
 
 def tsm_get_scale_and_mean(df, feature_set, n_past=N_PAST, scaling=SCALING):
@@ -414,18 +411,39 @@ def tsm_filter_users(tweets, threshold=TSM_MIN_USER_FOLLOWERS):
 
     return tweets
 
+# Checked (V)
+
 
 def tsm_get_single_user_eng_score(user_tweets, user_followers, include_replies=INCLUDE_REPLIES):
     u_n_rts, u_n_replies, u_n_likes = 0, 0, 0
+    stats = {
+        'retweet_count': 0,
+        'reply_count': 0,
+        'like_count': 0
+    }
+    # get stats
     for tweet in user_tweets:
-        u_n_rts += tweet['public_metrics']['retweet_count']
-        u_n_replies += tweet['public_metrics']['reply_count']
-        u_n_likes += tweet['public_metrics']['like_count']
+        for stat in stats:
+            stats[stat] += tweet['public_metrics'][stat]
+            # u_n_rts += tweet['public_metrics']['retweet_count']
+            # u_n_replies += tweet['public_metrics']['reply_count']
+            # u_n_likes += tweet['public_metrics']['like_count']
+
+    stats['follower_count'] = user_followers
+    # take log
+    for stat in stats:
+        stats[stat] = log(stats[stat] + 1, 2)
+
+    # normalize
+    for stat in stats:
+        scaler = MinMaxScaler()
+        scaler.fit(TSM_ENGAGEMENT_SCALING_PARAMS[stat])
+        stats[stat] = scaler.transform(stats[stat])
 
     if not include_replies:
-        u_n_replies = 0
+        stats['reply_count'] = 0
 
-    return calc_eng_score(n_rts=u_n_rts, n_likes=u_n_likes, n_replies=u_n_replies, n_followers=user_followers, n_tweets=len(user_tweets))
+    return calc_eng_score(scaled_log_n_rts=stats['retweet_count'], scaled_log_n_likes=stats['like_count'], scaled_log_n_replies=stats['reply_count'], scaled_log_n_followers=stats['follower_count'], n_tweets=len(user_tweets))
 
 #------ TweetStockModel.py - seperate -------#
 
@@ -445,8 +463,11 @@ def tsm_twitter_dict_res_to_df(data):
 
 
 def tsm_prep_data(df, feature_set):
-    # 1 Select features
-    df = tsm_get_scale_and_mean(df, feature_set)
+    # 0.0 sort df by date
+    df = sort_df_by_dates(df=df, date_col_name='created_at', format="")
+    # 1.0 Scale Data & Get Mean
+    df = tsm_get_scale_and_mean(tsm_transform_features_to_log(df), feature_set)
+    # 1.1 Select features
     df = df[feature_set]
 
     # 2 Get df mean
@@ -586,3 +607,15 @@ def load_csv(path, csv_delimiter='|'):
 
 def get_array_average(arr):
     return sum(arr) / len(arr)
+
+
+# def mt_scale_data_old(df, target='price_difference'):
+#     def is_scalable_feature(feature):
+#         return feature != 'Date' and feature != target
+
+#     def is_sentiment_feature(feature):
+#         return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
+#     # Start scaling
+
+#     for col in df.columns:
+#         scaler = MinMaxScaler()

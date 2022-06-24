@@ -1,9 +1,9 @@
-import pandas as pd
+from pandas import Timestamp
 import pandas_market_calendars as mcal
-import os
-import json
-import time
-import pyrebase
+from os import system
+from json import load as load_json
+from time import sleep
+from pyrebase import initialize_app as firebase_init_app
 from datetime import datetime as dt
 from TweetStockModel import TweetStockModel as tsm
 import Helper
@@ -16,7 +16,7 @@ MODELS = Helper.get_models()
 
 def init_Firebase_config():
     with open(f'{prefix}CONFIGS/firebaseconfig.json', 'r') as firebase_conf:
-        firebase_config = json.load(firebase_conf)
+        firebase_config = load_json(firebase_conf)
     return firebase_config
 
 
@@ -46,7 +46,7 @@ def post_to_FireBase(tables_dict, date):
 
 
 firebase_config = init_Firebase_config()
-firebase = pyrebase.initialize_app(firebase_config)
+firebase = firebase_init_app(firebase_config)
 db = firebase.database()
 # -------------------------------MODEL------------------------------------- #
 
@@ -87,7 +87,7 @@ def is_valid_day():
         Helper.write_to_log(f'nyse.open_at_time says:\n{e}')
         return False
 
-    timestamp = pd.Timestamp(
+    timestamp = Timestamp(
         f'{today} {time}', tz='Israel').tz_convert('America/New_York')  # convert israel time to NY time
 
     if not schedule.empty:
@@ -107,10 +107,10 @@ def sleep_until_market_opens():
     start_hour_in_sec = (start_hour * 60 + start_min) * 60
     now_in_sec = (now.hour * 60 + now.min) * 60
     if now_in_sec < start_hour_in_sec:
-        time.sleep(start_hour_in_sec - now_in_sec)
+        sleep(start_hour_in_sec - now_in_sec)
     else:
         one_day_in_sec = 24 * 60 * 60
-        time.sleep(one_day_in_sec - (now_in_sec - start_hour_in_sec))
+        sleep(one_day_in_sec - (now_in_sec - start_hour_in_sec))
 
 
 def update_firebase_db():
@@ -134,7 +134,7 @@ def update_firebase_db():
         else:
             Helper.write_to_log(
                 f'DB update error for ticker {ticker}:\npred_dict: {len(pred_dict)}\ntweets_dict: {len(tweets_dict)}\n\n')
-        time.sleep(15*60)  # sleep 15 min for each ticker
+        sleep(15*60)  # sleep 15 min for each ticker
 
     post_to_FireBase(updated_db, date)
 
@@ -145,11 +145,11 @@ def Main():
 
     # update_firebase_db()
     while True:
-        if os.system(ping_command) == 0:  # check first for internet connectivity
+        if system(ping_command) == 0:  # check first for internet connectivity
             if (is_valid_day()):
                 update_firebase_db()
                 sleeping_hours, sleeping_mins = 2, 0
-                time.sleep((sleeping_hours * 60 + sleeping_mins) * 60)
+                sleep((sleeping_hours * 60 + sleeping_mins) * 60)
             else:
                 sleep_until_market_opens()
 

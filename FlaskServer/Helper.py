@@ -1,6 +1,6 @@
 from os import system, name as os_name, getcwd, path as os_path, mkdir
 from datetime import datetime as dt
-import csv
+from csv import writer as csv_writer
 #from pandas import DataFrame
 
 
@@ -32,7 +32,7 @@ def save_dict_to_csv(dict, save_path, file_name, mode='w'):
 def save_delimited_dict(dict, save_path, mode='w', delimiter='|'):
     print(dict)
     with open(save_path, mode) as myfile:
-        tsv_writer = csv.writer(myfile, delimiter=delimiter)
+        tsv_writer = csv_writer(myfile, delimiter=delimiter)
         for key in dict.keys():
             tsv_writer.writerow([key, dict[key]])
 
