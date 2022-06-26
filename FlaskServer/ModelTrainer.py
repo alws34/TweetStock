@@ -249,7 +249,6 @@ class ModelTrainer:
         dnn_df = dnn_df[dnn_df['ticker_symbol'] == chosen_ticker]
         return dnn_df.drop(columns=['ticker_symbol'])
 
-
     def create_sequence(self, df, rows_at_a_time, target):
         sequence, label = DataHandler.create_sequence(
             dataset=df, target=target, num_of_rows=rows_at_a_time)
@@ -270,7 +269,8 @@ class ModelTrainer:
         target = 'price_difference'
 
         #----GET DATA----#
-        dnn_df = DataHandler.mt_transform_features_to_log(self.get_dnn_training_df())
+        dnn_df = DataHandler.mt_transform_features_to_log(
+            self.get_dnn_training_df())
         #Helper.save_df_to_csv(dnn_df, f'{self.saving_path}','dnn_df')
         #----SCALE DATA----#
         scaled_dnn_df = DataHandler.mt_scale_data(
@@ -323,7 +323,8 @@ class ModelTrainer:
         target = 'price_difference'
 
         #----GET DATA----#
-        dnn_df = DataHandler.mt_transform_features_to_log(self.get_dnn_training_df())
+        dnn_df = DataHandler.mt_transform_features_to_log(
+            self.get_dnn_training_df())
         #Helper.save_df_to_csv(dnn_df, f'{self.saving_path}','dnn_df')
         #----SCALE DATA----#
         scaled_dnn_df = DataHandler.mt_scale_data(
@@ -469,7 +470,7 @@ class ModelTrainer:
             'loss_funcs': ['binary_crossentropy', 'mean_squared_error'],
             'optimizers': ['rmsprop', 'adam'],
             'n_pasts': [1, 3],
-            'n_epochs': [10, 20, 50],
+            'n_epochs': [15, 30, 50],
             'layer_sets': [[16], [8, 4]]
         }
         return combinations
@@ -512,6 +513,7 @@ class ModelTrainer:
 
                                             if self.test_accuracy != None:
                                                 if float(self.test_accuracy) > acc_saving_threshold:
+                                                    self.saving_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}{n_past}{delimiter}{ticker}{delimiter}"
                                                     self.model_name = f"{ticker}_acc_{round(self.test_accuracy, 3)}_npast_{n_past}_epoch_{n_epoch}_opt_{optimizer}_num_{model_id}"
                                                     self.save()
                                                     model_id += 1
@@ -563,10 +565,9 @@ if __name__ == '__main__':
     # availables: 'alon' , 'guy', 'hadar', 'pi'
     delimiter, prefix = Helper.get_prefix_path()
     user = 'pi'
-    try_folder_name = 'final_23_06'
+    try_folder_name = 'final_26_06'
     #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}"
-
     mt = ModelTrainer(user=user, saving_path=save_path)
 
     #df = mt.init_data()

@@ -118,8 +118,8 @@ def get_user_data_paths(user):
             'initialized_df_path': f'D:\\Google Drive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\CSVs\\{initialized_df_csv_file}'
         },
         'pi': {
-            'users_path': f"{prefix}Data/CSVs/Initial_Data/",
-            'Networks_Save_Path': f'{prefix}Data/Networks/',
+            'users_path': f"{prefix}Data/CSVs/Initial_Data{delimiter}",
+            'Networks_Save_Path': f'{prefix}Data/Networks{delimiter}',
             'initialized_df_path': f'{prefix}Data/CSVs/{initialized_df_csv_file}'
         },
         'hadar': {
