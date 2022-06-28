@@ -1,4 +1,4 @@
-from pandas import Timestamp
+from pandas import Timestamp, DataFrame as pd_df
 import pandas_market_calendars as mcal
 from os import system
 from json import load as load_json
@@ -6,6 +6,7 @@ from time import sleep
 from pyrebase import initialize_app as firebase_init_app
 from datetime import datetime as dt
 from TweetStockModel import TweetStockModel as tsm
+import yfinance as yf
 import Helper
 # ---------------------------------Init----------------------------------------------- #
 delimiter, prefix = Helper.get_prefix_path()
@@ -13,9 +14,14 @@ ping_command = Helper.get_ping_command()
 MODELS = Helper.get_models()
 # -------------------------------FireBase------------------------------------- #
 
+updated_db = {
+    'Prediction': {},
+    'Tweets': {}
+}
+
 
 def init_Firebase_config():
-    with open(f'{prefix}CONFIGS/firebaseconfig.json', 'r') as firebase_conf:
+    with open(f'{prefix}FlaskServer{delimiter}CONFIGS{delimiter}firebaseconfig.json', 'r') as firebase_conf:
         firebase_config = load_json(firebase_conf)
     return firebase_config
 
@@ -114,18 +120,15 @@ def sleep_until_market_opens():
 
 
 def update_firebase_db():
-    updated_db = {
-        'Prediction': {},
-        'Tweets': {}
-    }
-
     for ticker, stock in MODELS.items():
         pred_dict, tweets_dict = Get_prediction(
             ticker=ticker, path=stock['path'], features_version=stock['features'])
+
         if is_valid_model_response(pred_dict, tweets_dict):
             date, time = Helper.get_date_time_stringify(
                 format="%d_%m_%Y"), Helper.get_date_time_stringify(format="%H_%M")
             pred_dict[0]['last_update'] = date + "_" + time
+
             for i in range(len(tweets_dict)):
                 tweets_dict[i]['last_update'] = date + "_" + time
 
@@ -137,6 +140,16 @@ def update_firebase_db():
         sleep(15*60)  # sleep 15 min for each ticker
 
     post_to_FireBase(updated_db, date)
+
+
+def Get_Real_Close():
+    for ticker in MODELS.keys():
+        stock = yf.Ticker(ticker)
+        look_back_n_days = 1
+        history = stock.history(period=f'{look_back_n_days}d')
+        updated_db['Prediction'][ticker]['Actual_close_price'] = 1 if history['Close'][0] >= history['Open'][0] else -1
+    post_to_FireBase(updated_db, Helper.get_date_time_stringify(
+        format="%d_%m_%Y"))
 
 
 def Main():
@@ -151,6 +164,7 @@ def Main():
                 sleeping_hours, sleeping_mins = 2, 0
                 sleep((sleeping_hours * 60 + sleeping_mins) * 60)
             else:
+                Get_Real_Close()
                 sleep_until_market_opens()
 
 

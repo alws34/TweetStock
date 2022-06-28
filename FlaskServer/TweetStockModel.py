@@ -17,7 +17,7 @@ N_PAST = 1
 MAX_TWEETS_RESULTS = 100        # max results for first tweets query.
 MAX_USER_TWEETS_RESULT = 100    # max results for use engagement tweets
 MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
-MIN_USER_FOLLOWERS = 100        # min user followers num to be included
+MIN_USER_FOLLOWERS = 50        # min user followers num to be included
 TWEETS_REFETCHING_THRESHOLD = 15
 REFETCHING_MAX_ITERATIONS_THRESHOLD = 5
 
@@ -71,7 +71,7 @@ class TweetStockModel:
             return tweepy_API(auth)
 
     def get_twitter_config(self):
-        with open(f'{prefix}CONFIGS/twitterconfig.json', 'r') as json_file:
+        with open(f'{prefix}{delimiter}FlaskServer{delimiter}CONFIGS{delimiter}twitterconfig.json', 'r') as json_file:
             twitter_configs = json.load(json_file)
         return twitter_configs
 
@@ -218,6 +218,8 @@ class TweetStockModel:
                         tweet=tweet, t_metrics=t_metrics, u_data=u_data))
             else:
                 # raise Exception(f"Couldn't Get Tweets!\nCode Returned from twitter:{temp_tweets.status_code}")
+                print(f'CODE: {temp_tweets.status_code}')
+                print(f'{temp_tweets}')
                 return None
         except Exception as err:
             print(f"{err}")
@@ -227,7 +229,8 @@ class TweetStockModel:
     def get_min_date(self, tweets):
         dates = [pd_datetime(tweet['created_at']) for tweet in tweets]
         #dt_obj = dt.fromtimestamp(min(dates)/pow(10, 9))
-        return min(dates).to_pydatetime()
+        date = min(dates).to_pydatetime().replace(second=0, tzinfo=None)
+        return date
 
     def calc_tweets_sentiment(self, tweets):
         for tweet in tweets:
@@ -246,10 +249,13 @@ class TweetStockModel:
         for i, tweet in enumerate(tweets):
             try:
                 u_tweets = self.twitter.request(
-                    resource='users/:'+tweet['u_id']+'/tweets', params=prms)
+                    resource=f'users/:{tweet["u_id"]}/tweets', params=prms)
 
-                tweets[i]['u_engagement'] = DataHandler.tsm_get_single_user_eng_score(
-                    user_tweets=u_tweets, user_followers=tweet['u_n_followers'])
+                if u_tweets.text == r'{"meta":{"result_count":0}}':
+                    tweets[i]['u_engagement'] = 0
+                else:
+                    tweets[i]['u_engagement'] = DataHandler.tsm_get_single_user_eng_score(
+                        user_tweets=u_tweets, user_followers=tweet['u_n_followers'])
 
             except TwitterRequestError as err:
                 if "429" in str(err):
@@ -286,7 +292,7 @@ class TweetStockModel:
         tweets = self.fetch_live_tweets_v2(start_date=start_date, end_date=end_date, max_results=MAX_TWEETS_RESULTS,
                                            n_past=N_PAST)
         # should be here - bexause we want the new end date BEFORE filtering
-        
+
         if self.tweets == None:
             print("Couldnt get tweets @get_tweets()")
             return None, None
@@ -323,21 +329,24 @@ class TweetStockModel:
     def get_prediction(self):
         start_date, end_date = self.get_n_past_date()
         iterations = 0
-        while len(self.tweets) < TWEETS_REFETCHING_THRESHOLD and iterations < REFETCHING_MAX_ITERATIONS_THRESHOLD:
+
+        # and len(self.tweets) < TWEETS_REFETCHING_THRESHOLD :
+        while iterations < REFETCHING_MAX_ITERATIONS_THRESHOLD:
             tweets, end_date = self.fetch_and_filter_data(
                 start_date=start_date, end_date=end_date)
             if end_date == None:
-                print("problem with end date @get_prediction()/while loop (got no tweets when fetched)")
+                print(
+                    "problem with end date @get_prediction()/while loop (got no tweets when fetched)")
             if tweets != None:
                 for tweet in tweets:
                     self.tweets.append(tweet)
             iterations += 1
             if iterations == REFETCHING_MAX_ITERATIONS_THRESHOLD:
-                print("reched max iterations threshold")
+                print("reached max iterations threshold")
 
         # Transform from dictionary to df for easier data handling
         tweets_df = DataHandler.tsm_twitter_dict_res_to_df(self.tweets)
-        if tweets_df.empty:
+        if tweets_df == None or tweets_df.empty:
             print("Couldnt convert twitter res dict to df @twitter_dict_res_to_df()")
             return None, None
         tweets_table_dict = DataHandler.tsm_get_tweets_table_dict_result(
@@ -359,7 +368,8 @@ class TweetStockModel:
 if __name__ == "__main__":
     model = TweetStockModel(
         # model_path=f'/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
-        model_path='/home/pi/FinalProject/FlaskServer/Data/Networks/4/TSLA_acc_0.62_npast_1_epoch_10_opt_rmsprop_num_3.h5',
+        # '/home/pi/FinalProject/FlaskServer/Data/Networks/4/TSLA_acc_0.62_npast_1_epoch_10_opt_rmsprop_num_3.h5',
+        model_path="C:\\Users\\alws3\\Desktop\\TSLA_acc_0.62_npast_1_epoch_10_opt_rmsprop_num_3.h5",
         model_ticker="TSLA",
         features_version=2)
     pred_table_dict, tweets_table_dict = model.get_prediction()

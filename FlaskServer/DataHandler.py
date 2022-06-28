@@ -197,7 +197,7 @@ def mt_filter_tweets(tweets_df, tweets_stats_threshold=25):
     return temp_tweets
 
 
-def calc_eng_score(scaled_log_n_rts, scaled_log_n_likes, scaled_log_n_replies, scaled_log_n_followers, n_tweets, ):
+def calc_eng_score(scaled_log_n_rts, scaled_log_n_likes, scaled_log_n_replies, scaled_log_n_followers, n_tweets):
     eng = 0
     # Engagement score calculation
     if scaled_log_n_followers > 0 and n_tweets > 0:
@@ -415,14 +415,16 @@ def tsm_filter_users(tweets, threshold=TSM_MIN_USER_FOLLOWERS):
 
 
 def tsm_get_single_user_eng_score(user_tweets, user_followers, include_replies=INCLUDE_REPLIES):
-    u_n_rts, u_n_replies, u_n_likes = 0, 0, 0
+    #u_n_rts, u_n_replies, u_n_likes = 0, 0, 0
     stats = {
         'retweet_count': 0,
         'reply_count': 0,
         'like_count': 0
     }
     # get stats
+    tweets_counter = 0
     for tweet in user_tweets:
+        tweets_counter += 1 
         for stat in stats:
             stats[stat] += tweet['public_metrics'][stat]
             # u_n_rts += tweet['public_metrics']['retweet_count']
@@ -438,12 +440,12 @@ def tsm_get_single_user_eng_score(user_tweets, user_followers, include_replies=I
     for stat in stats:
         scaler = MinMaxScaler()
         scaler.fit(TSM_ENGAGEMENT_SCALING_PARAMS[stat])
-        stats[stat] = scaler.transform(stats[stat])
+        stats[stat] = scaler.transform(
+            np_array(stats[stat]).reshape(-1, 1))[0][0]
 
     if not include_replies:
         stats['reply_count'] = 0
-
-    return calc_eng_score(scaled_log_n_rts=stats['retweet_count'], scaled_log_n_likes=stats['like_count'], scaled_log_n_replies=stats['reply_count'], scaled_log_n_followers=stats['follower_count'], n_tweets=len(user_tweets))
+    return calc_eng_score(scaled_log_n_rts=stats['retweet_count'], scaled_log_n_likes=stats['like_count'], scaled_log_n_replies=stats['reply_count'], scaled_log_n_followers=stats['follower_count'], n_tweets=tweets_counter)
 
 #------ TweetStockModel.py - seperate -------#
 

@@ -10,7 +10,7 @@ def create_dir(path):
 
 
 def write_to_log(msg):
-    with open(f'{get_prefix_path()[1]}\\Logs\\LOG_{get_date_time_stringify()}', 'a+', encoding='utf-8') as f:
+    with open(f'{get_prefix_path()[1]}\\Logs\\LOG_{get_date_time_stringify()}', 'w+', encoding='utf-8') as f:
         f.write(msg)
 
 
