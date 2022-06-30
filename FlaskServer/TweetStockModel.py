@@ -1,4 +1,5 @@
 import json
+from time import sleep
 from pandas import set_option as pd_set_option, to_datetime as pd_datetime
 from tweepy import OAuthHandler as tweepy_OAuthHandler, API as tweepy_API
 from keras.models import load_model
@@ -10,8 +11,10 @@ from datetime import datetime as dt, timedelta
 from pathlib import Path as pathlib_Path
 import Helper
 import DataHandler
+import Twitter_Responses
 
-TWITTER_VERSION = 2             # twitter version.
+
+TWITTER_VERSION = 2             # twitter fetch_and_filter_dataversion.
 # days on which the model was train to precict based on.
 N_PAST = 1
 MAX_TWEETS_RESULTS = 100        # max results for first tweets query.
@@ -20,8 +23,11 @@ MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
 MIN_USER_FOLLOWERS = 50        # min user followers num to be included
 TWEETS_REFETCHING_THRESHOLD = 15
 REFETCHING_MAX_ITERATIONS_THRESHOLD = 5
-
+SLEEP_TIME = 60*15
+TWITTER_RESPONSE_CODES = Twitter_Responses.GET_TWITTER_CODES()
 delimiter, prefix = Helper.get_prefix_path()
+
+VERSION = '1.6.0'
 
 
 class TweetStockModel:
@@ -208,22 +214,76 @@ class TweetStockModel:
         try:
             temp_tweets = self.twitter.request(
                 resource='tweets/search/recent', params=prms)
-            if temp_tweets.status_code == 200:
-                for tweet in temp_tweets:
-                    res = self.twitter.request(resource="users/:"+tweet['author_id'], params={
-                        'user.fields': 'public_metrics,description,username'}).json()
-                    u_data = res['data']
-                    t_metrics = tweet['public_metrics']
-                    tweets.append(generate_v2_tweet(
-                        tweet=tweet, t_metrics=t_metrics, u_data=u_data))
+        except TwitterRequestError as tre_tweets:
+            if tre_tweets.status_code == TWITTER_RESPONSE_CODES['Too Many Requests']:
+                print(
+                    f"Tweeter Status code Returned {tre_tweets.status_code}", 'SLEEPING....')
+                sleep(SLEEP_TIME)
+                return tre_tweets.status_code
             else:
-                # raise Exception(f"Couldn't Get Tweets!\nCode Returned from twitter:{temp_tweets.status_code}")
-                print(f'CODE: {temp_tweets.status_code}')
+                print(f'CODE: {tre_tweets.status_code}')
                 print(f'{temp_tweets}')
                 return None
-        except Exception as err:
-            print(f"{err}")
-            raise Exception("") from err
+
+        if temp_tweets.status_code == TWITTER_RESPONSE_CODES['OK']:
+            tweets_arr = [tweet for tweet in temp_tweets]
+            i = 0
+            while i < len(tweets_arr):
+                tweet = tweets_arr[i]
+
+                try:
+                    users_result = self.twitter.request(resource="users/:"+tweet['author_id'], params={
+                        'user.fields': 'public_metrics,description,username'}).json()
+                    # if 'data' in users_result:
+                    users_data = users_result['data']
+                    i += 1
+                    t_metrics = tweet['public_metrics']
+                    tweets.append(generate_v2_tweet(
+                        tweet=tweet, t_metrics=t_metrics, u_data=users_data))
+                except TwitterRequestError as tre_users:
+                    if tre_users.status_code == TWITTER_RESPONSE_CODES['Too Many Requests']:
+                        print(
+                            f"Tweeter Status code Returned {users_result['status']}", 'SLEEPING....')
+                        sleep(SLEEP_TIME)
+                        continue
+                    elif users_result['text'] in TWITTER_RESPONSE_CODES.keys():
+                        return None
+                    else:
+                        Helper.write_to_log(str(users_result))
+                        print(
+                            'MAJOR ERROR!\nCODE SHOULDNT GET HERE @fetch_live_tweets_v2')
+                        return None
+        else:
+            print(f'{temp_tweets.status_code}',
+                  ' PROBABLY SHOULDNT GET HERE @fetch_live_tweets_v2')
+            Helper.Write_To_Log(
+                f'{temp_tweets.status_code} @fetch_live_tweets_v2')
+            return None
+            # elif users_result['status'] == TWITTER_RESPONSE_CODES['Too Many Requests']:
+            #     print(
+            #         f"Tweeter Status code Returned {users_result['status']}", 'SLEEPING....')
+            #     sleep(SLEEP_TIME)
+            #     continue
+            # elif users_result['text'] in TWITTER_RESPONSE_CODES.keys():
+            #     return None
+            # else:
+            #     Helper.write_to_log(str(users_result))
+            #     print(
+            #         'MAJOR ERROR!\nCODE SHOULDNT GET HERE @fetch_live_tweets_v2')
+            #     return None
+
+            # elif temp_tweets.status_code == 429:
+            #     print(
+            #         f"Tweeter Status code Returned {users_result['status']}", 'SLEEPING....')
+            #     sleep(SLEEP_TIME)
+            #     return 429
+            # else:
+            #     print(f'CODE: {temp_tweets.status_code}')
+            #     print(f'{temp_tweets}')
+            #     return None
+        # except Exception as err:
+        #     print(f"{err}")
+        #     raise Exception("") from err
         return tweets
 
     def get_min_date(self, tweets):
@@ -245,32 +305,44 @@ class TweetStockModel:
             'exclude': 'retweets,replies',
             'tweet.fields': 'public_metrics',
         }
-
-        for i, tweet in enumerate(tweets):
+        i = 0
+        while i < len(tweets):
             try:
-                u_tweets = self.twitter.request(
-                    resource=f'users/:{tweet["u_id"]}/tweets', params=prms)
+                users_tweets = self.twitter.request(
+                    resource=f'users/:{tweets[i]["u_id"]}/tweets', params=prms)
 
-                if u_tweets.text == r'{"meta":{"result_count":0}}':
+                if users_tweets.text == r'{"meta":{"result_count":0}}':
                     tweets[i]['u_engagement'] = 0
                 else:
                     tweets[i]['u_engagement'] = DataHandler.tsm_get_single_user_eng_score(
-                        user_tweets=u_tweets, user_followers=tweet['u_n_followers'])
-
-            except TwitterRequestError as err:
-                if "429" in str(err):
-                    err_msg = "429 in err"
-                    print(err_msg, err)
-                    tweets[i]['u_engagement'] = 0
-                    # time.sleep(15*60) # sleep 15 mins
+                        user_tweets=users_tweets, user_followers=tweets[i]['u_n_followers'])
+                i += 1
+            except TwitterRequestError as tre:
+                print(tre)
+                if tre.title in TWITTER_RESPONSE_CODES.keys():
+                    if TWITTER_RESPONSE_CODES[tre.title] == 429:
+                        sleep(SLEEP_TIME)
+                        continue
+                    else:
+                        return None
                 else:
-                    err_msg = "twitter request error"
-                    print(err_msg, err)
-                    tweets[i]['u_engagement'] = 0
-            except Exception as err:
-                err_msg = "general exception"
-                print(err_msg, err)
-                tweets[i]['u_engagement'] = 0
+                    print(
+                        'SHOULDNT GET HERE @EXCEPT -- fetch_users_with_eng_by_tweets_v2')
+                    return None
+            # elif users_result['text'] in TWITTER_RESPONSE_CODES.keys():
+            #     if "429" in str(err):
+            #         err_msg = "429 in err"
+            #         print(err_msg, err)
+            #         tweets[i]['u_engagement'] = 0
+            #         # time.sleep(15*60) # sleep 15 mins
+            #     else:
+            #         err_msg = "twitter request error"
+            #         print(err_msg, err)
+            #         tweets[i]['u_engagement'] = 0
+            # except Exception as err:
+            #     err_msg = "general exception"
+            #     print(err_msg, err)
+            #     tweets[i]['u_engagement'] = 0
 
         return tweets
 
@@ -289,11 +361,11 @@ class TweetStockModel:
         6. returns the remaining tweets (sentiment and user engagement included)
         """
         # Step 1 - fetch the live tweets from twitter
-        tweets = self.fetch_live_tweets_v2(start_date=start_date, end_date=end_date, max_results=MAX_TWEETS_RESULTS,
-                                           n_past=N_PAST)
-        # should be here - bexause we want the new end date BEFORE filtering
-
-        if self.tweets == None:
+        tweets = 429
+        while tweets == 429:
+            tweets = self.fetch_live_tweets_v2(start_date=start_date, end_date=end_date, max_results=MAX_TWEETS_RESULTS,
+                                               n_past=N_PAST)
+        if tweets == None:
             print("Couldnt get tweets @get_tweets()")
             return None, None
 
@@ -323,6 +395,7 @@ class TweetStockModel:
         if len(tweets) == 0:
             print("Filtered all users @filter_users()")
             return None, new_end_date
+
         return tweets, new_end_date
 
     # Pred Function
@@ -337,23 +410,33 @@ class TweetStockModel:
             if end_date == None:
                 print(
                     "problem with end date @get_prediction()/while loop (got no tweets when fetched)")
+
             if tweets != None:
                 for tweet in tweets:
                     self.tweets.append(tweet)
+
             iterations += 1
+
             if iterations == REFETCHING_MAX_ITERATIONS_THRESHOLD:
-                print("reached max iterations threshold")
+                print("Reached max iterations threshold")
 
         # Transform from dictionary to df for easier data handling
         tweets_df = DataHandler.tsm_twitter_dict_res_to_df(self.tweets)
-        if tweets_df == None or tweets_df.empty:
-            print("Couldnt convert twitter res dict to df @twitter_dict_res_to_df()")
+
+        if tweets_df.empty:
+            if isinstance(tweets_df, pd_DataFrame):
+                print("Couldnt convert twitter res dict to df @twitter_dict_res_to_df()")
+            else:
+                print(tweets_df.Error_message, 'CUSTOM ERROR @get_prediction')
             return None, None
+
         tweets_table_dict = DataHandler.tsm_get_tweets_table_dict_result(
             tweets_df=tweets_df)
+
         # Prepare data for model
         preped_for_model, preped_df = DataHandler.tsm_prep_data(
             tweets_df, self.feature_set)
+
         # Perform the prediction (0,1 --> -1,1)
         pred = self.predict(preped_for_model)
 

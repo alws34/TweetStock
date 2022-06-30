@@ -8,6 +8,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 from csv import reader as csv_reader
 import Helper
+from Helper_Classes import Err_df
 '''
 This class will be used to coordinate the work between
 the ModelTrainer.py and TweetStockModel.py .
@@ -39,10 +40,10 @@ MT_SCALING_PARAMS = {
     "User_Engagement": [[0.0], [0.64]]
 }
 TSM_SCALING_PARAMS = {
-    "reply_count": [[0.0], [10.0]],  # 565],
-    "retweet_count": [[0.0], [10.0]],  # 990],
-    "like_count": [[0.0], [10.0]],  # 988]  # ,
-    "User_Engagement": [[0.0], [0.64]]
+    "n_replies": [[0.0], [10.0]],  # 565],
+    "n_retweets": [[0.0], [10.0]],  # 990],
+    "n_likes": [[0.0], [10.0]],  # 988]  # ,
+    "u_engagement": [[0.0], [0.64]]
 }
 
 # log2
@@ -128,12 +129,15 @@ def mt_scale_data(df, target='price_difference'):
     df = df.groupby(by=['Date'])
     for date in df:
         sentiment_col = np_array(date[1]["Tweet_Sentiment"]).reshape(-1, 1)
+
         curr_day_avg_sentiment = sentiment_col.mean()
         curr_day = date[0]
         curr_day_target = date[1][target].iloc[0]
+
         dates_dict['Tweet_Sentiment'].append(curr_day_avg_sentiment)
         dates_dict['Date'].append(curr_day)
         dates_dict[target].append(curr_day_target)
+
         for col_name in df_cols:
             curr_day_col = np_array(date[1][col_name]).reshape(-1, 1)
             if is_scalable_multipliable_feature(col_name):
@@ -197,7 +201,7 @@ def mt_filter_tweets(tweets_df, tweets_stats_threshold=25):
     return temp_tweets
 
 
-def calc_eng_score(scaled_log_n_rts, scaled_log_n_likes, scaled_log_n_replies, scaled_log_n_followers, n_tweets):
+def calc_eng_score(scaled_log_n_rts, scaled_log_n_likes, scaled_log_n_replies, scaled_log_n_followers, n_tweets, ):
     eng = 0
     # Engagement score calculation
     if scaled_log_n_followers > 0 and n_tweets > 0:
@@ -361,22 +365,22 @@ def tsm_transform_features_to_log(df):
 
 def tsm_get_scale_and_mean(df, feature_set, n_past=N_PAST, scaling=SCALING):
     def is_scalable_feature(f):
-        return f in feature_set or f == 's_compound'
-
-    def is_sentiment_feature(f):
-        return f in ['s_compound', 's_neg', 's_pos', 's_neu']
+        # feature_set or f == 's_compound'
+        return f in ['n_replies', 'n_retweets', 'n_likes', 'u_engagement']
 
     if n_past == 1:
         df_dict = {}
         for col in df.columns:
             if is_scalable_feature(col):
                 df_dict[col] = []
-                f = df[col] * \
-                    df["s_compound"] if not is_sentiment_feature(
-                        col) else df[col]
-                scaler = MinMaxScaler() if scaling == 'min_max' else StandardScaler()
+                f = df[col] * df["s_compound"]
+                scaler = MinMaxScaler()
+                scaler.fit(TSM_SCALING_PARAMS[col])
                 df_dict[col].append(scaler.fit_transform(
                     np_array(f).reshape(-1, 1)).mean())
+            elif col == 's_compound':
+                df_dict[col] = []
+                df_dict[col].append(df["s_compound"].mean())
         return pd_DataFrame.from_dict(df_dict)
     else:
         return "N_past is not 1 @ get_scale_and_mean()"
@@ -415,7 +419,7 @@ def tsm_filter_users(tweets, threshold=TSM_MIN_USER_FOLLOWERS):
 
 
 def tsm_get_single_user_eng_score(user_tweets, user_followers, include_replies=INCLUDE_REPLIES):
-    #u_n_rts, u_n_replies, u_n_likes = 0, 0, 0
+    u_n_rts, u_n_replies, u_n_likes = 0, 0, 0
     stats = {
         'retweet_count': 0,
         'reply_count': 0,
@@ -424,7 +428,7 @@ def tsm_get_single_user_eng_score(user_tweets, user_followers, include_replies=I
     # get stats
     tweets_counter = 0
     for tweet in user_tweets:
-        tweets_counter += 1 
+        tweets_counter += 1
         for stat in stats:
             stats[stat] += tweet['public_metrics'][stat]
             # u_n_rts += tweet['public_metrics']['retweet_count']
@@ -440,28 +444,37 @@ def tsm_get_single_user_eng_score(user_tweets, user_followers, include_replies=I
     for stat in stats:
         scaler = MinMaxScaler()
         scaler.fit(TSM_ENGAGEMENT_SCALING_PARAMS[stat])
-        stats[stat] = scaler.transform(
-            np_array(stats[stat]).reshape(-1, 1))[0][0]
+        stats[stat] = scaler.transform(np_array(stats[stat]).reshape(-1, 1))
 
     if not include_replies:
         stats['reply_count'] = 0
+
     return calc_eng_score(scaled_log_n_rts=stats['retweet_count'], scaled_log_n_likes=stats['like_count'], scaled_log_n_replies=stats['reply_count'], scaled_log_n_followers=stats['follower_count'], n_tweets=tweets_counter)
 
 #------ TweetStockModel.py - seperate -------#
 
 
+'''
+# def tsm_twitter_dict_res_to_df_old(data):
+#     try:
+#         temp = {}
+#         for key in data[0].keys():
+#             temp[key] = []
+#             for d in data:
+#                 temp[key].append(d[key])
+#     except Exception as err:
+#         print('twitter_dict_res_to_df()', err)
+#         return None
+#     # print(temp)
+#     return pd_DataFrame.from_dict(temp)
+'''
+
+
 def tsm_twitter_dict_res_to_df(data):
     try:
-        temp = {}
-        for key in data[0].keys():
-            temp[key] = []
-            for d in data:
-                temp[key].append(d[key])
-    except Exception as err:
-        print('twitter_dict_res_to_df()', err)
-        return None
-    # print(temp)
-    return pd_DataFrame.from_dict(temp)
+        return pd_DataFrame.from_records(data)
+    except Exception as e:
+        return Err_df(f'{e}')
 
 
 def tsm_prep_data(df, feature_set):
@@ -532,7 +545,7 @@ def create_sequence(dataset, target=None, num_of_rows=N_PAST):
     #     return None
 
     if target == None:
-        for stop_idx in range(int(num_of_rows), len(dataset)):
+        for stop_idx in range(int(num_of_rows), len(dataset)+1):
             sequences.append(dataset.iloc[start_idx:stop_idx])
             start_idx += 1
         return np_array(sequences, dtype='object')
