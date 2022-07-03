@@ -1,7 +1,35 @@
 from os import system, name as os_name, getcwd, path as os_path, mkdir
 from datetime import datetime as dt
 from csv import writer as csv_writer
-#from pandas import DataFrame
+
+#------- MISC --------#
+
+def clear_console(msg=''):
+    clear_cmd = 'cls' if os_name == 'nt' else 'clear'
+    system(clear_cmd)
+    print(msg, 'At:', get_date_time_stringify(
+        '%d/%m/%Y-%H:%M:%S'))
+
+#------- Saves & file handels --------#
+def save_dict_to_csv(dict, save_path, file_name, mode='w'):
+    with open(f'{save_path}{file_name}.csv', mode) as f:
+        for key in dict.keys():
+            f.write("%s,%s\n" % (key, dict[key]))
+
+
+def save_delimited_dict(dict, save_path, mode='w', delimiter='|'):
+    #print(dict)
+    try:
+        with open(save_path, mode) as myfile:
+            tsv_writer = csv_writer(myfile, delimiter=delimiter)
+            for key in dict.keys():
+                tsv_writer.writerow([key, dict[key]])
+    except Exception as e:
+        write_to_log(f'{e}')
+
+
+def save_df_to_csv(df, path, file_name):
+    df.to_csv(f'{path}{file_name}.csv')
 
 
 def create_dir(path):
@@ -10,35 +38,14 @@ def create_dir(path):
 
 
 def write_to_log(msg):
-    with open(f'{get_prefix_path()[1]}\\Logs\\LOG_{get_date_time_stringify()}', 'w+', encoding='utf-8') as f:
-        f.write(msg)
+    delimiter, prefix = get_prefix_path()
+    log_path = f'{prefix}Logs{delimiter}{get_date_time_stringify()}.log'
+    mode = 'a'
+    if not os_path.exists(log_path):
+        mode = 'w+'
 
-
-def clear_console(msg=''):
-    clear_cmd = 'cls' if os_name == 'nt' else 'clear'
-    system(clear_cmd)
-    print(msg, 'At:', get_date_time_stringify(
-        '%d/%m/%Y-%H:%M:%S'))
-
-#------- Savings --------#
-
-
-def save_dict_to_csv(dict, save_path, file_name, mode='w'):
-    with open(f'{save_path}{file_name}.csv', mode) as f:
-        for key in dict.keys():
-            f.write("%s,%s\n" % (key, dict[key]))
-
-
-def save_delimited_dict(dict, save_path, mode='w', delimiter='|'):
-    print(dict)
-    with open(save_path, mode) as myfile:
-        tsv_writer = csv_writer(myfile, delimiter=delimiter)
-        for key in dict.keys():
-            tsv_writer.writerow([key, dict[key]])
-
-
-def save_df_to_csv(df, path, file_name):
-    df.to_csv(f'{path}{file_name}.csv')
+    with open(log_path, mode, encoding='utf-8') as log_file:
+        log_file.write(f'{get_date_time_stringify(format="%H:%M:%S")}::\t\t{msg}\n\n')
 
 #------- Gets ---------#
 
@@ -58,19 +65,16 @@ def get_date_time():
     return dt.now()
 
 
-def get_date_time_stringify(format="%d_%m_%Y_%H"):
+def get_date_time_stringify(format="%d_%m_%Y"):
     return get_date_time().strftime(format)
 
 
 def get_ping_command(how_many_pings='1', host='1.1.1.1'):
+    var = 'c'
+    if os_name == 'nt':
+        var ='n'
 
-    def get_var():
-        if os_name == 'nt':
-            return'n'
-        elif os_name == 'posix':
-            return 'c'
-
-    return f'ping -{get_var()} {how_many_pings} {host}'
+    return f'ping -{var} {how_many_pings} {host}'
 
 
 def get_models():
@@ -86,10 +90,6 @@ def get_models():
         },
         'GOOG': {
             'path': f'{prefix}SelectedModels{delimiter}GOOG{delimiter}GOOG_acc_0.612_npast_1_epoch_10_opt_adam_num_2283.h5',
-            'features': 1
-        },
-        'GOOGL': {
-            'path': f'{prefix}SelectedModels{delimiter}GOOGL{delimiter}GOOGL_acc_1.0_npast_1_epoch_4_opt_adam_num_3147.h5',
             'features': 1
         },
         'MSFT': {
@@ -129,6 +129,6 @@ def get_user_data_paths(user):
     }
 
     if not user in paths.keys():
-        write_to_log(f'Invalid User Provided: {user}')
+        write_to_log(f'Invalid User Provided: {user} @Helper.get_user_data_paths')
         return None
     return paths[user]

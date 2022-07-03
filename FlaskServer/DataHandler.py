@@ -272,7 +272,7 @@ def mt_split_data(np_array_sequence, np_array_labels, train_random_state=4321, t
 
     if len(np_array_sequence) < (testing_size + validation_size):
         Helper.write_to_log(
-            f"DataHandler.py/mt_split_data: sequence is smaller than split sizes... {Helper.get_date_time_stringify(format='%d/%m/%Y-%H:%M:%S')}")
+            f"DataHandler.py/mt_split_data: sequence is smaller than split sizes... @ {Helper.get_date_time_stringify(format='%d/%m/%Y-%H:%M:%S')}")
         return None
 
     # 1. split {data} to -> {train_data}, {test_data}; len({test_data}) == testing_size
@@ -288,7 +288,7 @@ def mt_split_data(np_array_sequence, np_array_labels, train_random_state=4321, t
     return train_seq, train_labels,  validation_seq, validation_labels, test_seq, test_labels
 
 
-def mt_get_merged(tweets_df, users_df, stocks_df, exclude_TSLA=False):
+def mt_get_merged(tweets_df, users_df, stocks_df):
     ''' Get the merged tweets users and stocks pd_DataFrame - returns the merged df '''
     print("---get_merged----")
     # --> merge stocks_2019 with tweets_2019 by ticker and date
@@ -299,10 +299,6 @@ def mt_get_merged(tweets_df, users_df, stocks_df, exclude_TSLA=False):
     temp_users.rename(columns={'screen_name': 'writer'}, inplace=True)
     merged_df = pd_merge(temp_merged_df, temp_users,
                          on=['writer'], how='inner')
-    if exclude_TSLA:
-        print('with TSLA', len(merged_df))
-        merged_df = merged_df[merged_df['ticker_symbol'] != 'TSLA']
-        print('without TSLA', len(merged_df))
     # clear nulls
     merged_df.dropna(axis=0, inplace=True)
     merged_df.reset_index(drop=True, inplace=True)
@@ -495,8 +491,8 @@ def tsm_prep_data(df, feature_set):
     # print('\n\n', test_seq, test_seq.shape)
 
     # 4 Scale data
-    test_seq = test_seq.reshape(
-        (len(test_seq), test_seq.shape[0] * test_seq.shape[1]))
+    test_seq = reshape_sequence(test_seq)
+
     # scaled_test_seq = scale_seq(test_seq)
 
     # Return preped data
@@ -539,18 +535,17 @@ def create_sequence(dataset, target=None, num_of_rows=N_PAST):
     Creates a sequenced array from a dataframe sorted by date
     Returns np array
     '''
-    sequences = []
-    start_idx = 0
-    # if num_of_rows > len(dataset):
-    #     return None
+    sequences, labels = [], []
 
+    # Prepare for live prediction
     if target == None:
         for stop_idx in range(int(num_of_rows), len(dataset)+1):
             sequences.append(dataset.iloc[start_idx:stop_idx])
             start_idx += 1
-        return np_array(sequences, dtype='object')
+        return np_array(dataset, dtype='object')
 
-    labels = []
+    # Prepare for model training
+    start_idx = 0
     features_dataset = dataset.drop(columns=target)
     labels_dataset = dataset[[target]]
     # Selecting "num_of_rows"
@@ -623,6 +618,21 @@ def load_csv(path, csv_delimiter='|'):
 def get_array_average(arr):
     return sum(arr) / len(arr)
 
+
+def reshape_sequence(sequence):
+    '''
+        Convert 3D array to 2D array
+        E.G. shape = (5,6,7) ==> (5,6*7) = (5,42)
+    '''
+    if len(sequence.shape) == 2:
+        return sequence.reshape(len(sequence), sequence.shape[0]*sequence.shape[1])
+    elif len(sequence.shape) == 3:
+        return sequence.reshape(len(sequence), sequence.shape[1]*sequence.shape[2])
+    else:
+        print("Bad Sequence shape @DataHandler.reshape_sequene(), Writing to log!")
+        Helper.write_to_log(
+            "Bad Sequence shape @DataHandler.reshape_sequene()")
+        return None
 
 # def mt_scale_data_old(df, target='price_difference'):
 #     def is_scalable_feature(feature):

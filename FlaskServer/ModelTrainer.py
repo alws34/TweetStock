@@ -138,9 +138,7 @@ class ModelTrainer:
 
         merged_df = DataHandler.mt_get_merged(self.init_tweets_df(tweets_2019),
                                               self.init_users_df(users_df),
-                                              self.init_stocks_df(
-            stocks_2019),
-            exclude_TSLA=False)
+                                              self.init_stocks_df(stocks_2019))
         print('merged\n\n', merged_df)
         Helper.clear_console()
 
@@ -257,11 +255,9 @@ class ModelTrainer:
     def get_tensor_values(self, df):
         return ctt(df, dtype=tf_float32)
 
+    # MOVED TO DATAHANDLER
     def reshape_sequence(self, sequence):
-        '''Convert 3D array to 2D array
-        E.G. shape = (5,6,7) ==> (5,6*7) = (5,42)
-        '''
-        return sequence.reshape(len(sequence), sequence.shape[1]*sequence.shape[2])
+        return DataHandler.reshape_sequence(sequence)
 
     def train_model_from_comparison_example(self):
         '''Generates model according to inserted params'''
@@ -478,7 +474,6 @@ class ModelTrainer:
     def run_auto_training(self, acc_saving_threshold=0.55):
         '''
         Runs all possible models
-        runtime: ~13 hours
         '''
         combinations = self.get_training_params_combinations()
 
@@ -521,8 +516,8 @@ class ModelTrainer:
     def run_auto_retraining(self, iterations_for_each_stock=DEFAULT_RETRAINING_ITERATIONS, new_test_rand=False):
         # fill in with model param paths for each stock!
         root_dir = '/home/pi/FinalProject/FlaskServer/SelectedModels'
-        models_params_paths = ['AAPL', 'AMZN',
-                               'GOOG', 'MSFT', 'TSLA']  # 'GOOGL',
+        models_params_paths = ['AMZN']  # ['AAPL', 'AMZN',
+        # 'GOOG', 'MSFT', 'TSLA']  # 'GOOGL',
         delimiter, prefix = Helper.get_prefix_path()
 
         average_accuracies = {}
@@ -562,10 +557,9 @@ class ModelTrainer:
 
 #---------- MAIN -----------#
 if __name__ == '__main__':
-    # availables: 'alon' , 'guy', 'hadar', 'pi'
     delimiter, prefix = Helper.get_prefix_path()
-    user = 'pi'
-    try_folder_name = 'final_26_06'
+    user = 'pi'  # availables: 'alon' , 'guy', 'hadar', 'pi'
+    try_folder_name = 'final_01_07'
     #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}"
     mt = ModelTrainer(user=user, saving_path=save_path)
@@ -574,7 +568,7 @@ if __name__ == '__main__':
     #Helper.save_df_to_csv(df=df, path='/home/pi/FinalProject/FlaskServer/Data/CSVs/', file_name='new_initialized_df')
 
     # Train model
-    mt.run_auto_training(acc_saving_threshold=0.6)
+    # mt.run_auto_training(acc_saving_threshold=0.6)
 
     # Train specific model
     # mt.init_features_from_csv(
@@ -592,7 +586,7 @@ if __name__ == '__main__':
     # mt.save(append_accuracy=True)
 
     # Retrain model
-    #mt.run_auto_retraining(iterations_for_each_stock=1, new_test_rand=True)
+    mt.run_auto_retraining(iterations_for_each_stock=100, new_test_rand=True)
 
     # run single train iteration
     # mt.train_model()

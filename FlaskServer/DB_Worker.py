@@ -84,7 +84,7 @@ def is_valid_day():
     today, time = f'{year}-{month}-{day}', f'{hour}:{minute}'
     start_of_year, end_of_year = f'{year}-01-01', f'{year}-12-31'
 
-    nyse = mcal.get_calendar('NYSE')
+    nyse = mcal.get_calendar('NYSE') #Get NY stock exchange schedule.
 
     try:
         schedule = nyse.schedule(
