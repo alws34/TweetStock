@@ -13,7 +13,7 @@ import Helper
 import DataHandler
 import Twitter_Responses
 
-
+VERSION = '1.7.0'
 TWITTER_VERSION = 2             # twitter fetch_and_filter_dataversion.
 # days on which the model was train to precict based on.
 N_PAST = 1
@@ -27,7 +27,6 @@ SLEEP_TIME = 60*15
 TWITTER_RESPONSE_CODES = Twitter_Responses.GET_TWITTER_CODES()
 delimiter, prefix = Helper.get_prefix_path()
 
-VERSION = '1.6.0'
 
 
 class TweetStockModel:

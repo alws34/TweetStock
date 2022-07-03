@@ -1,0 +1,13 @@
+layers|[8, 4]
+ticker|TSLA
+features|['Date', 'ticker_symbol', 'price_difference', 'Tweet_Sentiment', 'Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes', 'User_Engagement']
+activation_all|relu
+activation_last|sigmoid
+loss_func|mean_squared_error
+optimizer|adam
+n_past|1
+epochs|15
+output_dim|2
+batch_size|8
+train_random_state|9165
+test_random_state|1234

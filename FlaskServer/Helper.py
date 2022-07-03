@@ -4,6 +4,7 @@ from csv import writer as csv_writer
 
 #------- MISC --------#
 
+
 def clear_console(msg=''):
     clear_cmd = 'cls' if os_name == 'nt' else 'clear'
     system(clear_cmd)
@@ -11,6 +12,8 @@ def clear_console(msg=''):
         '%d/%m/%Y-%H:%M:%S'))
 
 #------- Saves & file handels --------#
+
+
 def save_dict_to_csv(dict, save_path, file_name, mode='w'):
     with open(f'{save_path}{file_name}.csv', mode) as f:
         for key in dict.keys():
@@ -18,7 +21,7 @@ def save_dict_to_csv(dict, save_path, file_name, mode='w'):
 
 
 def save_delimited_dict(dict, save_path, mode='w', delimiter='|'):
-    #print(dict)
+    # print(dict)
     try:
         with open(save_path, mode) as myfile:
             tsv_writer = csv_writer(myfile, delimiter=delimiter)
@@ -45,7 +48,8 @@ def write_to_log(msg):
         mode = 'w+'
 
     with open(log_path, mode, encoding='utf-8') as log_file:
-        log_file.write(f'{get_date_time_stringify(format="%H:%M:%S")}::\t\t{msg}\n\n')
+        log_file.write(
+            f'{get_date_time_stringify(format="%H:%M:%S")}::\t\t{msg}\n\n')
 
 #------- Gets ---------#
 
@@ -72,33 +76,34 @@ def get_date_time_stringify(format="%d_%m_%Y"):
 def get_ping_command(how_many_pings='1', host='1.1.1.1'):
     var = 'c'
     if os_name == 'nt':
-        var ='n'
+        var = 'n'
 
     return f'ping -{var} {how_many_pings} {host}'
 
 
 def get_models():
     delimiter, prefix = get_prefix_path()
+    folder_name = "InUseModels"
     return {
         'AAPL': {
-            'path': f'{prefix}SelectedModels{delimiter}AAPL{delimiter}AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
-            'features': 1
+            'path': f'{prefix}{folder_name}{delimiter}AAPL{delimiter}AAPL_acc_0.68_npast_1_epoch_15_opt_rmsprop_num_227.h5',
+            'features': 2
         },
         'AMZN': {
-            'path': f'{prefix}SelectedModels{delimiter}AMZN{delimiter}AMZN_acc_0.673_npast_1_epoch_7_opt_rmsprop_num_1396.h5',
-            'features': 1
+            'path': f'{prefix}{folder_name}{delimiter}AMZN{delimiter}AMZN_acc_0.62_npast_1_epoch_15_opt_rmsprop_num_95.h5',
+            'features': 2
         },
         'GOOG': {
-            'path': f'{prefix}SelectedModels{delimiter}GOOG{delimiter}GOOG_acc_0.612_npast_1_epoch_10_opt_adam_num_2283.h5',
-            'features': 1
+            'path': f'{prefix}{folder_name}{delimiter}GOOG{delimiter}GOOG_acc_0.62_npast_1_epoch_30_opt_adam_num_105.h5',
+            'features': 2
         },
         'MSFT': {
-            'path': f'{prefix}SelectedModels{delimiter}MSFT{delimiter}MSFT_acc_0.612_npast_1_epoch_4_opt_adam_num_4359.h5',
+            'path': f'{prefix}{folder_name}{delimiter}MSFT{delimiter}MSFT_acc_0.62_npast_1_epoch_15_opt_rmsprop_num_299.h5',
             'features': 2
         },
         'TSLA': {
-            'path': f'{prefix}SelectedModels{delimiter}TSLA{delimiter}TSLA_acc_0.633_npast_1_epoch_4_opt_adam_num_804.h5',
-            'features': 1
+            'path': f'{prefix}{folder_name}{delimiter}TSLA{delimiter}TSLA_acc_0.68_npast_1_epoch_15_opt_adam_num_28_params.h5',
+            'features': 2
         }
     }
 
@@ -129,6 +134,7 @@ def get_user_data_paths(user):
     }
 
     if not user in paths.keys():
-        write_to_log(f'Invalid User Provided: {user} @Helper.get_user_data_paths')
+        write_to_log(
+            f'Invalid User Provided: {user} @Helper.get_user_data_paths')
         return None
     return paths[user]
