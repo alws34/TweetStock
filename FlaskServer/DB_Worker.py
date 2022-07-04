@@ -111,8 +111,10 @@ def sleep_until_market_opens():
     #now = {'hour': 1, 'min': 2}
     start_hour, start_min = 16, 30
     start_hour_in_sec = (start_hour * 60 + start_min) * 60
-    now_in_sec = (now.hour * 60 + now.min) * 60
+    now_in_sec = (now.hour * 60 + now.minute) * 60
     if now_in_sec < start_hour_in_sec:
+        print(
+            f'sleeping for {(start_hour_in_sec - now_in_sec)/60} minutes -- {(start_hour_in_sec - now_in_sec)/60/60} hours')
         sleep(start_hour_in_sec - now_in_sec)
     else:
         one_day_in_sec = 24 * 60 * 60
@@ -150,11 +152,10 @@ def Get_Real_Close():
 
         if ticker not in updated_db['Prediction'].keys():
             updated_db['Prediction'].update({ticker: {
-                'Actual_close_price': 0,
-                'Actual_open_price': 0
+                'Actual_volatility': 0
             }})
 
-        updated_db['Prediction'][ticker]['Actual_close_price'] = 1 if history['Close'][0] >= history['Open'][0] else -1
+        updated_db['Prediction'][ticker]['Actual_volatility'] = 1 if history['Close'][0] >= history['Open'][0] else -1
     post_to_FireBase(updated_db, Helper.get_date_time_stringify(
         format="%d_%m_%Y"))
 
