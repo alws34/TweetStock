@@ -21,7 +21,7 @@ updated_db = {
 
 
 def init_Firebase_config():
-    with open(f'{prefix}FlaskServer{delimiter}CONFIGS{delimiter}firebaseconfig.json', 'r') as firebase_conf:
+    with open(f'{prefix}{delimiter}CONFIGS{delimiter}firebaseconfig.json', 'r') as firebase_conf:
         firebase_config = load_json(firebase_conf)
     return firebase_config
 
@@ -84,7 +84,7 @@ def is_valid_day():
     today, time = f'{year}-{month}-{day}', f'{hour}:{minute}'
     start_of_year, end_of_year = f'{year}-01-01', f'{year}-12-31'
 
-    nyse = mcal.get_calendar('NYSE') #Get NY stock exchange schedule.
+    nyse = mcal.get_calendar('NYSE')  # Get NY stock exchange schedule.
 
     try:
         schedule = nyse.schedule(
@@ -147,6 +147,13 @@ def Get_Real_Close():
         stock = yf.Ticker(ticker)
         look_back_n_days = 1
         history = stock.history(period=f'{look_back_n_days}d')
+
+        if ticker not in updated_db['Prediction'].keys():
+            updated_db['Prediction'].update({ticker: {
+                'Actual_close_price': 0,
+                'Actual_open_price': 0
+            }})
+
         updated_db['Prediction'][ticker]['Actual_close_price'] = 1 if history['Close'][0] >= history['Open'][0] else -1
     post_to_FireBase(updated_db, Helper.get_date_time_stringify(
         format="%d_%m_%Y"))
