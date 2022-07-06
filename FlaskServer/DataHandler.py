@@ -1,8 +1,8 @@
 from pandas import DataFrame as pd_DataFrame, merge as pd_merge, to_datetime as pd_to_datetime
-from numpy import array as np_array, split as np_split
+from numpy import array as np_array
 from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
 from math import log, inf
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from csv import reader as csv_reader
 import Helper
@@ -65,15 +65,16 @@ def mt_filter_users(df, follower_threshold=150):
     -- 2. removes users with less than follower_threshold
     """
     to_remove = []
-    print("len before = " + str(len(df)))
+    print("DataHandler.mt_filter_users says: len before = " + str(len(df)))
     for i in range(len(df)):
         try:
             df['eng_score'][i] = float(df['eng_score'][i])
-        except ValueError as ex:
+        except ValueError as ve:
             to_remove.append(i)
-            print(ex)
+            Helper.logger(f"DataHandler.mt_filter_users says: {ve}")
         except:
-            print('Problem getting eng_score at index', i)
+            Helper.logger(
+                f'DataHandler.mt_filter_users says: Problem getting eng_score at index {i}')
 
     for i in range(len(df)):
         if df['eng_score'][i] == inf or df['followers_count'][i] < follower_threshold:
@@ -81,7 +82,7 @@ def mt_filter_users(df, follower_threshold=150):
 
     df.drop(to_remove, inplace=True)
     df.reset_index(drop=True, inplace=True)
-    print("len after = " + str(len(df)))
+    print("DataHandler.mt_filter_users says: len after = " + str(len(df)))
     return df
 
 
@@ -100,8 +101,7 @@ def mt_filter_tweets(tweets_df, tweets_stats_threshold=25):
     temp_tweets = temp_tweets[temp_tweets['Neutral'] != 1]
 
     temp_tweets.reset_index(drop=True, inplace=True)
-    print('len after', len(temp_tweets))
-    print("\n\n")
+    print('len after', len(temp_tweets), '\n\n')
     return temp_tweets
 
 
@@ -372,7 +372,8 @@ def tsm_get_tweets_table_dict_result(tweets_df):
         's_compound': 'sentiment_compound'
     }
     tweets_df = tweets_df[features].rename(columns=renames)
-    tweets_df['user_engagement']=[item[0][0] for item in tweets_df['user_engagement']]
+    tweets_df['user_engagement'] = [item[0][0]
+                                    for item in tweets_df['user_engagement']]
     return tweets_df.to_dict(orient='records')
 
 
@@ -448,8 +449,8 @@ def load_csv(path, csv_delimiter='|'):
         with open(path, mode='r') as infile:
             reader = csv_reader(infile, delimiter=csv_delimiter)
             return dict((rows[0], int(rows[1])) if rows[1].isdigit() else (rows[0], rows[1]) for rows in reader)
-    except Exception as err:
-        print(err)
+    except Exception as e:
+        Helper.logger(f"DataHandler.load_csv says: {e}")
         return None
 # END LOAD FEATURES CSV
 
@@ -468,9 +469,7 @@ def reshape_sequence(sequence):
     elif len(sequence.shape) == 3:
         return sequence.reshape(len(sequence), sequence.shape[1]*sequence.shape[2])
     else:
-        print("Bad Sequence shape @DataHandler.reshape_sequene(), Writing to log!")
-        Helper.write_to_log(
-            "Bad Sequence shape @DataHandler.reshape_sequene()")
+        Helper.logger("Bad Sequence shape @DataHandler.reshape_sequene()")
         return None
 
 

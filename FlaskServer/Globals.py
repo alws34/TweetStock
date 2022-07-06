@@ -1,7 +1,7 @@
 from Helper import get_prefix_path
-from Twitter_Responses import GET_TWITTER_CODES
+from TwitterResponses import GET_TWITTER_CODES
 
-APP_VERSION = '1.7.2'
+APP_VERSION = '1.7.3'
 TWITTER_VERSION = 2  # twitter fetch_and_filter_dataversion.
 N_PAST = 1  # days on which the model was trained.
 MAX_TWEETS_RESULTS = 100  # max results for first tweets query.

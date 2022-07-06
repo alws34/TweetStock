@@ -1,8 +1,8 @@
 from Globals import SLEEP_TIME, N_PAST
-from json import load as loadJson
-from Twitter_Responses import GET_TWITTER_CODES
+from json import JSONDecodeError, load as loadJson
+from TwitterResponses import GET_TWITTER_CODES
 from tweepy import OAuthHandler as tweepy_OAuthHandler, API as tweepy_API
-from TwitterAPI import TwitterAPI, TwitterRequestError
+from TwitterAPI import TwitterAPI, TwitterRequestError, TwitterConnectionError
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import DataHandler
 import Helper
@@ -56,7 +56,6 @@ class TweetsHandler:
             q=ticker, count=max_results, result_type=result_type)
 
         for tweet in temp_tweets:
-            # print(f'{tweet._json}')
             t = tweet._json
             user = t['user']
             self.tweets.append({
@@ -106,14 +105,25 @@ class TweetsHandler:
                 resource='tweets/search/recent', params=prms)
         except TwitterRequestError as tre_tweets:
             if tre_tweets.status_code == self.responses['Too Many Requests']:
-                print(
-                    f"Tweeter Status code Returned {tre_tweets.status_code}", 'SLEEPING....')
+                err_msg = f"Tweeter Status code Returned {tre_tweets.status_code}", 'SLEEPING....'
+                Helper.logger(err_msg)
                 sleep(SLEEP_TIME)
+                Helper.Woke_Up()
                 return tre_tweets.status_code
-            else:
-                print(f'CODE: {tre_tweets.status_code}')
-                print(f'{temp_tweets}')
-                return None
+            # else:
+            #     err_msg = f'CODE: {tre_tweets.status_code}'
+            #     Helper.logger(err_msg)
+            #     return None
+        except TwitterConnectionError as TCE:
+            err_msg = f"TwitterConnectionError @fetch_live_tweets_v2 --- {TCE}"
+            Helper.logger(err_msg)
+            sleep(SLEEP_TIME)
+            Helper.Woke_Up()
+            return self.responses['Service Unavailable']
+        except Exception as e:
+            err_msg = f"Error occured @fetch_live_tweets_v2 --- {e}"
+            Helper.logger(err_msg)
+            return self.responses['Service Unavailable']
 
         if temp_tweets.status_code == self.responses['OK']:
             tweets_arr = [tweet for tweet in temp_tweets]
@@ -123,7 +133,7 @@ class TweetsHandler:
                 tweet = tweets_arr[i]
 
                 try:
-                    users_result = self.twitter.request(resource="users/:"+tweet['author_id'], params={
+                    users_result = self.twitter.request(resource="users/:" + tweet['author_id'], params={
                         'user.fields': 'public_metrics,description,username'}).json()
                     if 'data' in users_result.keys():
                         users_data = users_result['data']
@@ -137,21 +147,28 @@ class TweetsHandler:
                         tweet=tweet, t_metrics=t_metrics, u_data=users_data))
                 except TwitterRequestError as tre_users:
                     if tre_users.status_code == self.responses['Too Many Requests']:
-                        print(
+                        Helper.logger(
                             f"Tweeter Status code Returned {users_result['status']}", 'SLEEPING....')
                         sleep(SLEEP_TIME)
+                        Helper.Woke_Up()
                         continue
                     elif 'text' in users_result and users_result['text'] in self.responses.keys():
                         return None
                     else:
-                        Helper.write_to_log(str(users_result))
-                        print(
+                        Helper.logger(str(users_result))
+                        Helper.logger(
                             'MAJOR ERROR!\nCODE SHOULDNT GET HERE @fetch_live_tweets_v2')
                         return None
+                except JSONDecodeError as JDE:
+                    err_msg = f"Exception {JDE} has occured @fetch_live_tweets_v2! Disconnected from twitter"
+                    Helper.logger(err_msg)
+                    sleep(SLEEP_TIME)
+                    Helper.Woke_Up()
+                    self.twitter = self.connect_to_twitter()  # reconnect to twitter
+                    continue
+
         else:
-            print(f'{temp_tweets.status_code}',
-                  ' PROBABLY SHOULDNT GET HERE @fetch_live_tweets_v2')
-            Helper.Write_To_Log(
+            Helper.logger(
                 f'{temp_tweets.status_code} @fetch_live_tweets_v2')
             return None
         return tweets
@@ -168,11 +185,17 @@ class TweetsHandler:
         # Step 1 - fetch the live tweets from twitter
 
         tweets = self.responses['Too Many Requests']
+        # or tweets == self.responses['Service Unavailable']:
         while tweets == self.responses['Too Many Requests']:
             tweets = self.fetch_live_tweets_v2(start_date=start_date, end_date=end_date, max_results=MAX_TWEETS_RESULTS,
                                                n_past=N_PAST)
         if tweets == None:
-            print("Couldnt get tweets @get_tweets()")
+            Helper.logger("Couldnt get tweets @get_tweets()")
+            return None, None
+
+        if tweets == self.responses['Service Unavailable']:
+            Helper.logger(
+                f"Couldnt get tweets @get_tweets(), Code Returned {self.responses['Service Unavailable']} robably due to TwitterConnection Error. See Log for more details.")
             return None, None
 
         new_end_date = Helper.get_min_date(data=tweets)
@@ -180,26 +203,26 @@ class TweetsHandler:
         # calculate sentiment score for each tweet
         tweets = self.calc_tweets_sentiment(tweets)
         if tweets == None:
-            print("Couldnt get sentiment @get_sentiment()")
+            Helper.logger("Couldnt get sentiment @get_sentiment()")
             return None, new_end_date
 
         # filter tweets
         tweets = DataHandler.tsm_filter_tweets(tweets)
         if len(tweets) == 0:
-            print("Filtered all tweets @filter_tweets()")
+            Helper.logger("Filtered all tweets @filter_tweets()")
             return None, new_end_date
 
         # get user engagement
         tweets = self.fetch_users_with_eng_by_tweets_v2(tweets)
         if tweets == None:
-            print("Couldnt get use engagement @get_user_engagement()")
+            Helper.logger("Couldnt get use engagement @get_user_engagement()")
             return None, new_end_date
 
         # filter users
         tweets = DataHandler.tsm_filter_users(
             tweets, threshold=MIN_USER_FOLLOWERS)
         if len(tweets) == 0:
-            print("Filtered all users @filter_users()")
+            Helper.logger("Filtered all users @filter_users()")
             return None, new_end_date
 
         return tweets, new_end_date
@@ -237,15 +260,16 @@ class TweetsHandler:
                         user_tweets=users_tweets, user_followers=tweets[i]['u_n_followers'])
                 i += 1
             except TwitterRequestError as tre:
-                print(tre)
+                Helper.logger(tre)
                 if tre.title in self.responses.keys():
                     if self.responses[tre.title] == self.responses['Too Many Requests']:
                         sleep(SLEEP_TIME)
+                        Helper.Woke_Up()
                         continue
                     else:
                         return None
                 else:
-                    print(
+                    Helper.logger(
                         'SHOULDNT GET HERE @EXCEPT -- fetch_users_with_eng_by_tweets_v2')
                     return None
         return tweets

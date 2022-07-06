@@ -8,9 +8,12 @@ from pandas import to_datetime as pd_datetime
 def clear_console(msg=''):
     clear_cmd = 'cls' if os_name == 'nt' else 'clear'
     system(clear_cmd)
-    print(msg, 'At:', get_date_time_stringify(
+    print(msg, ' Cleared At:', get_date_time_stringify(
         '%d/%m/%Y-%H:%M:%S'))
 
+
+def Woke_Up():
+    logger(f'Woke up @{get_date_time_stringify("%H:%M:%S")}')
 #------- Saves & file handels --------#
 
 
@@ -20,7 +23,7 @@ def save_dict_to_csv(dict, save_path, file_name, mode='w'):
             for key in dict.keys():
                 f.write("%s,%s\n" % (key, dict[key]))
     except Exception as e:
-        print(f'{e}')
+        logger(f'Helper.save_dict_to_csv says{e}')
 
 
 def save_delimited_dict(dict, save_path, mode='w', delimiter='|'):
@@ -30,7 +33,7 @@ def save_delimited_dict(dict, save_path, mode='w', delimiter='|'):
             for key in dict.keys():
                 tsv_writer.writerow([key, dict[key]])
     except Exception as e:
-        write_to_log(f'{e}')
+        logger(f'{e}')
 
 
 def save_df_to_csv(df, path, file_name):
@@ -40,6 +43,11 @@ def save_df_to_csv(df, path, file_name):
 def create_dir(path):
     if not os_path.exists(path):
         mkdir(path)
+
+
+def logger(msg):
+    print(msg)
+    write_to_log(msg)
 
 
 def write_to_log(msg):
@@ -134,7 +142,7 @@ def get_user_data_paths(user):
     return paths[user]
 
 
-def get_min_date(data, date_key = 'created_at'):
+def get_min_date(data, date_key='created_at'):
     dates = [pd_datetime(d[date_key]) for d in data]
     date = min(dates).to_pydatetime().replace(second=0, tzinfo=None)
     return date

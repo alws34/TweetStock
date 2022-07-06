@@ -5,7 +5,10 @@ from datetime import datetime as dt, timedelta
 from pathlib import Path as pathlib_Path
 import DataHandler
 from Globals import *
-from TweetsHandler import TweetsHandler
+from Helper import logger
+import TweetsHandler
+
+
 class TweetStockModel:
     def __init__(self, model_path, model_ticker, features_version=2):
         self.tweets = []
@@ -53,8 +56,8 @@ class TweetStockModel:
             tweets, end_date = self.tweets_handler.fetch_and_filter_data(
                 start_date=start_date, end_date=end_date)
             if end_date == None:
-                print(
-                    "problem with end date @get_prediction()/while loop (got no tweets when fetched)")
+                logger(
+                    "TSM.get_prediction says: problem with end date @get_prediction()/while loop (got no tweets when fetched)")
 
             if tweets != None:
                 for tweet in tweets:
@@ -63,16 +66,18 @@ class TweetStockModel:
             iterations += 1
 
             if iterations == REFETCHING_MAX_ITERATIONS_THRESHOLD:
-                print("Reached max iterations threshold")
+                logger("TSM.get_prediction says: Reached max iterations threshold")
 
         # Transform from dictionary to df for easier data handling
         tweets_df = DataHandler.tsm_twitter_dict_res_to_df(self.tweets)
 
         if tweets_df.empty:
             if isinstance(tweets_df, pdDataFrame):
-                print("Couldnt convert twitter res dict to df @twitter_dict_res_to_df()")
+                logger(
+                    "Couldnt convert twitter res dict to df @TSM.twitter_dict_res_to_df()")
             else:
-                print(tweets_df.Error_message, 'CUSTOM ERROR @get_prediction')
+                logger(
+                    f'CUSTOM ERROR @TSM.get_prediction {tweets_df.Error_message}')
             return None, None
 
         tweets_table_dict = DataHandler.tsm_get_tweets_table_dict_result(

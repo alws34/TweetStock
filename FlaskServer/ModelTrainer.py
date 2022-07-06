@@ -43,7 +43,8 @@ class ModelTrainer:
         its parameters and the saving path provided in @run_auto_training() method
         """
         if saving_path == None:
-            print("@ModelTrainer.py/init_saving_params() - path == None...\n")
+            Helper.logger(
+                "mt.init_model_saving_params says: - path == None...\n")
             return None
         self.saving_path = saving_path
 
@@ -138,7 +139,7 @@ class ModelTrainer:
         merged_df = DataHandler.mt_get_merged(self.init_tweets_df(tweets_2019),
                                               self.init_users_df(users_df),
                                               self.init_stocks_df(stocks_2019))
-        print('merged\n\n', merged_df)
+        #print('merged\n\n', merged_df)
         Helper.clear_console()
 
         merged_df = DataHandler.sort_df_by_dates(
@@ -225,8 +226,7 @@ class ModelTrainer:
         if model_name is not None:
             self.model_name = model_name
         if self.model_name is None:
-            print(
-                "Must either init self.model_name or provide a saving name for the file in order to save")
+            Helper.logger("mt.save says: Must either init self.model_name or provide a saving name for the file in order to save")
             return None
         if append_accuracy:
             self.model_name += f'_{self.test_accuracy}'
@@ -370,7 +370,8 @@ class ModelTrainer:
 
     def regenerate_new_random_state(self, previous_rand_states=[]):
         if previous_rand_states is [] or not isinstance(previous_rand_states, type([])):
-            print('previous_rand_states MUST BE a NONE EMPTY ARRAY')
+            Helper.logger(
+                'MT.regenerate_new_random_state says: previous_rand_states MUST BE a NONE EMPTY ARRAY')
             return None
         while True:
             new_rand_state = self.generate_random_state()
@@ -382,7 +383,8 @@ class ModelTrainer:
         (in order to implement sevaral- 
          we will need to include the name of the model file to save it in the final dictionary)"""
         if model_params_path is None:
-            print("must provide model_params_path!!")
+            Helper.logger(
+                "MT.retrain_model says: must provide model_params_path!!")
             return None
 
         self.init_features_from_csv(features_csv_path=model_params_path)

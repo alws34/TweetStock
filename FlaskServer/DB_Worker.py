@@ -118,18 +118,14 @@ def is_valid_day():
     return False
 
 
-def Woke_Up():
-    print(f'Woke up @{Helper.get_date_time_stringify("%H:%M:%S")}')
-
-
 def GoingToSleep(time, custom_msg=''):
     if custom_msg != '':
-        print(f'{custom_msg}')
+        Helper.logger(f'{custom_msg}')
     else:
-        print(
+        Helper.logger(
             f'Going to sleep for {time} seconds ({time/60} minutes)... @{Helper.get_date_time_stringify("%H:%M:%S")}')
     sleep(time)
-    Woke_Up()
+    Helper.Woke_Up()
 
 
 def sleep_until_market_opens(start_hour=16, start_min=30):
