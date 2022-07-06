@@ -21,7 +21,6 @@ class ModelTrainer:
         self.user = user
 
         self.initialized_df = self.get_initialized_df()
-        # self.save_df_to_csv(file_name='initialized_df')
         self.init_model_params(saving_path)
 
     #------------ INITIALIZATION ----------------#
@@ -90,7 +89,7 @@ class ModelTrainer:
                         'eng_total_replies', 'eng_tweets_length', 'User_Engagement']
 
         stock_features = ['Date', 'ticker_symbol',
-                          'price_difference']  # ,'Close']
+                          'price_difference']
         tweet_features = ['Tweet_Sentiment',
                           'Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
         tweet_features2 = ['Tweet_Comments', 'Tweet_Retweets',
@@ -183,7 +182,7 @@ class ModelTrainer:
         self.model.save(f'{saving_path}{model_name}.h5')
 
     def save_graph(self, saving_path=None, model_name=None):
-        '''Save Model's Graph.
+        '''Save Model's Graph.\n
         saving_path and model_name can be None - will default to self.saving_path and self.model_name'''
         if saving_path is None:
             saving_path = self.saving_path
@@ -252,12 +251,8 @@ class ModelTrainer:
             dataset=df, target=target, num_of_rows=rows_at_a_time)
         return sequence, label
 
-    def get_tensor_values(self, df):
-        return ctt(df, dtype=tf_float32)
 
-    # MOVED TO DATAHANDLER
-    def reshape_sequence(self, sequence):
-        return DataHandler.reshape_sequence(sequence)
+###################################
 
     def train_model_from_comparison_example(self):
         '''Generates model according to inserted params'''
@@ -277,14 +272,14 @@ class ModelTrainer:
         train_seq, train_label,  validation_seq, validation_label, test_seq, test_label = DataHandler.mt_split_data(
             sequence, labels, train_random_state=self.model_training_params['train_random_state'], test_random_state=self.model_training_params['test_random_state'])
         #----End NEW ----#
-        train_seq, validation_seq, test_seq = self.reshape_sequence(
-            train_seq), self.reshape_sequence(validation_seq), self.reshape_sequence(test_seq)
+        train_seq, validation_seq, test_seq = DataHandler.reshape_sequence(
+            train_seq), DataHandler.reshape_sequence(validation_seq), DataHandler.reshape_sequence(test_seq)
 
-        train_seq, validation_seq, test_seq = self.get_tensor_values(
-            train_seq), self.get_tensor_values(validation_seq), self.get_tensor_values(test_seq)
+        train_seq, validation_seq, test_seq = DataHandler.get_tensor_values(
+            train_seq), DataHandler.get_tensor_values(validation_seq), DataHandler.get_tensor_values(test_seq)
 
-        train_label, validation_label, test_label = self.get_tensor_values(to_categorical(train_label)), self.get_tensor_values(
-            to_categorical(validation_label)), self.get_tensor_values(to_categorical(test_label))
+        train_label, validation_label, test_label = DataHandler.get_tensor_values(to_categorical(train_label)), DataHandler.get_tensor_values(
+            to_categorical(validation_label)), DataHandler.get_tensor_values(to_categorical(test_label))
 
         # Build the model
         from tensorflow import keras
@@ -321,37 +316,15 @@ class ModelTrainer:
         #----GET DATA----#
         dnn_df = DataHandler.mt_transform_features_to_log(
             self.get_dnn_training_df())
-        #Helper.save_df_to_csv(dnn_df, f'{self.saving_path}','dnn_df')
         #----SCALE DATA----#
         scaled_dnn_df = DataHandler.mt_scale_data(
             dnn_df).drop(columns=['Date'])
 
-#----NEW-----#
         sequence, labels = self.create_sequence(scaled_dnn_df, n_past, target)
         train_seq, train_label,  validation_seq, validation_label, test_seq, test_label = DataHandler.mt_split_data(
             sequence, labels, train_random_state=self.model_training_params['train_random_state'], test_random_state=self.model_training_params['test_random_state'])
-#----End NEW ----#
 
-
-#---OLD----#
-        """
-        #----SPLIT DATA----#
-        # train_data, validation_data, test_data = DataHandler.mt_split_data(
-        #     scaled_dnn_df)
-        # print(type(train_data))
-        # #----CREATE SEQUENCES----#
-        # train_seq, train_label = self.create_sequence(
-        #     train_data, n_past, target)
-        # print(type(train_seq))
-
-        # validation_seq, validation_label = self.create_sequence(
-        #     validation_data, n_past, target)
-
-        # test_seq, test_label = self.create_sequence(test_data, n_past, target)
-        """
-#----- End OLD ----#
-
-        #----INITIALIZE NETWORK----#
+        #----INITIALIZE NEURAL NETWORK----#
         network = Sequential()
 
         for units in self.model_training_params['layers']:
@@ -366,23 +339,15 @@ class ModelTrainer:
                         loss=self.model_training_params['loss_func'], metrics=['accuracy'])
 
         #----RESHAPE SEQUENCES----#
-        train_seq, validation_seq, test_seq = self.reshape_sequence(
-            train_seq), self.reshape_sequence(validation_seq), self.reshape_sequence(test_seq)
-
-        # import pandas as pd
-        # Helper.save_df_to_csv(pd.DataFrame(train_seq),
-        #                       f'{self.saving_path}', 'train1')
-        # Helper.save_df_to_csv(
-        #     pd.DataFrame(validation_seq), f'{self.saving_path}', 'validation1')
-        # Helper.save_df_to_csv(pd.DataFrame(test_seq),
-        #                       f'{self.saving_path}', 'test1')
+        train_seq, validation_seq, test_seq = DataHandler.reshape_sequence(
+            train_seq), DataHandler.reshape_sequence(validation_seq), DataHandler.reshape_sequence(test_seq)
 
         #----GET TENSOR VALUES----#
-        train_seq, validation_seq, test_seq = self.get_tensor_values(
-            train_seq), self.get_tensor_values(validation_seq), self.get_tensor_values(test_seq)
+        train_seq, validation_seq, test_seq = DataHandler.get_tensor_values(
+            train_seq), DataHandler.get_tensor_values(validation_seq), DataHandler.get_tensor_values(test_seq)
 
-        train_label, validation_label, test_label = self.get_tensor_values(to_categorical(train_label)), self.get_tensor_values(
-            to_categorical(validation_label)), self.get_tensor_values(to_categorical(test_label))
+        train_label, validation_label, test_label = DataHandler.get_tensor_values(to_categorical(train_label)), DataHandler.get_tensor_values(
+            to_categorical(validation_label)), DataHandler.get_tensor_values(to_categorical(test_label))
 
         #----TRAIN THE MODEL----#
         try:
@@ -426,8 +391,6 @@ class ModelTrainer:
         test_previous_rand_states = [
             self.model_training_params['test_random_state']]
         accuracies = []
-
-        # self.saving_path = f'{model_params_path}{}'
 
         # Retrain [iterations] amount of times
         for i in range(iterations):
@@ -516,12 +479,11 @@ class ModelTrainer:
     def run_auto_retraining(self, iterations_for_each_stock=DEFAULT_RETRAINING_ITERATIONS, new_test_rand=False):
         # fill in with model param paths for each stock!
         root_dir = '/home/pi/FinalProject/FlaskServer/SelectedModels'
-        models_params_paths = ['AMZN']  # ['AAPL', 'AMZN',
-        # 'GOOG', 'MSFT', 'TSLA']  # 'GOOGL',
+        models_params_tickers = ['AMZN', 'AAPL', 'GOOG', 'MSFT', 'TSLA']
         delimiter, prefix = Helper.get_prefix_path()
 
         average_accuracies = {}
-        for params_path in models_params_paths:
+        for params_path in models_params_tickers:
             ticker_dir_path = f'{root_dir}{delimiter}{params_path}'
             csv_params_paths = self.get_files_path(
                 ticker_dir_path, extension="csv")
@@ -558,7 +520,7 @@ class ModelTrainer:
 #---------- MAIN -----------#
 if __name__ == '__main__':
     delimiter, prefix = Helper.get_prefix_path()
-    user = 'pi'  # availables: 'alon' , 'guy', 'hadar', 'pi'
+    user = 'pi'  # availables: 'alon','pi'
     try_folder_name = 'final_01_07'
     #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}"
@@ -567,14 +529,15 @@ if __name__ == '__main__':
     #df = mt.init_data()
     #Helper.save_df_to_csv(df=df, path='/home/pi/FinalProject/FlaskServer/Data/CSVs/', file_name='new_initialized_df')
 
-    # Train model
+    '''Train model (all models from a directory)'''
     # mt.run_auto_training(acc_saving_threshold=0.6)
 
-    # Train specific model
+    '''Train specific model'''
     # mt.init_features_from_csv(
     #     "C:\\Users\\alws3\\Desktop\\AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
     # mt.set_model_epochs(200)
 
+    '''Model Comparisons'''
     # Training our model
     # mt.set_model_name("TEST_ours")
     # mt.train_model()
@@ -584,10 +547,11 @@ if __name__ == '__main__':
     # mt.set_model_name("TEST_Example")
     # mt.train_model_from_comparison_example()
     # mt.save(append_accuracy=True)
+    ''' END Model Comparisons'''
 
-    # Retrain model
+    '''Model auto Retraining'''
     mt.run_auto_retraining(iterations_for_each_stock=100, new_test_rand=True)
 
-    # run single train iteration
+    '''run single train iteration'''
     # mt.train_model()
     # mt.save(saving_path='/home/pi/FinalProject/FlaskServer/Data/Networks/test', model_name='testeeeett')

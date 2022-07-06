@@ -2,9 +2,9 @@ from os import system, name as os_name, getcwd, path as os_path, mkdir
 from datetime import datetime as dt
 from csv import writer as csv_writer
 from pandas import to_datetime as pd_datetime
+
+
 #------- MISC --------#
-
-
 def clear_console(msg=''):
     clear_cmd = 'cls' if os_name == 'nt' else 'clear'
     system(clear_cmd)
@@ -22,8 +22,8 @@ def save_dict_to_csv(dict, save_path, file_name, mode='w'):
     except Exception as e:
         print(f'{e}')
 
+
 def save_delimited_dict(dict, save_path, mode='w', delimiter='|'):
-    # print(dict)
     try:
         with open(save_path, mode) as myfile:
             tsv_writer = csv_writer(myfile, delimiter=delimiter)
@@ -114,10 +114,6 @@ def get_user_data_paths(user):
     delimiter, prefix = get_prefix_path()
     initialized_df_csv_file = 'new_initialized_df.csv'
     paths = {
-        'guy': {
-            'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',
-            'Networks_Save_Path': ''
-        },
         'alon': {
             'users_path': "D:\\Google Drive\\Alon\\לימודים\\Final Project\\Data\\Self Collected\\",
             'user_path2': 'D:\\Google Drive\\Alon\\לימודים\\Final Project\\Data\\Self Collected\\',
@@ -128,10 +124,6 @@ def get_user_data_paths(user):
             'users_path': f"{prefix}Data/CSVs/Initial_Data{delimiter}",
             'Networks_Save_Path': f'{prefix}Data/Networks{delimiter}',
             'initialized_df_path': f'{prefix}Data/CSVs/{initialized_df_csv_file}'
-        },
-        'hadar': {
-            'users_path': '/content/drive/MyDrive/Final Project/Data/Self Collected/',
-            'Networks_Save_Path': '',
         }
     }
 
@@ -142,8 +134,7 @@ def get_user_data_paths(user):
     return paths[user]
 
 
-def get_min_date( tweets):
-        dates = [pd_datetime(tweet['created_at']) for tweet in tweets]
-        #dt_obj = dt.fromtimestamp(min(dates)/pow(10, 9))
-        date = min(dates).to_pydatetime().replace(second=0, tzinfo=None)
-        return date
+def get_min_date(data, date_key = 'created_at'):
+    dates = [pd_datetime(d[date_key]) for d in data]
+    date = min(dates).to_pydatetime().replace(second=0, tzinfo=None)
+    return date

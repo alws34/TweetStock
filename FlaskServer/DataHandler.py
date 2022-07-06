@@ -1,5 +1,3 @@
-# import pandas as pd
-#from urllib.request import DataHandler
 from pandas import DataFrame as pd_DataFrame, merge as pd_merge, to_datetime as pd_to_datetime
 from numpy import array as np_array, split as np_split
 from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
@@ -9,106 +7,15 @@ from sklearn.model_selection import train_test_split
 from csv import reader as csv_reader
 import Helper
 from Helper_Classes import Err_df
+from Globals import *
 '''
 This class will be used to coordinate the work between
 the ModelTrainer.py and TweetStockModel.py .
 It will contain every method which is used to handle data.
 '''
 
-
-'''
-# TWITTER_VERSION = 2             # twitter version.
-# MAX_TWEETS_RESULTS = 100        # max results for first tweets query.
-# MAX_USER_TWEETS_RESULT = 100    # max results for use engagement tweets
-'''
-# days on which the model was train to precict based on.
-N_PAST = 1
-TSM_MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
-TSM_MIN_USER_FOLLOWERS = 100        # min user followers num to be included
-# SCALING
-SCALING = 'min_max'
-# MT_SCALING_PARAMS = {
-#     "Tweet_Comments": (0, 565),
-#     "Tweet_Retweets": (0, 990),
-#     "Tweet_Likes": (0, 988)  # ,
-#     # "User_Engagement": (0, 1000)
-# }
-MT_SCALING_PARAMS = {
-    "Tweet_Comments": [[0.0], [10.0]],
-    "Tweet_Retweets": [[0.0], [10.0]],
-    "Tweet_Likes": [[0.0], [10.0]],
-    "User_Engagement": [[0.0], [0.64]]
-}
-TSM_SCALING_PARAMS = {
-    "n_replies": [[0.0], [10.0]],  # 565],
-    "n_retweets": [[0.0], [10.0]],  # 990],
-    "n_likes": [[0.0], [10.0]],  # 988]  # ,
-    "u_engagement": [[0.0], [0.64]]
-}
-
-# log2
-MT_ENGAGEMENT_SCALING_PARAMS = {
-    'eng_total_retweets': [[0.0], [19.32]],
-    'eng_total_likes': [[0.0], [22.35]],
-    'eng_total_replies': [[0.0], [16.8]],
-    'followers_count': [[0.0], [24.5]],
-    'eng_tweets_length': [[0.0], [100.0]]
-}
-TSM_ENGAGEMENT_SCALING_PARAMS = {
-    "reply_count": [[0.0], [19.32]],
-    "retweet_count": [[0.0], [22.35]],
-    "like_count": [[0.0], [16.8]],
-    'follower_count': [[0.0], [24.5]],
-    'eng_tweets_length': [[0.0], [100.0]]
-}
-
-# ENGAGEMENT_SCALING_PARAMS - other versions
-"""
-# log3
-# ENGAGEMENT_SCALING_PARAMS = {
-#     'eng_total_retweets': (0.0, 12.188),
-#     'eng_total_likes': (0.0, 14.1),
-#     'eng_total_replies': (0.0, 10.6),
-#     'followers_count': (0.0, 15.47),
-#     'eng_tweets_length': (0.0, 100.0)
-# }
-# log3-followers| log2-else
-# ENGAGEMENT_SCALING_PARAMS = {
-#     'eng_total_retweets': [[0.0], [19.32]],
-#     'eng_total_likes': [[0.0], [22.35]],
-#     'eng_total_replies': [[0.0], [16.8]],
-#     'followers_count': [[0.0], [15.5]],
-#     'eng_tweets_length': [[0.0], [100.0]]
-# }
-"""
-INCLUDE_REPLIES = True
-
 #--------- ModelTrainer.py - to combine ----------#
 # COMBINED METHODS
-"""
-def mt_create_sequence(dataset, target, num_of_rows=N_PAST):
-    '''Returns np array'''
-    sequences = []
-
-    start_idx = 0
-    if target:
-        labels = []
-        features_df = dataset.drop(columns=target)
-        labels_df = dataset[[target]]
-        # Selecting "num_of_rows"
-        for stop_idx in range(num_of_rows, len(dataset)):
-            sequences.append(features_df.iloc[start_idx:stop_idx])
-            labels.append(labels_df.iloc[stop_idx][0])
-            start_idx += 1
-        return np_array(sequences, dtype='object'), np_array(labels, dtype='object')
-    else:
-        # Selecting "num_of_rows"
-        for stop_idx in range(num_of_rows, len(dataset)):
-            sequences.append(dataset.iloc[start_idx:stop_idx])
-            labels.append(dataset.iloc[stop_idx])
-            start_idx += 1
-        return np_array(sequences, dtype='object')
-"""
 
 
 def mt_scale_data(df, target='price_difference'):
@@ -148,10 +55,7 @@ def mt_scale_data(df, target='price_difference'):
                 curr_day_col = scaler.transform(curr_day_col)
 
                 dates_dict[col_name].append(curr_day_col.mean())
-            # if col_name == 'User_Engagement':
-            #     print("hi")
     new_df = pd_DataFrame.from_dict(dates_dict)
-    #Helper.save_df_to_csv(new_df, '/home/pi/FinalProject/FlaskServer/Data/Networks/', 'ScaledData.csv')
     return new_df
 
 
@@ -201,15 +105,6 @@ def mt_filter_tweets(tweets_df, tweets_stats_threshold=25):
     return temp_tweets
 
 
-def calc_eng_score(scaled_log_n_rts, scaled_log_n_likes, scaled_log_n_replies, scaled_log_n_followers, n_tweets, ):
-    eng = 0
-    # Engagement score calculation
-    if scaled_log_n_followers > 0 and n_tweets > 0:
-        eng = ((scaled_log_n_rts+scaled_log_n_likes +
-               scaled_log_n_replies)/scaled_log_n_followers)/n_tweets
-    return eng
-
-
 def mt_get_eng_score(users_df, include_replies=INCLUDE_REPLIES):
     ''' gets users df and returns the df with the engagement score calculated.
         df should have the following columns:  '''
@@ -257,6 +152,15 @@ def mt_transform_features_to_log(dnn_df):
     for col_name in ['Tweet_Likes', 'Tweet_Comments', 'Tweet_Retweets']:
         dnn_df[col_name] = [log(x+1, 2) for x in dnn_df[col_name]]
     return dnn_df
+
+
+def calc_eng_score(scaled_log_n_rts, scaled_log_n_likes, scaled_log_n_replies, scaled_log_n_followers, n_tweets, ):
+    eng = 0
+    # Engagement score calculation
+    if scaled_log_n_followers > 0 and n_tweets > 0:
+        eng = ((scaled_log_n_rts+scaled_log_n_likes +
+               scaled_log_n_replies)/scaled_log_n_followers)/n_tweets
+    return eng
 
 #------ ModelTrainer.py - seperate -------#
 
@@ -315,21 +219,12 @@ def mt_get_price_diff(stocks_df):
     temp = {}
 
     for i in range(1, len(temp_stocks)):
-        # Next Close - Today Close
-        # today = float(temp_stocks['Close'][i])
-        # yesterday = float(temp_stocks['Close'][i-1])
-        # # try getAvg(high,low)
-        # price_diff = today-yesterday
 
         price_diff = float(temp_stocks['Close'][i]) - \
             float(temp_stocks['Open'][i])
         temp[i] = price_diff
-        #temp_stocks['price_difference'][i] = price_diff
 
         temp_stocks['price_difference'][i] = 1 if price_diff >= 0 else 0
-
-        # if (price_diff>=0): temp_stocks['price_difference'][i] = 1
-        # else: temp_stocks['price_difference'][i] = 0
 
     temp_stocks.drop([0], inplace=True)
     temp_stocks.reset_index(drop=True, inplace=True)
@@ -361,7 +256,6 @@ def tsm_transform_features_to_log(df):
 
 def tsm_get_scale_and_mean(df, feature_set, n_past=N_PAST, scaling=SCALING):
     def is_scalable_feature(f):
-        # feature_set or f == 's_compound'
         return f in ['n_replies', 'n_retweets', 'n_likes', 'u_engagement']
 
     if n_past == 1:
@@ -383,9 +277,7 @@ def tsm_get_scale_and_mean(df, feature_set, n_past=N_PAST, scaling=SCALING):
 
 
 def tsm_filter_tweets(tweets, threshold=TSM_MIN_TWEET_STATS_SUM):
-    # print(f"Filtering Tweets of {self.ticker} for {self.ip}")
     tweets_to_remove = []
-    # print("len before", len(tweets))
     for tweet in tweets:
         if tweet['s_compound'] == 0.0 or tweet['s_neu'] == 1.0 or tweet['n_retweets'] + tweet['n_likes'] + tweet['n_replies'] < threshold:
             tweets_to_remove.append(tweet)
@@ -393,14 +285,10 @@ def tsm_filter_tweets(tweets, threshold=TSM_MIN_TWEET_STATS_SUM):
     for tweet in tweets_to_remove:
         tweets.remove(tweet)
 
-    # print("len after", len(tweets))
-    # for tweet in tweets:
-    #     print(tweet['s_neu'])
     return tweets
 
 
 def tsm_filter_users(tweets, threshold=TSM_MIN_USER_FOLLOWERS):
-    # print(f"Filtering users of {self.ticker} for {self.ip}")
     tweets_to_remove = []
     for tweet in tweets:
         if tweet['u_n_followers'] < threshold or tweet['u_engagement'] == 0:
@@ -410,8 +298,6 @@ def tsm_filter_users(tweets, threshold=TSM_MIN_USER_FOLLOWERS):
         tweets.remove(tweet)
 
     return tweets
-
-# Checked (V)
 
 
 def tsm_get_single_user_eng_score(user_tweets, user_followers, include_replies=INCLUDE_REPLIES):
@@ -427,9 +313,6 @@ def tsm_get_single_user_eng_score(user_tweets, user_followers, include_replies=I
         tweets_counter += 1
         for stat in stats:
             stats[stat] += tweet['public_metrics'][stat]
-            # u_n_rts += tweet['public_metrics']['retweet_count']
-            # u_n_replies += tweet['public_metrics']['reply_count']
-            # u_n_likes += tweet['public_metrics']['like_count']
 
     stats['follower_count'] = user_followers
     # take log
@@ -450,22 +333,6 @@ def tsm_get_single_user_eng_score(user_tweets, user_followers, include_replies=I
 #------ TweetStockModel.py - seperate -------#
 
 
-'''
-# def tsm_twitter_dict_res_to_df_old(data):
-#     try:
-#         temp = {}
-#         for key in data[0].keys():
-#             temp[key] = []
-#             for d in data:
-#                 temp[key].append(d[key])
-#     except Exception as err:
-#         print('twitter_dict_res_to_df()', err)
-#         return None
-#     # print(temp)
-#     return pd_DataFrame.from_dict(temp)
-'''
-
-
 def tsm_twitter_dict_res_to_df(data):
     try:
         return pd_DataFrame.from_records(data)
@@ -481,22 +348,14 @@ def tsm_prep_data(df, feature_set):
     # 1.1 Select features
     df = df[feature_set]
 
-    # 2 Get df mean
-    # print('before mean', df, len(df), df.shape)
-    # df = self.get_scale_and_mean(df)
-    # print('after mean', df, len(df), df.shape)
-
-    # 3 Create sequence from df
+    # 2 Create sequence from df
     test_seq = create_sequence(df)
-    # print('\n\n', test_seq, test_seq.shape)
 
-    # 4 Scale data
+    # 3 Scale data
     test_seq = reshape_sequence(test_seq)
 
-    # scaled_test_seq = scale_seq(test_seq)
-
     # Return preped data
-    return ctt(test_seq, dtype=tf_float32), df
+    return get_tensor_values(test_seq), df
 
 
 def tsm_get_tweets_table_dict_result(tweets_df):
@@ -512,7 +371,9 @@ def tsm_get_tweets_table_dict_result(tweets_df):
         's_neg': 'sentiment_neg',
         's_compound': 'sentiment_compound'
     }
-    return tweets_df[features].rename(columns=renames).to_dict(orient='records')
+    tweets_df = tweets_df[features].rename(columns=renames)
+    tweets_df['user_engagement']=[item[0][0] for item in tweets_df['user_engagement']]
+    return tweets_df.to_dict(orient='records')
 
 
 def tsm_get_pred_table_dict_result(prepared_df, prediction, ticker):
@@ -535,16 +396,13 @@ def create_sequence(dataset, target=None, num_of_rows=N_PAST):
     Creates a sequenced array from a dataframe sorted by date
     Returns np array
     '''
-    sequences, labels = [], []
-    start_idx = 0
-    # Prepare for live prediction
+    # Prepare for live prediction (tsm)
     if target == None:
-        for stop_idx in range(int(num_of_rows), len(dataset)+1):
-            sequences.append(dataset.iloc[start_idx:stop_idx])
-            start_idx += 1
         return np_array(dataset, dtype='object')
 
-    # Prepare for model training
+    # Prepare for model training (mt)
+    sequences, labels = [], []
+    start_idx = 0
     features_dataset = dataset.drop(columns=target)
     labels_dataset = dataset[[target]]
     # Selecting "num_of_rows"
@@ -553,24 +411,6 @@ def create_sequence(dataset, target=None, num_of_rows=N_PAST):
         labels.append(labels_dataset.iloc[stop_idx][0])
         start_idx += 1
     return np_array(sequences, dtype='object'), np_array(labels, dtype='object')
-
-    # option 2
-    """
-    sequences = []
-
-    if target == None:
-        for start_idx, stop_idx in zip(range(0, len(dataset)-num_of_rows), range(num_of_rows, len(dataset))):
-            sequences.append(dataset.iloc[start_idx:stop_idx])
-        return np_array(sequences, dtype='object')
-
-    labels = []
-    features_dataset = dataset.drop(columns=target)
-    labels_dataset = dataset[[target]]
-    for start_idx, stop_idx in zip(range(0, len(dataset)-num_of_rows), range(num_of_rows, len(dataset))):
-        sequences.append(features_dataset.iloc[start_idx:stop_idx])
-        labels.append(labels_dataset.iloc[stop_idx][0])
-    return np_array(sequences, dtype='object'), np_array(labels, dtype='object')
-    """
 
 
 # LOAD FEATURES CSV - used only by ModelTrainer.py
@@ -633,13 +473,6 @@ def reshape_sequence(sequence):
             "Bad Sequence shape @DataHandler.reshape_sequene()")
         return None
 
-# def mt_scale_data_old(df, target='price_difference'):
-#     def is_scalable_feature(feature):
-#         return feature != 'Date' and feature != target
 
-#     def is_sentiment_feature(feature):
-#         return feature == "Tweet_Sentiment" or feature == "Positivity" or feature == "Neutral" or feature == "Negativity"
-#     # Start scaling
-
-#     for col in df.columns:
-#         scaler = MinMaxScaler()
+def get_tensor_values(data):
+    return ctt(data, dtype=tf_float32)
