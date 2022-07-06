@@ -15,8 +15,20 @@ MODELS = Helper.get_models()
 # -------------------------------FireBase------------------------------------- #
 
 updated_db = {
-    'Prediction': {},
-    'Tweets': {}
+    'Prediction': {
+        'MSFT': {},
+        'TSLA': {},
+        'GOOG': {},
+        'AMZN': {},
+        'AAPL': {}
+    },
+    'Tweets': {
+        'MSFT': {},
+        'TSLA': {},
+        'GOOG': {},
+        'AMZN': {},
+        'AAPL': {}
+    }
 }
 
 
@@ -83,10 +95,10 @@ def is_valid_day():
     year, month, day, hour, minute = current_time.year, current_time.month, current_time.day, current_time.hour, current_time.minute
     today, time = f'{year}-{month}-{day}', f'{hour}:{minute}'
     start_of_year, end_of_year = f'{year}-01-01', f'{year}-12-31'
-
-    nyse = mcal.get_calendar('NYSE')  # Get NY stock exchange schedule.
-
+    
+    
     try:
+        nyse = mcal.get_calendar('NYSE')  # Get NY stock exchange schedule.
         schedule = nyse.schedule(
             start_date=today, end_date=today)
     except Exception as e:
@@ -106,6 +118,19 @@ def is_valid_day():
     return False
 
 
+def Woke_Up():
+    print(f'Woke up @{Helper.get_date_time_stringify("%H:%M:%S")}')
+
+
+def GoingToSleep(time,custom_msg =''):
+    if custom_msg != '':
+        print(f'{custom_msg}')
+    else:    
+        print(f'Going to sleep for {time} seconds ({time/60} minutes)... @{Helper.get_date_time_stringify("%H:%M:%S")}')
+    sleep(time)
+    Woke_Up()
+
+
 def sleep_until_market_opens():
     now = Helper.get_date_time()
     #now = {'hour': 1, 'min': 2}
@@ -113,12 +138,10 @@ def sleep_until_market_opens():
     start_hour_in_sec = (start_hour * 60 + start_min) * 60
     now_in_sec = (now.hour * 60 + now.minute) * 60
     if now_in_sec < start_hour_in_sec:
-        print(
-            f'sleeping for {(start_hour_in_sec - now_in_sec)/60} minutes -- {(start_hour_in_sec - now_in_sec)/60/60} hours')
-        sleep(start_hour_in_sec - now_in_sec)
+        GoingToSleep(start_hour_in_sec - now_in_sec, custom_msg = f'sleeping for {(start_hour_in_sec - now_in_sec)/60} minutes -- {(start_hour_in_sec - now_in_sec)/60/60} hours')
     else:
         one_day_in_sec = 24 * 60 * 60
-        sleep(one_day_in_sec - (now_in_sec - start_hour_in_sec))
+        GoingToSleep(time = one_day_in_sec - (now_in_sec - start_hour_in_sec))
 
 
 def update_firebase_db():
@@ -139,9 +162,11 @@ def update_firebase_db():
         else:
             Helper.write_to_log(
                 f'DB update error for ticker {ticker}:\npred_dict: {len(pred_dict)}\ntweets_dict: {len(tweets_dict)}\n\n')
-        sleep(15*60)  # sleep 15 min for each ticker
+        
+        post_to_FireBase(updated_db, date) #  update DB for each ticker
+        GoingToSleep(15*60)
 
-    post_to_FireBase(updated_db, date)
+
 
 
 def Get_Real_Close():
@@ -149,12 +174,6 @@ def Get_Real_Close():
         stock = yf.Ticker(ticker)
         look_back_n_days = 1
         history = stock.history(period=f'{look_back_n_days}d')
-
-        if ticker not in updated_db['Prediction'].keys():
-            updated_db['Prediction'].update({ticker: {
-                'Actual_volatility': 0
-            }})
-
         updated_db['Prediction'][ticker]['Actual_volatility'] = 1 if history['Close'][0] >= history['Open'][0] else -1
     post_to_FireBase(updated_db, Helper.get_date_time_stringify(
         format="%d_%m_%Y"))
@@ -163,14 +182,13 @@ def Get_Real_Close():
 def Main():
     # 'features': 1 --> ['Tweet_Comments', 'Tweet_Retweets','Tweet_Likes', 'Positivity', 'Negativity', 'Neutral']
     # 'features': 2 --> ['Tweet_Sentiment','Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
-
-    # update_firebase_db()
+    #update_firebase_db()
     while True:
         if system(ping_command) == 0:  # check first for internet connectivity
             if (is_valid_day()):
                 update_firebase_db()
                 sleeping_hours, sleeping_mins = 2, 0
-                sleep((sleeping_hours * 60 + sleeping_mins) * 60)
+                GoingToSleep((sleeping_hours * 60 + sleeping_mins) * 60)
             else:
                 Get_Real_Close()
                 sleep_until_market_opens()

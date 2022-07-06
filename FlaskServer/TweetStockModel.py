@@ -1,32 +1,30 @@
-import json
+from json import load as loadJson
 from time import sleep
-from pandas import set_option as pd_set_option, to_datetime as pd_datetime
+from pandas import set_option as pdSetOption, to_datetime as pd_datetime, DataFrame as pdDataFrame
 from tweepy import OAuthHandler as tweepy_OAuthHandler, API as tweepy_API
+from TwitterAPI import TwitterAPI, TwitterRequestError
 from keras.models import load_model
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-# ,TwitterOAuth,  TwitterConnectionError, TwitterPager
-from TwitterAPI import TwitterAPI, TwitterRequestError
-#from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from datetime import datetime as dt, timedelta
 from pathlib import Path as pathlib_Path
 import Helper
 import DataHandler
-import Twitter_Responses
+from Twitter_Responses import GET_TWITTER_CODES
+import TwitterConnections
+import TweetsHandler
 
-VERSION = '1.7.0'
-TWITTER_VERSION = 2             # twitter fetch_and_filter_dataversion.
-# days on which the model was train to precict based on.
-N_PAST = 1
-MAX_TWEETS_RESULTS = 100        # max results for first tweets query.
-MAX_USER_TWEETS_RESULT = 100    # max results for use engagement tweets
-MIN_TWEET_STATS_SUM = 25        # min tweet filtering sum of stats
-MIN_USER_FOLLOWERS = 50        # min user followers num to be included
+VERSION = '1.7.1'
+TWITTER_VERSION = 2  # twitter fetch_and_filter_dataversion.
+N_PAST = 1  # days on which the model was trained.
+MAX_TWEETS_RESULTS = 100  # max results for first tweets query.
+MAX_USER_TWEETS_RESULT = 100  # max results for use engagement tweets
+MIN_TWEET_STATS_SUM = 25  # minimum tweet filtering sum of stats
+MIN_USER_FOLLOWERS = 50  # minimum user followers to be included
 TWEETS_REFETCHING_THRESHOLD = 15
 REFETCHING_MAX_ITERATIONS_THRESHOLD = 5
 SLEEP_TIME = 60*15
-TWITTER_RESPONSE_CODES = Twitter_Responses.GET_TWITTER_CODES()
+TWITTER_RESPONSE_CODES = GET_TWITTER_CODES()
 delimiter, prefix = Helper.get_prefix_path()
-
 
 
 class TweetStockModel:
@@ -43,7 +41,7 @@ class TweetStockModel:
 
         self.sentiment_analyzer = SentimentIntensityAnalyzer()
         self.twitter = self.connect_to_twitter()
-        pd_set_option('display.max_columns', None)
+        pdSetOption('display.max_columns', None)
 
     def get_feature_set(self, features_version):
         '''
@@ -61,6 +59,7 @@ class TweetStockModel:
         return self.save_path
 
     def connect_to_twitter(self, version=TWITTER_VERSION):
+        # return TwitterConnections.connect_to_twitter(version=TWITTER_VERSION)
         Twitter_Config = self.get_twitter_config()
         consumer_key = Twitter_Config['consumer_key']
         consumer_secret = Twitter_Config['consumer_secret']
@@ -76,8 +75,8 @@ class TweetStockModel:
             return tweepy_API(auth)
 
     def get_twitter_config(self):
-        with open(f'{prefix}{delimiter}FlaskServer{delimiter}CONFIGS{delimiter}twitterconfig.json', 'r') as json_file:
-            twitter_configs = json.load(json_file)
+        with open(f'{prefix}{delimiter}CONFIGS{delimiter}twitterconfig.json', 'r') as json_file:
+            twitter_configs = loadJson(json_file)
         return twitter_configs
 
     def get_n_past_date(self, days_to_subtract=1, hours_to_subtract=2):
@@ -92,47 +91,6 @@ class TweetStockModel:
         end_date = now - timedelta(hours=hours_to_subtract)
 
         return start_date, end_date
-
-    """
-    def twitter_dict_res_to_df(self, data):
-        try:
-            temp = {}
-            for key in data[0].keys():
-                temp[key] = []
-                for d in data:
-                    temp[key].append(d[key])
-        except Exception as err:
-            print('twitter_dict_res_to_df()', err)
-            return None
-        # print(temp)
-        return pd.DataFrame.from_dict(temp)
-
-    def get_scale_and_mean(self, df, n_past=N_PAST, scaling='min_max'):
-        def is_scalable_feature(f):
-            return f in self.feature_set or f == 's_compound'
-
-        def is_sentiment_feature(f):
-            return f in ['s_compound', 's_neg', 's_pos', 's_neu']
-
-        if n_past == 1:
-            df_dict = {}
-            for col in df.columns:
-                if is_scalable_feature(col):
-                    df_dict[col] = []
-                    f = df[col] * \
-                        df["s_compound"] if not is_sentiment_feature(
-                            col) else df[col]
-                    scaler = MinMaxScaler() if scaling == 'min_max' else StandardScaler()
-                    df_dict[col].append(scaler.fit_transform(
-                        np.array(f).reshape(-1, 1)).mean())
-            return pd.DataFrame.from_dict(df_dict)
-        else:
-            return "N_past is not 1 @ get_scale_and_mean()"
-
-
-    def create_sequence(self, dataset):
-        return np.array(dataset)
-    """
 
 # -------------------------------------------------------------------------------------------------------------- #
 
@@ -151,6 +109,7 @@ class TweetStockModel:
         return tweet_ids
 
     def fetch_live_tweets_v1(self, max_results=MAX_TWEETS_RESULTS, n_past=N_PAST):
+        #TweetsHandler.fetch_live_tweets_v1(max_results=MAX_TWEETS_RESULTS, n_past=N_PAST)
         if '$' in self.ticker:
             ticker = ticker.replace('$', '')
         else:
@@ -179,6 +138,7 @@ class TweetStockModel:
             })
 
     def fetch_live_tweets_v2(self, start_date, end_date, max_results=MAX_TWEETS_RESULTS, n_past=N_PAST):
+        # return TweetsHandler.fetch_live_tweets_v2(start_date, end_date, max_results=MAX_TWEETS_RESULTS, n_past=N_PAST)
         def generate_v2_tweet(tweet, t_metrics, u_data):
             return {
                 'tweet_id': tweet['id'],
@@ -233,8 +193,12 @@ class TweetStockModel:
                 try:
                     users_result = self.twitter.request(resource="users/:"+tweet['author_id'], params={
                         'user.fields': 'public_metrics,description,username'}).json()
-                    # if 'data' in users_result:
-                    users_data = users_result['data']
+                    if 'data' in users_result.keys():
+                        users_data = users_result['data']
+                    elif 'status' in users_result.keys():
+                        raise TwitterRequestError(users_result['status'])
+                    else:
+                        raise Exception
                     i += 1
                     t_metrics = tweet['public_metrics']
                     tweets.append(generate_v2_tweet(
@@ -245,7 +209,7 @@ class TweetStockModel:
                             f"Tweeter Status code Returned {users_result['status']}", 'SLEEPING....')
                         sleep(SLEEP_TIME)
                         continue
-                    elif users_result['text'] in TWITTER_RESPONSE_CODES.keys():
+                    elif 'text' in users_result and users_result['text'] in TWITTER_RESPONSE_CODES.keys():
                         return None
                     else:
                         Helper.write_to_log(str(users_result))
@@ -292,6 +256,7 @@ class TweetStockModel:
         return date
 
     def calc_tweets_sentiment(self, tweets):
+        # return TweetsHandler.calc_tweets_sentiment(tweets)
         for tweet in tweets:
             s = self.sentiment_analyzer.polarity_scores(tweet['text'])
             tweet['s_neg'], tweet['s_neu'], tweet['s_pos'], tweet['s_compound'] = s['neg'], s['neu'], s['pos'], s['compound']
@@ -423,7 +388,7 @@ class TweetStockModel:
         tweets_df = DataHandler.tsm_twitter_dict_res_to_df(self.tweets)
 
         if tweets_df.empty:
-            if isinstance(tweets_df, pd_DataFrame):
+            if isinstance(tweets_df, pdDataFrame):
                 print("Couldnt convert twitter res dict to df @twitter_dict_res_to_df()")
             else:
                 print(tweets_df.Error_message, 'CUSTOM ERROR @get_prediction')
@@ -447,7 +412,7 @@ class TweetStockModel:
         return pred_table_dict, tweets_table_dict
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # FOR DEBUGGING
     model = TweetStockModel(
         # model_path=f'/home/pi/FinalProject/FlaskServer/SelectedModels/AAPL/AAPL_acc_0.633_npast_1_epoch_4_opt_rmsprop_num_3848.h5',
         # '/home/pi/FinalProject/FlaskServer/Data/Networks/4/TSLA_acc_0.62_npast_1_epoch_10_opt_rmsprop_num_3.h5',

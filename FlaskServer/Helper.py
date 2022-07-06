@@ -1,7 +1,7 @@
 from os import system, name as os_name, getcwd, path as os_path, mkdir
 from datetime import datetime as dt
 from csv import writer as csv_writer
-
+from pandas import to_datetime as pd_datetime
 #------- MISC --------#
 
 
@@ -15,10 +15,12 @@ def clear_console(msg=''):
 
 
 def save_dict_to_csv(dict, save_path, file_name, mode='w'):
-    with open(f'{save_path}{file_name}.csv', mode) as f:
-        for key in dict.keys():
-            f.write("%s,%s\n" % (key, dict[key]))
-
+    try:
+        with open(f'{save_path}{file_name}.csv', mode) as f:
+            for key in dict.keys():
+                f.write("%s,%s\n" % (key, dict[key]))
+    except Exception as e:
+        print(f'{e}')
 
 def save_delimited_dict(dict, save_path, mode='w', delimiter='|'):
     # print(dict)
@@ -102,7 +104,7 @@ def get_models():
             'features': 2
         },
         'TSLA': {
-            'path': f'{prefix}{folder_name}{delimiter}TSLA{delimiter}TSLA_acc_0.68_npast_1_epoch_15_opt_adam_num_28_params.h5',
+            'path': f'{prefix}{folder_name}{delimiter}TSLA{delimiter}TSLA_acc_0.68_npast_1_epoch_15_opt_adam_num_28.h5',
             'features': 2
         }
     }
@@ -138,3 +140,10 @@ def get_user_data_paths(user):
             f'Invalid User Provided: {user} @Helper.get_user_data_paths')
         return None
     return paths[user]
+
+
+def get_min_date( tweets):
+        dates = [pd_datetime(tweet['created_at']) for tweet in tweets]
+        #dt_obj = dt.fromtimestamp(min(dates)/pow(10, 9))
+        date = min(dates).to_pydatetime().replace(second=0, tzinfo=None)
+        return date

@@ -536,7 +536,7 @@ def create_sequence(dataset, target=None, num_of_rows=N_PAST):
     Returns np array
     '''
     sequences, labels = [], []
-
+    start_idx = 0
     # Prepare for live prediction
     if target == None:
         for stop_idx in range(int(num_of_rows), len(dataset)+1):
@@ -545,7 +545,6 @@ def create_sequence(dataset, target=None, num_of_rows=N_PAST):
         return np_array(dataset, dtype='object')
 
     # Prepare for model training
-    start_idx = 0
     features_dataset = dataset.drop(columns=target)
     labels_dataset = dataset[[target]]
     # Selecting "num_of_rows"
