@@ -1,0 +1,22 @@
+00:32:05::		nyse.open_at_time says:
+The provided timestamp is not covered by the schedule
+
+16:07:31::		nyse.open_at_time says:
+The provided timestamp is not covered by the schedule
+
+16:31:45::		Object of type ndarray is not JSON serializable
+
+16:52:38::		Object of type ndarray is not JSON serializable
+
+17:11:39::		Object of type ndarray is not JSON serializable
+
+18:20:49::		post_to_FireBase says:
+Object of type ndarray is not JSON serializable
+
+20:46:07::		{'title': 'Service Unavailable', 'detail': 'Service Unavailable', 'type': 'about:blank', 'status': 503}
+
+23:19:46::		nyse.open_at_time says:
+The provided timestamp is not covered by the schedule  ---ValueError@is_valid_day
+
+23:19:49::		Going to sleep for 60060 seconds (1001.0 minutes)... @23:19:49
+
