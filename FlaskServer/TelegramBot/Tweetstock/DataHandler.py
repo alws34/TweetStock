@@ -175,8 +175,8 @@ def mt_split_data(np_array_sequence, np_array_labels, train_random_state=4321, t
     testing_size, validation_size = 50, 50
 
     if len(np_array_sequence) < (testing_size + validation_size):
-        Helper.write_to_log(
-            f"DataHandler.py/mt_split_data: sequence is smaller than split sizes... @ {Helper.get_date_time_stringify(format='%d/%m/%Y-%H:%M:%S')}")
+        Helper.WriteToLog(
+            f"DataHandler.py/mt_split_data: sequence is smaller than split sizes... @ {Helper.GetDateTimeStringify(format='%d/%m/%Y-%H:%M:%S')}")
         return None
 
     # 1. split {data} to -> {train_data}, {test_data}; len({test_data}) == testing_size
@@ -229,7 +229,7 @@ def mt_get_price_diff(stocks_df):
     temp_stocks.drop([0], inplace=True)
     temp_stocks.reset_index(drop=True, inplace=True)
 
-    Helper.save_dict_to_csv(
+    Helper.SaveDicttoCSV(
         temp, '/home/pi/FinalProject/FlaskServer/Data/Networks/test/', 'price_diff')
 
     return temp_stocks

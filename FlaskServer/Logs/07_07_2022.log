@@ -1,0 +1,12 @@
+10:53:38::		nyse.open_at_time says:
+The provided timestamp is not covered by the schedule  ---ValueError@IsValidDay
+
+10:53:42::		sleeping for 307.0 minutes -- 5.116666666666666 hours
+
+16:00:42::		Woke up @16:00:42
+
+16:00:44::		nyse.open_at_time says:
+The provided timestamp is not covered by the schedule  ---ValueError@IsValidDay
+
+16:00:47::		Going to sleep for 86400 seconds (1440.0 minutes)... @16:00:47
+

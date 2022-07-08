@@ -1,4 +1,4 @@
-from Helper import get_prefix_path
+from Helper import GetPrefixandDelimiter
 from TwitterResponses import GET_TWITTER_CODES
 
 APP_VERSION = '1.7.3'
@@ -15,7 +15,7 @@ REFETCHING_MAX_ITERATIONS_THRESHOLD = 5
 SLEEP_TIME = 60*15
 SCALING = 'min_max'
 TWITTER_RESPONSE_CODES = GET_TWITTER_CODES()
-delimiter, prefix = get_prefix_path()
+delimiter, prefix = GetPrefixandDelimiter()
 INCLUDE_REPLIES = True
 
 MT_SCALING_PARAMS = {
