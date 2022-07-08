@@ -140,7 +140,7 @@ class ModelTrainer:
                                               self.init_users_df(users_df),
                                               self.init_stocks_df(stocks_2019))
         #print('merged\n\n', merged_df)
-        Helper.clear_console()
+        Helper.ClearConsole()
 
         merged_df = DataHandler.sort_df_by_dates(
             df=merged_df, date_col_name='Date')
@@ -169,8 +169,8 @@ class ModelTrainer:
 
     #---------- MODEL TRAINING ---------#
 
-    def save_df_to_csv(self, file_name):
-        Helper.save_df_to_csv(self.initialized_df,
+    def SaveDFtoCSV(self, file_name):
+        Helper.SaveDFtoCSV(self.initialized_df,
                               self.saving_path, file_name)
 
     def save_model(self, saving_path=None, model_name=None):
@@ -211,7 +211,7 @@ class ModelTrainer:
         if model_name is None:
             model_name = self.model_name
         file_name = "".join((str(model_name), '_params'))
-        Helper.save_delimited_dict(
+        Helper.SaveDelimitedDict(
             self.model_training_params, f'{saving_path}{file_name}.csv')
 
     def save(self, saving_path=None, model_name=None, append_accuracy=False):
@@ -262,7 +262,7 @@ class ModelTrainer:
         #----GET DATA----#
         dnn_df = DataHandler.mt_transform_features_to_log(
             self.get_dnn_training_df())
-        #Helper.save_df_to_csv(dnn_df, f'{self.saving_path}','dnn_df')
+        #Helper.SaveDFtoCSV(dnn_df, f'{self.saving_path}','dnn_df')
         #----SCALE DATA----#
         scaled_dnn_df = DataHandler.mt_scale_data(
             dnn_df).drop(columns=['Date'])
@@ -354,14 +354,14 @@ class ModelTrainer:
             history = network.fit(train_seq, train_label, epochs=self.model_training_params['epochs'], batch_size=self.model_training_params['batch_size'], validation_data=(
                 validation_seq, validation_label))
         except Exception as e:
-            Helper.write_to_log(f'{e}')
+            Helper.WriteToLog(f'{e}')
             return None, None, None
 
         #----MODEL EVALUATION----#
         test_loss, test_acc = network.evaluate(test_seq, test_label)
         test_acc = round(test_acc, 7)
 
-        Helper.clear_console(f'Acc = {test_acc}')
+        Helper.ClearConsole(f'Acc = {test_acc}')
 
         self.model, self.test_accuracy, self.history = network, test_acc, history
 
@@ -482,7 +482,7 @@ class ModelTrainer:
         # fill in with model param paths for each stock!
         root_dir = '/home/pi/FinalProject/FlaskServer/SelectedModels'
         models_params_tickers = ['AMZN', 'AAPL', 'GOOG', 'MSFT', 'TSLA']
-        delimiter, prefix = Helper.get_prefix_path()
+        delimiter, prefix = Helper.GetPrefixandDelimiter()
 
         average_accuracies = {}
         for params_path in models_params_tickers:
@@ -499,14 +499,14 @@ class ModelTrainer:
 
                 average_accuracies[model_dir_num] = average_acc
 
-            Helper.save_dict_to_csv(
+            Helper.SaveDicttoCSV(
                 dict=average_accuracies, save_path=f'{ticker_dir_path}{delimiter}', file_name="1_Average_Retraining_Accuracies")
 
     def get_files_path(self, model_params_path, extension="*"):
         '''
         Returns a list of files (full paths) from given directory
         '''
-        delimiter, prefix = Helper.get_prefix_path()
+        delimiter, prefix = Helper.GetPrefixandDelimiter()
         return glob(f"{model_params_path}{delimiter}*.{extension}")
 
     def get_retraining_saving_dir_name(self, file_path):
@@ -521,7 +521,7 @@ class ModelTrainer:
 
 #---------- MAIN -----------#
 if __name__ == '__main__':
-    delimiter, prefix = Helper.get_prefix_path()
+    delimiter, prefix = Helper.GetPrefixandDelimiter()
     user = 'pi'  # availables: 'alon','pi'
     try_folder_name = 'final_01_07'
     #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
@@ -529,7 +529,7 @@ if __name__ == '__main__':
     mt = ModelTrainer(user=user, saving_path=save_path)
 
     #df = mt.init_data()
-    #Helper.save_df_to_csv(df=df, path='/home/pi/FinalProject/FlaskServer/Data/CSVs/', file_name='new_initialized_df')
+    #Helper.SaveDFtoCSV(df=df, path='/home/pi/FinalProject/FlaskServer/Data/CSVs/', file_name='new_initialized_df')
 
     '''Train model (all models from a directory)'''
     # mt.run_auto_training(acc_saving_threshold=0.6)

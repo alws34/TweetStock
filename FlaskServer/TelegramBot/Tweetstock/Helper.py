@@ -3,30 +3,39 @@ from datetime import datetime as dt
 from csv import writer as csv_writer
 from pandas import to_datetime as pd_datetime
 
-
 #------- MISC --------#
-def clear_console(msg=''):
+def ClearConsole(msg=''):
     clear_cmd = 'cls' if os_name == 'nt' else 'clear'
     system(clear_cmd)
-    print(msg, ' Cleared At:', get_date_time_stringify(
+    print(msg, ' Cleared At:', GetDateTimeStringify(
         '%d/%m/%Y-%H:%M:%S'))
 
 
-def Woke_Up():
-    logger(f'Woke up @{get_date_time_stringify("%H:%M:%S")}')
+def WokeUp():
+    logger(f'Woke up @{GetDateTimeStringify("%H:%M:%S")}')
+
+
+def GetTickerObj():
+    return {
+        'MSFT': {},
+        'TSLA': {},
+        'GOOG': {},
+        'AMZN': {},
+        'AAPL': {}
+        }    
 #------- Saves & file handels --------#
 
 
-def save_dict_to_csv(dict, save_path, file_name, mode='w'):
+def SaveDicttoCSV(dict, save_path, file_name, mode='w'):
     try:
         with open(f'{save_path}{file_name}.csv', mode) as f:
             for key in dict.keys():
                 f.write("%s,%s\n" % (key, dict[key]))
     except Exception as e:
-        logger(f'Helper.save_dict_to_csv says{e}')
+        logger(f'Helper.SaveDicttoCSV says{e}')
 
 
-def save_delimited_dict(dict, save_path, mode='w', delimiter='|'):
+def SaveDelimitedDict(dict, save_path, mode='w', delimiter='|'):
     try:
         with open(save_path, mode) as myfile:
             tsv_writer = csv_writer(myfile, delimiter=delimiter)
@@ -36,7 +45,7 @@ def save_delimited_dict(dict, save_path, mode='w', delimiter='|'):
         logger(f'{e}')
 
 
-def save_df_to_csv(df, path, file_name):
+def SaveDFtoCSV(df, path, file_name):
     df.to_csv(f'{path}{file_name}.csv')
 
 
@@ -47,40 +56,40 @@ def create_dir(path):
 
 def logger(msg):
     print(msg)
-    write_to_log(msg)
+    WriteToLog(msg)
 
 
-def write_to_log(msg):
-    delimiter, prefix = get_prefix_path()
-    log_path = f'{prefix}Logs{delimiter}{get_date_time_stringify()}.log'
+def WriteToLog(msg):
+    delimiter, prefix = GetPrefixandDelimiter()
+    log_path = f'/home/pi/FinalProject/FlaskServer/Logs/{GetDateTimeStringify()}.log'
     mode = 'a'
     if not os_path.exists(log_path):
         mode = 'w+'
 
     with open(log_path, mode, encoding='utf-8') as log_file:
         log_file.write(
-            f'{get_date_time_stringify(format="%H:%M:%S")}::\t\t{msg}\n\n')
+            f'{GetDateTimeStringify(format="%H:%M:%S")}::\t\t{msg}\n\n')
 
 #------- Gets ---------#
 
 
-def get_prefix_path():
+def GetPrefixandDelimiter():
     if os_name == 'nt':
         delimiter = '\\'
         prefix = f'{getcwd()}\\'
     elif os_name == 'posix':
         delimiter = '/'
-        prefix = '/home/pi/FinalProject/FlaskServer/'
+        prefix = f'{getcwd()}{delimiter}' #'/home/pi/FinalProject/FlaskServer/'
 
     return delimiter, prefix
 
 
-def get_date_time():
+def GetDateTime():
     return dt.now()
 
 
-def get_date_time_stringify(format="%d_%m_%Y"):
-    return get_date_time().strftime(format)
+def GetDateTimeStringify(format="%d_%m_%Y"):
+    return GetDateTime().strftime(format)
 
 
 def get_ping_command(how_many_pings='1', host='1.1.1.1'):
@@ -92,7 +101,7 @@ def get_ping_command(how_many_pings='1', host='1.1.1.1'):
 
 
 def get_models():
-    delimiter, prefix = get_prefix_path()
+    delimiter, prefix = GetPrefixandDelimiter()
     folder_name = "InUseModels"
     return {
         'AAPL': {
@@ -119,7 +128,7 @@ def get_models():
 
 
 def get_user_data_paths(user):
-    delimiter, prefix = get_prefix_path()
+    delimiter, prefix = GetPrefixandDelimiter()
     initialized_df_csv_file = 'new_initialized_df.csv'
     paths = {
         'alon': {
@@ -136,7 +145,7 @@ def get_user_data_paths(user):
     }
 
     if not user in paths.keys():
-        write_to_log(
+        WriteToLog(
             f'Invalid User Provided: {user} @Helper.get_user_data_paths')
         return None
     return paths[user]

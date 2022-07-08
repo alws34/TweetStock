@@ -108,7 +108,7 @@ class TweetsHandler:
                 err_msg = f"Tweeter Status code Returned {tre_tweets.status_code}", 'SLEEPING....'
                 Helper.logger(err_msg)
                 sleep(SLEEP_TIME)
-                Helper.Woke_Up()
+                Helper.WokeUp()
                 return tre_tweets.status_code
             # else:
             #     err_msg = f'CODE: {tre_tweets.status_code}'
@@ -118,7 +118,7 @@ class TweetsHandler:
             err_msg = f"TwitterConnectionError @fetch_live_tweets_v2 --- {TCE}"
             Helper.logger(err_msg)
             sleep(SLEEP_TIME)
-            Helper.Woke_Up()
+            Helper.WokeUp()
             return self.responses['Service Unavailable']
         except Exception as e:
             err_msg = f"Error occured @fetch_live_tweets_v2 --- {e}"
@@ -150,7 +150,7 @@ class TweetsHandler:
                         Helper.logger(
                             f"Tweeter Status code Returned {users_result['status']}", 'SLEEPING....')
                         sleep(SLEEP_TIME)
-                        Helper.Woke_Up()
+                        Helper.WokeUp()
                         continue
                     elif 'text' in users_result and users_result['text'] in self.responses.keys():
                         return None
@@ -163,7 +163,7 @@ class TweetsHandler:
                     err_msg = f"Exception {JDE} has occured @fetch_live_tweets_v2! Disconnected from twitter"
                     Helper.logger(err_msg)
                     sleep(SLEEP_TIME)
-                    Helper.Woke_Up()
+                    Helper.WokeUp()
                     self.twitter = self.connect_to_twitter()  # reconnect to twitter
                     continue
 
@@ -264,7 +264,7 @@ class TweetsHandler:
                 if tre.title in self.responses.keys():
                     if self.responses[tre.title] == self.responses['Too Many Requests']:
                         sleep(SLEEP_TIME)
-                        Helper.Woke_Up()
+                        Helper.WokeUp()
                         continue
                     else:
                         return None

@@ -29,7 +29,7 @@ def read_and_change():
         for idx, row in enumerate(reader):
             reader[idx] = row.replace(',', '|', 1)
 
-        Helper.save_delimited_dict(dict=build_dict(
+        Helper.SaveDelimitedDict(dict=build_dict(
             reader), save_path=file)
 
 
