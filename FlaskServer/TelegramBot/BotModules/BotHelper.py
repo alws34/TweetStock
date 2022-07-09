@@ -37,7 +37,7 @@ def Unauthorized(msg, id,bot,bot_commands,delimiter,path):
             f.write('FROM:\n' + str(msg['from']) +
                     '\nCHAT:\n' + str(msg['chat']))
         bot.sendMessage(id, 'Unauthorized USER!\n')
-        bot_commands.sendMessage('Unautorized Access Attempt from:\n' +
+        bot_commands.sendMessage(id, 'Unautorized Access Attempt from:\n' +
                     str(msg['from']))
     except Exception as e:
         Helper.logger(str(e))
