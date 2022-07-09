@@ -113,9 +113,8 @@ def MessageHandler(msg):
 
 def RunDBWorker(id,venv_path,db_path):
     db_proc = subprocess.Popen([venv_path, db_path],shell=True, stdout=PIPE, stderr=PIPE)
-    print(db_proc.pid)
-    print('HI!')
-    while True:
+    bot_commands.sendMessage(id, f'Running DB Worker on PI {db_proc.pid}')
+    while True: #TODO handle stdout & stderr correctly (if printed correctly it will be sent correctly......)
         print('STDOUT::\t\t' , db_proc.stdout.readline)
         print('STDERR::\t\t', db_proc.stderr.readline)
 
