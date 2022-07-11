@@ -6,7 +6,7 @@ from pathlib import Path as pathlib_Path
 import DataHandler
 from Globals import *
 from Helper import logger
-import TweetsHandler
+from TweetsHandler import TweetsHandler
 
 
 class TweetStockModel:
