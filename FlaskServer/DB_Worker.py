@@ -15,20 +15,9 @@ MODELS = Helper.get_models()
 # -------------------------------FireBase------------------------------------- #
 
 updated_db = {
-    'Prediction': {
-        'MSFT': {},
-        'TSLA': {},
-        'GOOG': {},
-        'AMZN': {},
-        'AAPL': {}
-    },
-    'Tweets': {
-        'MSFT': {},
-        'TSLA': {},
-        'GOOG': {},
-        'AMZN': {},
-        'AAPL': {}
-    }
+    'Prediction': Helper.GetTickerObj(),
+    'Tweets': Helper.GetTickerObj(),
+    'Volatility': Helper.GetTickerObj()
 }
 
 
@@ -169,7 +158,7 @@ def Get_Real_Close():
         stock = yf.Ticker(ticker)
         look_back_n_days = 1
         history = stock.history(period=f'{look_back_n_days}d')
-        updated_db['Prediction'][ticker]['Actual_volatility'] = 1 if history['Close'][0] >= history['Open'][0] else -1
+        updated_db['Volatility'][ticker]['Actual_volatility'] = 1 if history['Close'][0] >= history['Open'][0] else -1
     post_to_FireBase(updated_db, Helper.get_date_time_stringify(
         format="%d_%m_%Y"))
 

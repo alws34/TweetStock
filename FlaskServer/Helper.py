@@ -16,6 +16,14 @@ def Woke_Up():
     logger(f'Woke up @{get_date_time_stringify("%H:%M:%S")}')
 #------- Saves & file handels --------#
 
+def GetTickerObj():
+    return {
+        'MSFT': {},
+        'TSLA': {},
+        'GOOG': {},
+        'AMZN': {},
+        'AAPL': {}
+        }    
 
 def save_dict_to_csv(dict, save_path, file_name, mode='w'):
     try:
