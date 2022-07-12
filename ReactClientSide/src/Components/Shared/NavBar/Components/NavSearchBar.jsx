@@ -111,7 +111,7 @@ export default function NavSearchBar(props) {
 
 
 }
-
+//src https://www.sec.gov/files/company_tickers.json
 const ticker_dict = [
   {
     ticker: "AAPL",
