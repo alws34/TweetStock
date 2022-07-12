@@ -54,7 +54,6 @@ export default function NavSearchBar(props) {
       input={{ paddingLeft: 0 }}
       style={{ width: "80%", paddingLeft: 1 }}
       //       onKeyPress={(e) => e.key === "Enter" && props.onSubmit(searchQuery)}
-
       onKeyPress={(e) => e.key === "Enter" && props.onSubmit(searchQuery)}
       renderOption={(props, option) => (
         <Box
@@ -74,16 +73,42 @@ export default function NavSearchBar(props) {
         </Box>
       )}
       renderInput={(params) => (
-        <TextField
-          {...params}
-          style={{ border: "1px solid", borderRadius: "5px" }}
-          label="Choose a Stock"
-          inputProps={{
-            ...params.inputProps,
-            autoComplete: "new-password", // disable autocomplete and autofill
-          }}
-          onChange={() => console.log(params.inputProps)}
-        />
+        <Search sx={{ paddingLeft: 0.5, marginLeft: 2 }}>
+          <StyledInputBase
+            id="navSearch"
+            placeholder="Search Stock…"
+            inputProps={{ "aria-label": "search" }}
+            input={{ paddingLeft: 0 }}
+            style={{ width: "80%", paddingLeft: 1 }}
+            sx={{ input: { paddingLeft: 0 } }}
+            onChange={setSearchQuery(params.inputProps.value)}
+            {...params}
+            onKeyPress={(e) => e.key === "Enter" && props.onSubmit(searchQuery)}
+          />
+          <SearchIcon
+            onClick={() => props.onSubmit(searchQuery)}
+            onMouseEnter={(e) => {
+              e.target.style.background = "rgb(255, 255, 255, 0.5)";
+              e.target.style.borderRadius = "5px";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = "none";
+            }}
+          />
+        </Search>
+
+        // <div>
+        //   <TextField
+        //     {...params}
+        //     style={{ border: "1px solid", borderRadius: "5px" }}
+        //     label="Choose a Stock"
+        //     inputProps={{
+        //       ...params.inputProps,
+        //       autoComplete: "new-password", // disable autocomplete and autofill
+        //     }}
+        //     onChange={() => console.log(params.inputProps)}
+        //   />
+        // </div>
       )}
     />
   );
