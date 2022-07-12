@@ -35,15 +35,15 @@ def post_to_FireBase(tables_dict, date):
     try:
         for table_name, table_dict in tables_dict.items():
             for stock_name, stock_dict in table_dict.items():
-                if type(stock_dict) == dict: #stock data
+                if type(stock_dict) == dict:  # stock data
                     db.child(date).child(table_name).child(
                         stock_name).update(stock_dict)
-                elif type(stock_dict) == list: # stock tweets
+                elif type(stock_dict) == list:  # stock tweets
                     clear_table(table_name, date, stock_name)
                     for item in stock_dict:
                         if type(item) == dict and 'tweet_id' in item.keys():
                             db.child(date).child(table_name).child(stock_name).child(
-                                item['tweet_id']).update(item)
+                                item['tweet_id']).set(item)
                         else:
                             return None
                 else:
@@ -167,14 +167,15 @@ def Main():
     # 'features': 1 --> ['Tweet_Comments', 'Tweet_Retweets','Tweet_Likes', 'Positivity', 'Negativity', 'Neutral']
     # 'features': 2 --> ['Tweet_Sentiment','Tweet_Comments', 'Tweet_Retweets', 'Tweet_Likes']
     # update_firebase_db()
-    #Get_Real_Close()
+    # Get_Real_Close()
     sleeping_hours, sleeping_mins = 2, 0
     sleep_time = (sleeping_hours * 60 + sleeping_mins) * 60
     while True:
         if system(ping_command) == 0:  # check first for internet connectivity
             if (is_valid_day()):
                 update_firebase_db()
-                GoingToSleep(time = sleep_time, custom_msg= f'DB_Worker.Main loop says:\tGoing to sleep for {sleep_time} seconds ({sleep_time/60} minutes)... @{Helper.get_date_time_stringify("%H:%M:%S")}')
+                GoingToSleep(
+                    time=sleep_time, custom_msg=f'DB_Worker.Main loop says:\tGoing to sleep for {sleep_time} seconds ({sleep_time/60} minutes)... @{Helper.get_date_time_stringify("%H:%M:%S")}')
             else:
                 Get_Real_Close()
                 sleep_until_market_opens(start_hour=16, start_min=0)
