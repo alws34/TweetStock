@@ -138,33 +138,6 @@ export default function ProfilePage() {
     });
   };
 
-  const ButtonsContainer = () => {
-    return (
-      <div className="buttonsContainer">
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-          color="success"
-        >
-          Update Profile
-        </Button>
-        <Grid container justifyContent="flex-end">
-          <Grid item>
-            <Button
-              onClick={() => navigate(navPaths["home"])}
-              variant="body2"
-              //color="secondary"
-            >
-              Home Page
-            </Button>
-          </Grid>
-        </Grid>
-      </div>
-    );
-  };
-
   const formValues = {
     //label: [fieldName, fieldValue, autoComplete, inputProps, sx]
     "First Name": [
@@ -239,6 +212,34 @@ export default function ProfilePage() {
     </ThemeProvider>
   );
 }
+
+// const ButtonsContainer = () => {
+//   return (
+//     <div className="buttonsContainer">
+//       <Button
+//         type="submit"
+//         fullWidth
+//         variant="contained"
+//         sx={{ mt: 3, mb: 2 }}
+//         color="success"
+//       >
+//         Update Profile
+//       </Button>
+//       <Grid container justifyContent="flex-end">
+//         <Grid item>
+//           <Button
+//             onClick={() => navigate(navPaths["home"])}
+//             variant="body2"
+//             //color="secondary"
+//           >
+//             Home Page
+//           </Button>
+//         </Grid>
+//       </Grid>
+//     </div>
+//   );
+// };
+
 // <FormField
 //   xs={12}
 //   sm={6}

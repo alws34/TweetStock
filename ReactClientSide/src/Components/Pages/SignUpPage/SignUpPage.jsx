@@ -39,18 +39,6 @@ export default function SignUp() {
   const [country, setCountry] = useState(null);
   // const webRef = useRef(null);
 
-  // const showImage = () => {
-  //   let imgBefore = btoa(webRef.current.getScreenshot(), "Base64");
-  //   setEncodeImg(imgBefore);
-  //   let imgAfter = atob(imgBefore, "Base64");
-  //   setImg(imgAfter);
-  //   setImg(webRef.current.getScreenshot());
-  //   console.log(imgBefore);
-  //   console.log(imgAfter);
-  //   console.log(webRef.current.getScreenshot())
-  //   console.log("shoot");
-  // };
-
   const getCountry = (countryProp) => {
     setCountry(countryProp);
     console.log(country);
@@ -119,27 +107,6 @@ export default function SignUp() {
 
     postUser(user);
   };
-
-  const ButtonsContainer = () => (
-    <div className="buttonsContainer">
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        sx={{ mt: 3, mb: 2 }}
-        color="success"
-      >
-        Sign Up
-      </Button>
-      <Grid container>
-        <Grid item>
-          <Button onClick={() => navigate(navPaths["sign in"])} variant="body2">
-            <Link>Already have an account? Sign In</Link>
-          </Button>
-        </Grid>
-      </Grid>
-    </div>
-  );
 
   const formValues = {
     //label: [fieldName, fieldValue, autoComplete, inputProps, sx]
@@ -221,6 +188,39 @@ export default function SignUp() {
     // </ThemeProvider>
   );
 }
+
+// const showImage = () => {
+//   let imgBefore = btoa(webRef.current.getScreenshot(), "Base64");
+//   setEncodeImg(imgBefore);
+//   let imgAfter = atob(imgBefore, "Base64");
+//   setImg(imgAfter);
+//   setImg(webRef.current.getScreenshot());
+//   console.log(imgBefore);
+//   console.log(imgAfter);
+//   console.log(webRef.current.getScreenshot())
+//   console.log("shoot");
+// };
+
+// const ButtonsContainer = () => (
+//   <div className="buttonsContainer">
+//     <Button
+//       type="submit"
+//       fullWidth
+//       variant="contained"
+//       sx={{ mt: 3, mb: 2 }}
+//       color="success"
+//     >
+//       Sign Up
+//     </Button>
+//     <Grid container>
+//       <Grid item>
+//         <Button onClick={() => navigate(navPaths["sign in"])} variant="body2">
+//           <Link>Already have an account? Sign In</Link>
+//         </Button>
+//       </Grid>
+//     </Grid>
+//   </div>
+// );
 
 /* <FormField
       xs={12}

@@ -7,16 +7,12 @@ import { saveUserLocalStorage } from "../../Configs/getLoggedUser";
 import { navPaths } from "../../Configs/navPaths";
 import {
   Avatar,
-  Button,
   CssBaseline,
   Typography,
   Container,
-  TextField,
   FormControlLabel,
   Checkbox,
   Box,
-  Grid,
-  Link,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -169,24 +165,6 @@ export default function SignIn() {
               linkText={"Don't have an account? Sign Up"}
               navPathKey={"sign up"}
             />
-            {/* <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Sign In
-            </Button>
-            <Grid container>
-              <Grid item>
-                <Button
-                  onClick={() => navigate(navPaths["sign up"])}
-                  variant="body2"
-                >
-                  <Link>Don't have an account? Sign Up</Link>
-                </Button>
-              </Grid>
-            </Grid> */}
           </Box>
         </Box>
         <Copyright sx={{ mt: 8, mb: 4 }} />
@@ -194,6 +172,25 @@ export default function SignIn() {
     </ThemeProvider>
   );
 }
+
+/* <Button
+  type="submit"
+  fullWidth
+  variant="contained"
+  sx={{ mt: 3, mb: 2 }}
+>
+  Sign In
+</Button>
+<Grid container>
+  <Grid item>
+    <Button
+      onClick={() => navigate(navPaths["sign up"])}
+      variant="body2"
+    >
+      <Link>Don't have an account? Sign Up</Link>
+    </Button>
+  </Grid>
+</Grid> */
 
 /* <TextField
   margin="normal"
