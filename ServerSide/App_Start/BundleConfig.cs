@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Optimization;
 
-namespace finalServerSide
+namespace ServerSide
 {
     public class BundleConfig
     {

@@ -349,3 +349,5 @@ FlaskServer/CONFIGS/*
 FlaskServer/Data/CSVs/Initial_Data/*
 FlaskServer/OLD/*
 FlaskServer/SelectedModels (For Retraining)/*
+ServerSide/Web.config
+ServerSide/Web.config
