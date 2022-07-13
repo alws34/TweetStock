@@ -6,7 +6,6 @@ import { styled } from "@mui/material/styles";
 import "./Camera.css";
 import heic2any from "heic2any";
 
-
 import Resizer from "react-image-file-resizer";
 
 const blobToBase64 = async (blobFile) => {
@@ -81,7 +80,7 @@ export default function Camera(props) {
       )}
       <label htmlFor="contained-button-file" style={{ width: "100%" }}>
         <Input
-          accept="*" //"image/*"
+          accept=".jpeg, .jpg, .jpe, .heic, .png" //"image/*"
           id="contained-button-file"
           type="file"
           onChange={(event) => {
@@ -90,16 +89,21 @@ export default function Camera(props) {
               blobFile.type.toLowerCase() === "image/heic" ||
               blobFile.name.toLowerCase().includes(".heic")
             ) {
-              heic2any({ blob: blobFile, toType: "image/jpg", quality: 1 }).then(
-                (newImage) => {
-                  console.log("new image:", newImage);
-                  //const url = URL.createObjectURL(newImage);
-                  //https://codesandbox.io/s/kmdh7?file=/src/index.js:1014-1017
-                  setImage(newImage);
-                }
-              );
+              heic2any({
+                blob: blobFile,
+                toType: "image/jpg",
+                quality: 1,
+              }).then((newImage) => {
+                console.log("new image:", newImage);
+                //const url = URL.createObjectURL(newImage);
+                //https://codesandbox.io/s/kmdh7?file=/src/index.js:1014-1017
+                setImage(newImage);
+              });
+            } else {
+              setImage(blobFile);
+            }
           }}
-         } />
+        />
         <Button fullWidth variant="contained" component="span">
           Upload
         </Button>
