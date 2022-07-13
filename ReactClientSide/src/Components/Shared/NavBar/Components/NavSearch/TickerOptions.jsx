@@ -1,7 +1,19 @@
 //src https://www.sec.gov/files/company_tickers.json
+const capitalizeWordsFromArray = (arr) => {
+  return arr.map(
+    (element) =>
+      element.charAt(0).toUpperCase() + element.substring(1).toLowerCase()
+  );
+};
+
+export const capitalizeFirstLetters = (str) =>
+  capitalizeWordsFromArray(str.split(" ")).join(" ");
+
 export const getNameFromTicker = (ticker) => {
   for (let i = 0; i < tickerOptions.length; i++) {
-    if (tickerOptions[i].ticker === ticker) return tickerOptions[i].title;
+    if (tickerOptions[i].ticker === ticker) {
+      return capitalizeFirstLetters(tickerOptions[i].title);
+    }
   }
   return undefined;
 };

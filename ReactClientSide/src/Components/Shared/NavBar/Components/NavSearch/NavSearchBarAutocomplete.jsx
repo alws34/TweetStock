@@ -1,7 +1,7 @@
 import React from "react";
 import { Autocomplete, Box } from "@mui/material";
 import TextField from "@material-ui/core/TextField";
-import { tickerOptions } from "./TickerOptions";
+import { tickerOptions, capitalizeFirstLetters } from "./TickerOptions";
 
 export default function NavSearchBarAutocomplete(props) {
   const getTickerFromSearchQuery = (val) => {
@@ -21,7 +21,7 @@ export default function NavSearchBarAutocomplete(props) {
         getOptionLabel={(option) => option.ticker}
         renderOption={(props, option) => (
           <Box {...props} component="li">
-            {option.title} ({option.ticker})
+            {capitalizeFirstLetters(option.title)} - {option.ticker}
           </Box>
         )}
         renderInput={(params) => (
