@@ -23,7 +23,7 @@ body {
   cursor: pointer;
   position: relative;
   display: inline-block;
-  font-size: 3rem;
+  font-size: 6.2vw;
   background: linear-gradient(to bottom, #000, #000 60%, #fff 60%, #fff 100%);
   background-clip: text;
   -webkit-background-clip: text;
@@ -32,10 +32,16 @@ body {
   transition: background 0.2s ease-out;
   white-space: nowrap;
   color: #356cc5;
-  /* color: #fff; */
+  max-width: 100%;
 }
 
-.PageHeader span {
+@media screen and (min-width: 800px) {
+  .PageHeader p {
+    font-size: 50px;
+  }
+}
+.pageHeae
+/* .PageHeader span {
   position: relative;
 }
 
@@ -49,12 +55,12 @@ body {
   bottom: 10px;
   transition: all 0.2s ease-out;
   border-radius: 3px;
-}
+} */
 
 .PageHeader p:hover {
   background-position: 0px 10px;
 }
 
-.PageHeader span:hover:before {
+/* .PageHeader span:hover:before {
   transform: translateY(10px);
-}
+} */

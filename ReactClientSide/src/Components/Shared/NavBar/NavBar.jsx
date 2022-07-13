@@ -3,7 +3,7 @@ import { useState } from "react";
 import "./NavBarStyle.css";
 import SpreadedNav from "./Components/NavItems/SpreadedNav";
 import HamburgerNav from "./Components/NavItems/HamburgerNav";
-import NavSearchBar from "./Components/NavSearchBar";
+import NavSearchBar from "./Components/NavSearch/NavSearchBar";
 import NavBarLogo from "./Components/NavBarLogo";
 import SettingsMenu from "./Components/SettingsMenu";
 import { getLoggedUser, isLoggedUser } from "../../Configs/getLoggedUser";
@@ -69,7 +69,8 @@ export default function NavBar() {
             console.log("fetch apiStock= ", result.quoteResponse.result[0]);
 
             let s = result.quoteResponse.result[0];
-            if (s.displayName) {
+            if (1) {
+              //(s.displayName) {
               navigate(navs["about"], {
                 state: {
                   ticker: ticker,

@@ -45,7 +45,7 @@ export default function StockDetails(props) {
 
   const data = props.stockData;
   const lines1 = {
-    "Name:": data.displayName,
+    "Name:": props.tickerDisplayName,
     "Full Name:": data.fullExchangeName,
     "Symbol:": data.symbol,
     "Open:": data.regularMarketOpen,
@@ -79,111 +79,19 @@ export default function StockDetails(props) {
       <Row>
         <Col xs={12} sm={6} md={12} lg={6}>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {Object.keys(lines1).map((text) => (
-              <Line key={text} text={text} data={lines1[text]} />
-            ))}
+            {Object.keys(lines1).map((text) =>
+              text ? <Line key={text} text={text} data={lines1[text]} /> : ""
+            )}
           </div>
         </Col>
         <Col xs={12} sm={6} md={12} lg={6}>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {Object.keys(lines2).map((text) => (
-              <Line key={text} text={text} data={lines2[text]} />
-            ))}
+            {Object.keys(lines2).map((text) =>
+              text ? <Line key={text} text={text} data={lines2[text]} /> : ""
+            )}
           </div>
         </Col>
       </Row>
     </div>
   );
 }
-
-// {
-//   /* <Line
-//   xs={xs_bootstrap_size}
-//   md={7}
-//   text={"Name:"}
-//   data={props.stockData.displayName}
-// />
-// <Line
-//   xs={xs_bootstrap_size}
-//   md={7}
-//   text={"Full Name:"}
-//   data={props.stockData.fullExchangeName}
-// />
-// <Line
-//   xs={xs_bootstrap_size}
-//   md={5}
-//   text={"Symbol:"}
-//   data={props.stockData.symbol}
-// />
-// <Line
-//   xs={xs_bootstrap_size}
-//   text={"Open:"}
-//   data={props.stockData.regularMarketOpen}
-// />
-// <Line
-//   xs={xs_bootstrap_size}
-//   text={"Close:"}
-//   data={props.stockData.regularMarketPrice}
-// />
-// <Line
-//   xs={xs_bootstrap_size}
-//   text={"High:"}
-//   data={props.stockData.regularMarketDayHigh}
-// />
-// <Line
-//   xs={xs_bootstrap_size}
-//   text={"Volume:"}
-//   data={props.stockData.regularMarketVolume}
-// />
-// <Line
-//   xs={xs_bootstrap_size}
-//   text={"Average Volume:"}
-//   data={props.stockData.averageDailyVolume3Month}
-// />
-// <Line
-//   xs={8}
-//   md={7}
-//   text={"Region:"}
-//   data={props.stockData.region}
-// /> */
-// }
-
-//             {
-//               /* <Line
-//   xs={4}
-//   md={5}
-//   text={"Currency:"}
-//   data={props.stockData.financialCurrency}
-// />
-// <Line
-//   xs={6}
-//   text={"Change Range:"}
-//   data={props.stockData.regularMarketDayRange}
-// />
-// <Line
-//   xs={6}
-//   text={"52 Week Range:"}
-//   data={props.stockData.fiftyTwoWeekRange}
-// />
-// <Line xs={6} text={"Bid:"} data={props.stockData.bid} />
-// <Line xs={6} text={"Ask:"} data={props.stockData.ask} />
-// <Line
-//   xs={6}
-//   text={"Market Cap:"}
-//   data={props.stockData.marketCap}
-// />
-// <Line
-//   xs={6}
-//   text={"ESP:"}
-//   data={props.stockData.epsTrailingTwelveMonths}
-// />
-// <Line
-//   xs={6}
-//   text={"Price Now:"}
-//   data={
-//     props.stockData.postMarketPrice
-//       ? props.stockData.postMarketPrice
-//       : ""
-//   }
-// /> */
-//             }
