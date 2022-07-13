@@ -98,7 +98,7 @@ export default function SignUp() {
       email: data.get('email'),
       password: data.get('password'),
       address: country,
-      picture: "img"//encodeImg
+      picture: encodeImg//"img"//encodeImg
     };
     postUser(user);
   };
