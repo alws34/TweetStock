@@ -15,7 +15,7 @@ import ProfilePage from "./Components/Pages/ProfilePage/ProfilePage";
 import { navPaths } from "./Components/Configs/navPaths";
 
 import IconButton from "@mui/material/IconButton";
-import { lightTheme, darkTheme, Theme } from "./Themes/Themes";
+import { lightTheme, darkTheme } from "./Themes/themes.jsx"; //"./Themes/Themes";
 import { Paper, ThemeProvider } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Brightness4Icon from "@mui/icons-material/Brightness4"; // light theme icon
