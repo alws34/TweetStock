@@ -1,14 +1,14 @@
 .PageHeader * {
   padding: 0;
   margin: 0;
-  box-sizing: border-box;
+  /* box-sizing: border-box; */
 }
 
 .PageHeader > html,
 body {
   font-family: "Fira Code", monospace;
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   font-size: 20px;
 }
 
@@ -22,15 +22,15 @@ body {
 .PageHeader p {
   cursor: pointer;
   position: relative;
-  display: inline-block;
+  /* display: inline-block; */
   font-size: 6.2vw;
   background: linear-gradient(to bottom, #000, #000 60%, #fff 60%, #fff 100%);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
   background-repeat: no-repeat;
-  transition: background 0.2s ease-out;
-  white-space: nowrap;
+  /* transition: background 0.2s ease-out;
+  white-space: nowrap; */
   color: #356cc5;
   max-width: 100%;
 }
@@ -40,7 +40,10 @@ body {
     font-size: 50px;
   }
 }
-.pageHeae
+.PageHeader > div {
+  max-width: 500px;
+  overflow-x: visible;
+}
 /* .PageHeader span {
   position: relative;
 }
