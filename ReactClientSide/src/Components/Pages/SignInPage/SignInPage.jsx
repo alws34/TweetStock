@@ -23,6 +23,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import FormPageButtons from "../../Shared/Forms/FormPageButtons";
 
 const MySwal = withReactContent(Swal);
 
@@ -163,7 +164,12 @@ export default function SignIn() {
               }
               label="Remember me"
             />
-            <Button
+            <FormPageButtons
+              primaryButtonText={"Sign In"}
+              linkText={"Don't have an account? Sign Up"}
+              navPathKey={"sign up"}
+            />
+            {/* <Button
               type="submit"
               fullWidth
               variant="contained"
@@ -180,7 +186,7 @@ export default function SignIn() {
                   <Link>Don't have an account? Sign Up</Link>
                 </Button>
               </Grid>
-            </Grid>
+            </Grid> */}
           </Box>
         </Box>
         <Copyright sx={{ mt: 8, mb: 4 }} />
