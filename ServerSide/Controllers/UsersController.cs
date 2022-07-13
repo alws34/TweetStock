@@ -1,10 +1,12 @@
-﻿using finalServerSide.Models;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+
+using finalServerSide.Models;
 
 namespace finalServerSide.Controllers
 {
