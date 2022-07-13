@@ -1,0 +1,72 @@
+17:35:16::		Filtered all tweets @filter_tweets()
+
+17:35:16::		TSM.get_prediction says: Reached max iterations threshold
+
+17:35:19::		Going to sleep for 900 seconds (15.0 minutes)... @17:35:19
+
+17:50:19::		Woke up @17:50:19
+
+17:55:46::		TSM.get_prediction says: Reached max iterations threshold
+
+17:55:57::		Going to sleep for 900 seconds (15.0 minutes)... @17:55:57
+
+18:10:57::		Woke up @18:10:57
+
+18:16:18::		TSM.get_prediction says: Reached max iterations threshold
+
+18:16:34::		Going to sleep for 900 seconds (15.0 minutes)... @18:16:34
+
+18:31:34::		Woke up @18:31:34
+
+18:35:52::		TSM.get_prediction says: Reached max iterations threshold
+
+18:36:11::		Going to sleep for 900 seconds (15.0 minutes)... @18:36:11
+
+18:51:11::		Woke up @18:51:11
+
+18:54:31::		Filtered all users @filter_users()
+
+18:55:19::		TSM.get_prediction says: Reached max iterations threshold
+
+18:55:39::		Going to sleep for 900 seconds (15.0 minutes)... @18:55:39
+
+19:10:39::		Woke up @19:10:39
+
+19:10:39::		DB_Worker.Main loop says:	Going to sleep for 7200 seconds (120.0 minutes)... @19:10:39
+
+21:10:39::		Woke up @21:10:39
+
+21:12:16::		Filtered all users @filter_users()
+
+21:14:44::		TSM.get_prediction says: Reached max iterations threshold
+
+21:15:04::		Going to sleep for 900 seconds (15.0 minutes)... @21:15:04
+
+21:30:04::		Woke up @21:30:04
+
+21:35:42::		TSM.get_prediction says: Reached max iterations threshold
+
+21:36:05::		Going to sleep for 900 seconds (15.0 minutes)... @21:36:05
+
+21:51:05::		Woke up @21:51:05
+
+21:55:53::		TSM.get_prediction says: Reached max iterations threshold
+
+21:56:09::		Going to sleep for 900 seconds (15.0 minutes)... @21:56:09
+
+22:11:09::		Woke up @22:11:09
+
+22:15:51::		TSM.get_prediction says: Reached max iterations threshold
+
+22:16:09::		Going to sleep for 900 seconds (15.0 minutes)... @22:16:09
+
+22:31:09::		Woke up @22:31:09
+
+22:36:15::		TSM.get_prediction says: Reached max iterations threshold
+
+22:36:38::		Going to sleep for 900 seconds (15.0 minutes)... @22:36:38
+
+22:51:38::		Woke up @22:51:38
+
+22:51:38::		DB_Worker.Main loop says:	Going to sleep for 7200 seconds (120.0 minutes)... @22:51:38
+

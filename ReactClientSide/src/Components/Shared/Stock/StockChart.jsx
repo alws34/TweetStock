@@ -18,7 +18,7 @@ export default function StockChart(props) {
   const [priceTime, setPriceTime] = useState(null);
   const [isStockValid, setIsStockValid] = useState(true);
 
-  console.log(global.config.theme);
+  //console.log(global.config.theme);
 
   const chart_options = {
     theme: {
