@@ -18,23 +18,29 @@ export default function StockChart(props) {
   const [priceTime, setPriceTime] = useState(null);
   const [isStockValid, setIsStockValid] = useState(true);
 
+  //const [theme, setTheme] = useState(global.config.theme);
   //console.log(global.config.theme);
+
+  //useEffect(() => setTheme(global.config.theme), []);
 
   const chart_options = {
     theme: {
       mode: global.config.theme,
-      //palette: "palette1",
     },
     chart: {
       height: 350,
+      background:
+        global.config.theme === "dark"
+          ? global.config.darkBG
+          : global.config.lightBG,
       toolbar: {
         show: true,
       },
     },
     title: {
-      text: `$${props.stock_ticker.toUpperCase()} Graph`,
+      text: `$${props.stock_ticker.toUpperCase()}`,
       align: "left",
-      style: { fontSize: "28px", fontWeight: "bold", color: "" },
+      style: { fontSize: "24px", fontWeight: "bold", color: "" },
     },
     xaxis: {
       type: "datetime",

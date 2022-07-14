@@ -7,22 +7,19 @@ import { saveUserLocalStorage } from "../../Configs/getLoggedUser";
 import { navPaths } from "../../Configs/navPaths";
 import {
   Avatar,
-  Button,
   CssBaseline,
   Typography,
   Container,
-  TextField,
   FormControlLabel,
   Checkbox,
   Box,
-  Grid,
-  Link,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate, useLocation } from "react-router-dom";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import FormPageButtons from "../../Shared/Forms/FormPageButtons";
 
 const MySwal = withReactContent(Swal);
 
@@ -163,24 +160,11 @@ export default function SignIn() {
               }
               label="Remember me"
             />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Sign In
-            </Button>
-            <Grid container>
-              <Grid item>
-                <Button
-                  onClick={() => navigate(navPaths["sign up"])}
-                  variant="body2"
-                >
-                  <Link>Don't have an account? Sign Up</Link>
-                </Button>
-              </Grid>
-            </Grid>
+            <FormPageButtons
+              primaryButtonText={"Sign In"}
+              linkText={"Don't have an account? Sign Up"}
+              navPathKey={"sign up"}
+            />
           </Box>
         </Box>
         <Copyright sx={{ mt: 8, mb: 4 }} />
@@ -188,6 +172,25 @@ export default function SignIn() {
     </ThemeProvider>
   );
 }
+
+/* <Button
+  type="submit"
+  fullWidth
+  variant="contained"
+  sx={{ mt: 3, mb: 2 }}
+>
+  Sign In
+</Button>
+<Grid container>
+  <Grid item>
+    <Button
+      onClick={() => navigate(navPaths["sign up"])}
+      variant="body2"
+    >
+      <Link>Don't have an account? Sign Up</Link>
+    </Button>
+  </Grid>
+</Grid> */
 
 /* <TextField
   margin="normal"

@@ -22,6 +22,9 @@ const Search = styled("div")(({ theme }) => ({
 export default function NavSearchBar(props) {
   const [searchQuery, setSearchQuery] = useState(null);
 
+  useEffect(() => searchQuery && props.onSubmit(searchQuery), [searchQuery]);
+  //searchQuery && props.onSubmit(searchQuery);
+
   const autoCompleteInputHandler = (e) => {
     setSearchQuery(e);
     console.log(e);
@@ -30,12 +33,9 @@ export default function NavSearchBar(props) {
   return (
     <Search
       sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingLeft: 0.5,
-        paddingRight: 0.5,
+        padding: 1,
         marginLeft: 2,
+        paddingTop: 0,
       }}
     >
       <NavSearchBarAutocomplete
@@ -44,11 +44,17 @@ export default function NavSearchBar(props) {
         setSearchQuery={autoCompleteInputHandler}
         inputProps={{ "aria-label": "search" }}
         input={{ paddingLeft: 0 }}
-        sx={{ input: { paddingLeft: 0 }, width: "100%", paddingLeft: 1 }}
+        sx={{
+          input: { paddingLeft: 0 },
+          width: "100%",
+          paddingLeft: 0,
+          marginRight: 0,
+          paddingBottom: 2,
+        }}
         autoHighlight
       />
 
-      <SearchIcon
+      {/* <SearchIcon
         onClick={() => props.onSubmit(searchQuery)}
         onMouseEnter={(e) => {
           e.target.style.background = "rgb(255, 255, 255, 0.5)";
@@ -57,7 +63,7 @@ export default function NavSearchBar(props) {
         onMouseLeave={(e) => {
           e.target.style.background = "none";
         }}
-      />
+      /> */}
     </Search>
   );
 }

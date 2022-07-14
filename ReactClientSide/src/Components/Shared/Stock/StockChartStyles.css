@@ -2,3 +2,8 @@
   border-radius: 5px;
   padding: 0.1;
 }
+
+.stockChartPanelContainer p {
+  font-weight: bold;
+  font-size: large;
+}

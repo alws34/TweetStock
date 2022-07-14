@@ -18,6 +18,12 @@ export const getNameFromTicker = (ticker) => {
   return undefined;
 };
 
+// export const isValidStockSearch = (ticker) => {
+//   for (let i = 0; i< tickerOptions.length; i++){
+//     if 
+//   }
+// }
+
 export const tickerOptions = [
   {
     ticker: "AAPL",

@@ -23,6 +23,8 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import FormPageButtons from "../../Shared/Forms/FormPageButtons";
+
 const MySwal = withReactContent(Swal);
 
 const default_profile_img =
@@ -36,18 +38,6 @@ export default function SignUp() {
   //const [encodeImg, setEncodeImg] = useState("");
   const [country, setCountry] = useState(null);
   // const webRef = useRef(null);
-
-  // const showImage = () => {
-  //   let imgBefore = btoa(webRef.current.getScreenshot(), "Base64");
-  //   setEncodeImg(imgBefore);
-  //   let imgAfter = atob(imgBefore, "Base64");
-  //   setImg(imgAfter);
-  //   setImg(webRef.current.getScreenshot());
-  //   console.log(imgBefore);
-  //   console.log(imgAfter);
-  //   console.log(webRef.current.getScreenshot())
-  //   console.log("shoot");
-  // };
 
   const getCountry = (countryProp) => {
     setCountry(countryProp);
@@ -118,26 +108,38 @@ export default function SignUp() {
     postUser(user);
   };
 
-  const ButtonsContainer = () => (
-    <div className="buttonsContainer">
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        sx={{ mt: 3, mb: 2 }}
-        color="success"
-      >
-        Sign Up
-      </Button>
-      <Grid container>
-        <Grid item>
-          <Button onClick={() => navigate(navPaths["sign in"])} variant="body2">
-            <Link>Already have an account? Sign In</Link>
-          </Button>
-        </Grid>
-      </Grid>
-    </div>
-  );
+  const formValues = {
+    //label: [fieldName, fieldValue, autoComplete, inputProps, sx]
+    "First Name": [
+      "firstName",
+      user.FirstName,
+      "given-name",
+      { minLength: 2, maxLength: 15 },
+      { autoFocus: true, required: true },
+    ],
+    "Last Name": [
+      "lastName",
+      user.LastName,
+      "family-name",
+      { minLength: 2, maxLength: 15 },
+      { required: true },
+    ],
+    Email: [
+      "email",
+      user.Email,
+      "email",
+      { pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$" },
+      { required: true },
+    ],
+    Password: [
+      "password",
+      "",
+      "new-password",
+      { minLength: 6 },
+      { type: "password", required: true },
+    ],
+  };
+
   return (
     // <ThemeProvider theme={theme}>
     <Container component="main" maxWidth="xs">
@@ -151,61 +153,18 @@ export default function SignUp() {
         </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
-            <FormField
-              xs={12}
-              sm={6}
-              label="First Name"
-              autoComplete="given-name"
-              fieldName="firstName"
-              fieldValue={user.FirstName}
-              inputProps={{
-                minlength: 2,
-                maxlength: 15,
-              }}
-              sx={{
-                autoFocus: true,
-                required: true,
-              }}
-            />
-            <FormField
-              xs={12}
-              sm={6}
-              label="Last Name"
-              autoComplete="family-name"
-              fieldName="lastName"
-              fieldValue={user.LastName}
-              inputProps={{
-                minlength: 2,
-                maxlength: 15,
-              }}
-              sx={{ required: true }}
-            />
-            <FormField
-              xs={12}
-              label="Email Address"
-              autoComplete="email"
-              fieldName="email"
-              fieldValue={user.Email}
-              inputProps={{
-                pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
-              }}
-              sx={{ required: true }}
-            />
-
-            <FormField
-              xs={12}
-              label="Password"
-              autoComplete="new-password"
-              fieldName="password"
-              inputProps={{
-                minlength: 6,
-              }}
-              sx={{
-                type: "password",
-                required: true,
-              }}
-            />
-
+            {Object.keys(formValues).map((formVal) => (
+              <FormField
+                xs={12}
+                //sm={6}
+                label={formVal}
+                fieldName={formValues[formVal][0]}
+                fieldValue={formValues[formVal][1]}
+                autoComplete={formValues[formVal][2]}
+                inputProps={formValues[formVal][3]}
+                sx={formValues[formVal][4]}
+              />
+            ))}
             <Grid item xs={12}>
               <CountrySelect id="country" sendToForm={getCountry} />
             </Grid>
@@ -215,7 +174,13 @@ export default function SignUp() {
               <br />
             </Grid>
           </Grid>
-          <ButtonsContainer />
+          <FormPageButtons
+            primaryButtonText={"Sign Up"}
+            linkText={"Already have an account? Sign In"}
+            navPathKey={"sign in"}
+            buttonColor={"success"}
+          />
+          {/* <ButtonsContainer /> */}
         </Box>
       </Box>
       <Copyright sx={{ mt: 5 }} />
@@ -223,3 +188,91 @@ export default function SignUp() {
     // </ThemeProvider>
   );
 }
+
+// const showImage = () => {
+//   let imgBefore = btoa(webRef.current.getScreenshot(), "Base64");
+//   setEncodeImg(imgBefore);
+//   let imgAfter = atob(imgBefore, "Base64");
+//   setImg(imgAfter);
+//   setImg(webRef.current.getScreenshot());
+//   console.log(imgBefore);
+//   console.log(imgAfter);
+//   console.log(webRef.current.getScreenshot())
+//   console.log("shoot");
+// };
+
+// const ButtonsContainer = () => (
+//   <div className="buttonsContainer">
+//     <Button
+//       type="submit"
+//       fullWidth
+//       variant="contained"
+//       sx={{ mt: 3, mb: 2 }}
+//       color="success"
+//     >
+//       Sign Up
+//     </Button>
+//     <Grid container>
+//       <Grid item>
+//         <Button onClick={() => navigate(navPaths["sign in"])} variant="body2">
+//           <Link>Already have an account? Sign In</Link>
+//         </Button>
+//       </Grid>
+//     </Grid>
+//   </div>
+// );
+
+/* <FormField
+      xs={12}
+      sm={6}
+      label="First Name"
+      autoComplete="given-name"
+      fieldName="firstName"
+      fieldValue={user.FirstName}
+      inputProps={{
+        minlength: 2,
+        maxlength: 15,
+      }}
+      sx={{
+        autoFocus: true,
+        required: true,
+      }}
+    />
+    <FormField
+      xs={12}
+      sm={6}
+      label="Last Name"
+      autoComplete="family-name"
+      fieldName="lastName"
+      fieldValue={user.LastName}
+      inputProps={{
+        minlength: 2,
+        maxlength: 15,
+      }}
+      sx={{ required: true }}
+    />
+    <FormField
+      xs={12}
+      label="Email Address"
+      autoComplete="email"
+      fieldName="email"
+      fieldValue={user.Email}
+      inputProps={{
+        pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
+      }}
+      sx={{ required: true }}
+    />
+
+    <FormField
+      xs={12}
+      label="Password"
+      autoComplete="new-password"
+      fieldName="password"
+      inputProps={{
+        minlength: 6,
+      }}
+      sx={{
+        type: "password",
+        required: true,
+      }}
+    /> */

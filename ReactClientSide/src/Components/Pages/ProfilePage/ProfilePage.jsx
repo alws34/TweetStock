@@ -24,6 +24,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import FormPageButtons from "../../Shared/Forms/FormPageButtons";
 
 //import CountrySelect from "../Functional Components/CountrySelect";
 
@@ -137,31 +138,30 @@ export default function ProfilePage() {
     });
   };
 
-  const ButtonsContainer = () => {
-    return (
-      <div className="buttonsContainer">
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
-          color="success"
-        >
-          Update Profile
-        </Button>
-        <Grid container justifyContent="flex-end">
-          <Grid item>
-            <Button
-              onClick={() => navigate(navPaths["home"])}
-              variant="contained"
-              color="secondary"
-            >
-              Home Page
-            </Button>
-          </Grid>
-        </Grid>
-      </div>
-    );
+  const formValues = {
+    //label: [fieldName, fieldValue, autoComplete, inputProps, sx]
+    "First Name": [
+      "firstName",
+      user.FirstName,
+      "given-name",
+      { minLength: 2, maxLength: 15 },
+      { autoFocus: true },
+    ],
+    "Last Name": [
+      "lastName",
+      user.LastName,
+      "family-name",
+      { minLength: 2, maxLength: 15 },
+      "",
+    ],
+    Email: ["email", user.Email, "email", { readOnly: true }, ""],
+    Password: [
+      "password",
+      "",
+      "new-password",
+      { minLength: 6 },
+      { type: "password" },
+    ],
   };
 
   return (
@@ -177,59 +177,18 @@ export default function ProfilePage() {
           </Typography>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
-              <FormField
-                xs={12}
-                sm={6}
-                label="First Name"
-                autoComplete="given-name"
-                fieldName="firstName"
-                fieldValue={user.FirstName}
-                inputProps={{
-                  minlength: 2,
-                  maxlength: 15,
-                }}
-                sx={{
-                  autoFocus: true,
-                }}
-              />
-
-              <FormField
-                xs={12}
-                sm={6}
-                label="Last Name"
-                autoComplete="family-name"
-                fieldName="lastName"
-                fieldValue={user.LastName}
-                inputProps={{
-                  minlength: 2,
-                  maxlength: 15,
-                }}
-              />
-
-              <FormField
-                xs={12}
-                label="Email"
-                autoComplete="email"
-                fieldName="email"
-                fieldValue={user.Email}
-                inputProps={{
-                  readOnly: true,
-                }}
-              />
-
-              <FormField
-                xs={12}
-                label="Password"
-                autoComplete="new-password"
-                fieldName="password"
-                inputProps={{
-                  minlength: 6,
-                }}
-                sx={{
-                  type: "password",
-                }}
-              />
-
+              {Object.keys(formValues).map((formVal) => (
+                <FormField
+                  xs={12}
+                  //sm={6}
+                  label={formVal}
+                  fieldName={formValues[formVal][0]}
+                  fieldValue={formValues[formVal][1]}
+                  autoComplete={formValues[formVal][2]}
+                  inputProps={formValues[formVal][3]}
+                  sx={formValues[formVal][4]}
+                />
+              ))}
               {/* <Grid item xs={12}>
                 <CountrySelect id="country" sendToForm={getCountry} />
               </Grid> */}
@@ -239,7 +198,13 @@ export default function ProfilePage() {
                 <br />
               </Grid>
             </Grid>
-            <ButtonsContainer />
+            <FormPageButtons
+              primaryButtonText={"Update Profile"}
+              linkText={"Return To Home Page"}
+              navPathKey={"home"}
+              buttonColor={"success"}
+            />
+            {/* <ButtonsContainer /> */}
           </Box>
         </Box>
         <Copyright sx={{ mt: 5 }} />
@@ -247,3 +212,83 @@ export default function ProfilePage() {
     </ThemeProvider>
   );
 }
+
+// const ButtonsContainer = () => {
+//   return (
+//     <div className="buttonsContainer">
+//       <Button
+//         type="submit"
+//         fullWidth
+//         variant="contained"
+//         sx={{ mt: 3, mb: 2 }}
+//         color="success"
+//       >
+//         Update Profile
+//       </Button>
+//       <Grid container justifyContent="flex-end">
+//         <Grid item>
+//           <Button
+//             onClick={() => navigate(navPaths["home"])}
+//             variant="body2"
+//             //color="secondary"
+//           >
+//             Home Page
+//           </Button>
+//         </Grid>
+//       </Grid>
+//     </div>
+//   );
+// };
+
+// <FormField
+//   xs={12}
+//   sm={6}
+//   label="First Name"
+//   autoComplete="given-name"
+//   fieldName="firstName"
+//   fieldValue={user.FirstName}
+//   inputProps={{
+//     minlength: 2,
+//     maxlength: 15,
+//   }}
+//   sx={{
+//     autoFocus: true,
+//   }}
+// />
+
+// <FormField
+//   xs={12}
+//   sm={6}
+//   label="Last Name"
+//   autoComplete="family-name"
+//   fieldName="lastName"
+//   fieldValue={user.LastName}
+//   inputProps={{
+//     minlength: 2,
+//     maxlength: 15,
+//   }}
+// />
+
+// <FormField
+//   xs={12}
+//   label="Email"
+//   autoComplete="email"
+//   fieldName="email"
+//   fieldValue={user.Email}
+//   inputProps={{
+//     readOnly: true,
+//   }}
+// />
+
+// <FormField
+//   xs={12}
+//   label="Password"
+//   autoComplete="new-password"
+//   fieldName="password"
+//   inputProps={{
+//     minlength: 6,
+//   }}
+//   sx={{
+//     type: "password",
+//   }}
+// />
