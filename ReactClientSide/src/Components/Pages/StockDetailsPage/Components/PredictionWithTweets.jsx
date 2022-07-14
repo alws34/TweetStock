@@ -5,23 +5,34 @@ import PredTable from "./PredictionStatsTable/PredictionTable";
 import Prediction from "../../../Shared/Prediction/Prediction";
 
 export default function PredictionWithTweets(props) {
-  const flaskResponse = props.flaskResponse;
+  const predictionResponse = props.predictionResponse;
   const ticker = props.ticker;
+  var tweetsArr = [];
+  if (predictionResponse) {
+    Object.keys(predictionResponse["Tweets"]).forEach((key, index) => {
+      var tweet = predictionResponse["Tweets"][key];
+      tweetsArr.push(tweet);
+    });
+  }
   return (
     <div className="predictionWithTweets">
       <div className="predictionContainer">
         <Prediction
-          isLoading={flaskResponse === null}
+          isLoading={predictionResponse === null}
           size={"400px"}
           ticker={ticker}
           dir={
-            flaskResponse && flaskResponse["prediction"] === 1 ? "up" : "down"
+            predictionResponse &&
+            predictionResponse["Prediction"]["prediction"] === 1
+              ? "up"
+              : "down"
           }
         ></Prediction>
       </div>
       <div className="tweetsAndTableContainer">
-        {flaskResponse &&
-          flaskResponse["tweets"].map((tweet) => {
+        {tweetsArr &&
+          tweetsArr.length > 0 &&
+          tweetsArr.map((tweet) => {
             return (
               <div className="tweetsAndTableContainer">
                 <div>

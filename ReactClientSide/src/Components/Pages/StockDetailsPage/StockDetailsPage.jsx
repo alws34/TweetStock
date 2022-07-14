@@ -15,28 +15,64 @@ import LoggedUserFeatures from "./Components/LoggedUserFeatures";
 import PredictionWithTweets from "./Components/PredictionWithTweets";
 import "../../Configs/Global";
 import { getNameFromTicker } from "../../Shared/NavBar/Components/NavSearch/TickerOptions";
+import { ref, onValue, push } from "firebase/database";
+import { getRealTimeDBRef } from "../../Configs/FirebaseConfig";
 
 export default function StockDetailsPage() {
   const [stockData, setStockData] = useState(null);
-  const [flaskResponse, setFlaskResponse] = useState(null);
+  const [predictionResponse, setPredictionResponse] = useState(null);
 
   const isLoggedIn = isLoggedUser();
   let ticker = useLocation().state.ticker;
   let tickerDisplayName = getNameFromTicker(ticker);
   let data = useLocation().state.data;
 
-  const fetchFlaskStockPrediction = (ticker) => {
-    // GET
-    //console.log("FETCHING FROM FLASK", ticker);
-    fetch(apiUrlFlask + `/getPrediction?ticker=${ticker}`)
-      .then((res) => {
-        //console.log("Flask!", res);
-        return res.json();
-      })
-      .then((res) => {
-        //console.log("Flask!", res);
-        setFlaskResponse(res);
-      });
+  const getLatestUpdate = (res) => {
+    // should return the last updated db object
+    //(res -> firebase db result json of single stock containing dates)
+
+    // opt 1- get last key
+    var lastKey;
+    for (var key in res) {
+      if (res.hasOwnProperty(key)) {
+        lastKey = key;
+      }
+    }
+    return res[lastKey];
+
+    //opt 2 - get highest date
+    //var highest = res[Object.keys(res).sort().pop()];
+    //return highest;
+  };
+
+  const fetchLastPrediction = () => {
+    console.log(ticker);
+    if (!ticker) return false;
+    let t = ticker.toUpperCase();
+    if (
+      t !== "TSLA" &&
+      t !== "AMZN" &&
+      t !== "AAPL" &&
+      t !== "GOOG" &&
+      t !== "MSFT"
+    ) {
+      return false;
+    } else {
+      // Attach an asynchronous callback to read the data at our posts reference
+      const dbRef = getRealTimeDBRef("/PredictionDB/" + t);
+      onValue(
+        dbRef,
+        (snapshot) => {
+          let res = snapshot.val();
+          let latestUpdate = getLatestUpdate(res);
+          console.log(latestUpdate);
+          setPredictionResponse(latestUpdate);
+        },
+        (errorObject) => {
+          console.log("The read failed: " + errorObject.name);
+        }
+      );
+    }
   };
 
   const fetchStockDetails = () => {
@@ -72,6 +108,7 @@ export default function StockDetailsPage() {
 
     //console.log("use effect", ticker);
     data ? setStockData(data) : fetchStockDetails();
+    fetchLastPrediction();
 
     //fetchFlaskStockPrediction(ticker);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,7 +143,10 @@ export default function StockDetailsPage() {
             </Col>
           </Row>
           {isLoggedIn && <LoggedUserFeatures ticker={ticker} />}
-          <PredictionWithTweets ticker={ticker} flaskResponse={flaskResponse} />
+          <PredictionWithTweets
+            ticker={ticker}
+            predictionResponse={predictionResponse}
+          />
         </div>
       )}
     </div>
