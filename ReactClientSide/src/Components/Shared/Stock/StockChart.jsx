@@ -22,7 +22,7 @@ export default function StockChart(props) {
 
   const chart_options = {
     theme: {
-      mode: global.config.theme,
+      mode: global.config.theme, //dark
       //palette: "palette1",
     },
     chart: {

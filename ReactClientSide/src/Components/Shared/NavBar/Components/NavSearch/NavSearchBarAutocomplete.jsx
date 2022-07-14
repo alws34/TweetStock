@@ -4,21 +4,22 @@ import TextField from "@material-ui/core/TextField";
 import { tickerOptions, capitalizeFirstLetters } from "./TickerOptions";
 
 export default function NavSearchBarAutocomplete(props) {
-  const getTickerFromSearchQuery = (val) => {
-    //console.log(searchQuery);
-    // if (searchQuery === undefined || searchQuery === null) {
-    //   return undefined;
-    // }
-    return typeof val === "string" ? val : val.ticker;
-  };
-
   return (
     <div>
       <Autocomplete
         id="navSearch"
-        options={tickerOptions}
-        //value={searchQuery}
-        getOptionLabel={(option) => option.ticker}
+        clearOnEscape={true}
+        autoSelect={true}
+        //options={tickerOptions}
+        options={tickerOptions.sort(
+          (a, b) => -b.ticker[0].localeCompare(a.ticker[0])
+        )}
+        groupBy={(option) => option.ticker[0].toUpperCase()}
+        //value={tickerOptions[0]}
+        getOptionLabel={(option) => option.title + " - " + option.ticker}
+        onChange={(event, newOption) => {
+          props.setSearchQuery(newOption.ticker);
+        }}
         renderOption={(props, option) => (
           <Box {...props} component="li">
             {capitalizeFirstLetters(option.title)} - {option.ticker}
@@ -30,14 +31,21 @@ export default function NavSearchBarAutocomplete(props) {
             label="Search Stocks..."
             inputProps={{
               ...params.inputProps,
-              autoComplete: "new-password", // disable autocomplete and autofill
+              autoComplete: "off", // disable autocomplete and autofill
             }}
             style={{ width: "100%" }}
-            onChange={props.setSearchQuery(
-              getTickerFromSearchQuery(params.inputProps.value)
-            )}
+            // onChange={props.setSearchQuery(
+            //   getTickerFromSearchQuery(params.inputProps.value)
+            // )}
           />
         )}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            // Prevent's default 'Enter' behavior.
+            event.defaultMuiPrevented = true;
+            // your handler code
+          }
+        }}
       />
     </div>
   );
