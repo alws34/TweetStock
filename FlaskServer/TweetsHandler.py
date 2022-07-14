@@ -147,8 +147,7 @@ class TweetsHandler:
                         tweet=tweet, t_metrics=t_metrics, u_data=users_data))
                 except TwitterRequestError as tre_users:
                     if tre_users.status_code == self.responses['Too Many Requests']:
-                        Helper.logger(
-                            f"Tweeter Status code Returned {users_result['status']}", 'SLEEPING....')
+                        Helper.logger(f"Tweeter Status code Returned {users_result['status']} SLEEPING....")
                         sleep(SLEEP_TIME)
                         Helper.Woke_Up()
                         continue

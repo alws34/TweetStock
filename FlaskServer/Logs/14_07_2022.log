@@ -1,0 +1,28 @@
+16:00:37::		Woke up @16:00:37
+
+16:17:38::		Market is closed.
+
+16:17:38::		sleeping for 30.0 minutes -- 0.5 hours
+
+16:30:38::		Woke up @16:30:38
+
+16:32:27::		Filtered all users @filter_users()
+
+16:35:27::		TSM.get_prediction says: Reached max iterations threshold
+
+16:35:31::		Going to sleep for 900 seconds (15.0 minutes)... @16:35:31
+
+16:50:31::		Woke up @16:50:31
+
+16:56:05::		TSM.get_prediction says: Reached max iterations threshold
+
+16:56:13::		Going to sleep for 900 seconds (15.0 minutes)... @16:56:13
+
+17:13:09::		Filtered all tweets @filter_tweets()
+
+17:14:56::		Filtered all tweets @filter_tweets()
+
+17:16:46::		TSM.get_prediction says: Reached max iterations threshold
+
+17:16:49::		Going to sleep for 900 seconds (15.0 minutes)... @17:16:49
+

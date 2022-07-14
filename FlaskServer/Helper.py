@@ -75,7 +75,7 @@ def write_to_log(msg):
 def get_prefix_path():
     if os_name == 'nt':
         delimiter = '\\'
-        prefix = f'{getcwd()}\\'
+        prefix = 'C:\\Users\\alws3\\Desktop\\tweetstock\\FlaskServer\\'
     elif os_name == 'posix':
         delimiter = '/'
         prefix = '/home/pi/FinalProject/FlaskServer/'

@@ -22,7 +22,7 @@ updated_db = {
 
 
 def init_Firebase_config():
-    with open(f'{prefix}{delimiter}CONFIGS{delimiter}firebaseconfig.json', 'r') as firebase_conf:
+    with open(r"C:\Users\alws3\Desktop\tweetstock\FlaskServer\CONFIGS\firebaseconfig.json", 'r') as firebase_conf:
         firebase_config = load_json(firebase_conf)
     return firebase_config
 
@@ -36,13 +36,13 @@ def post_to_FireBase(tables_dict, date):
         for table_name, table_dict in tables_dict.items():
             for stock_name, stock_dict in table_dict.items():
                 if type(stock_dict) == dict:  # stock data
-                    db.child(date).child(table_name).child(
+                    db.child("PredictionDB").child(date).child(table_name).child(
                         stock_name).update(stock_dict)
                 elif type(stock_dict) == list:  # stock tweets
                     clear_table(table_name, date, stock_name)
                     for item in stock_dict:
                         if type(item) == dict and 'tweet_id' in item.keys():
-                            db.child(date).child(table_name).child(stock_name).child(
+                            db.child("PredictionDB").child(date).child(table_name).child(stock_name).child(
                                 item['tweet_id']).set(item)
                         else:
                             return None
@@ -117,16 +117,19 @@ def GoingToSleep(time, custom_msg=''):
     Helper.Woke_Up()
 
 
-def sleep_until_market_opens(start_hour=16, start_min=30):
+def sleep_until_market_opens():
+    start_hour, start_min = 16, 30
     now = Helper.get_date_time()
-    #now = {'hour': 1, 'min': 2}
     start_hour_in_sec = (start_hour * 60 + start_min) * 60
     now_in_sec = (now.hour * 60 + now.minute) * 60
     if now_in_sec < start_hour_in_sec:
+        Helper.logger('Market is closed.')
         GoingToSleep(start_hour_in_sec - now_in_sec,
                      custom_msg=f'sleeping for {(start_hour_in_sec - now_in_sec)/60} minutes -- {(start_hour_in_sec - now_in_sec)/60/60} hours')
+        
     else:
         one_day_in_sec = 24 * 60 * 60
+        Helper.logger('Market is closed.')
         GoingToSleep(time=one_day_in_sec - (now_in_sec - start_hour_in_sec))
 
 
@@ -178,7 +181,7 @@ def Main():
                     time=sleep_time, custom_msg=f'DB_Worker.Main loop says:\tGoing to sleep for {sleep_time} seconds ({sleep_time/60} minutes)... @{Helper.get_date_time_stringify("%H:%M:%S")}')
             else:
                 Get_Real_Close()
-                sleep_until_market_opens(start_hour=16, start_min=0)
+                sleep_until_market_opens()
 
 
 # ----------------------------------------------------------------------------------------------- #

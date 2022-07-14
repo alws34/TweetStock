@@ -1,2 +1,49 @@
 00:51:38::		Woke up @00:51:38
 
+19:24:48::		Filtered all users @filter_users()
+
+19:28:23::		TSM.get_prediction says: Reached max iterations threshold
+
+19:28:26::		Going to sleep for 900 seconds (15.0 minutes)... @19:28:26
+
+19:52:30::		TSM.get_prediction says: Reached max iterations threshold
+
+19:52:33::		Going to sleep for 900 seconds (15.0 minutes)... @19:52:33
+
+20:07:33::		Woke up @20:07:33
+
+20:12:51::		TSM.get_prediction says: Reached max iterations threshold
+
+20:13:03::		Going to sleep for 900 seconds (15.0 minutes)... @20:13:03
+
+20:28:03::		Woke up @20:28:03
+
+20:30:24::		Filtered all tweets @filter_tweets()
+
+20:32:05::		TSM.get_prediction says: Reached max iterations threshold
+
+20:32:18::		Going to sleep for 900 seconds (15.0 minutes)... @20:32:18
+
+20:47:18::		Woke up @20:47:18
+
+20:51:28::		TSM.get_prediction says: Reached max iterations threshold
+
+20:51:41::		Going to sleep for 900 seconds (15.0 minutes)... @20:51:41
+
+21:06:41::		Woke up @21:06:41
+
+21:11:03::		TSM.get_prediction says: Reached max iterations threshold
+
+21:11:18::		Going to sleep for 900 seconds (15.0 minutes)... @21:11:18
+
+21:26:18::		Woke up @21:26:18
+
+21:26:18::		DB_Worker.Main loop says:	Going to sleep for 7200 seconds (120.0 minutes)... @21:26:18
+
+23:26:18::		Woke up @23:26:18
+
+23:26:20::		nyse.open_at_time says:
+The provided timestamp is not covered by the schedule  ---ValueError@is_valid_day
+
+23:26:37::		Going to sleep for 59640 seconds (994.0 minutes)... @23:26:37
+
