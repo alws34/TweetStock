@@ -33,12 +33,13 @@ export default function NavSearchBar(props) {
   return (
     <Search
       sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingLeft: 0.5,
-        paddingRight: 0.5,
+        //display: "flex",
+        //justifyContent: "space-around",
+        justifyContent: "center",
+        alignItems: "top",
+        padding: 1,
         marginLeft: 2,
+        paddingTop: 0,
       }}
     >
       <NavSearchBarAutocomplete
@@ -47,7 +48,13 @@ export default function NavSearchBar(props) {
         setSearchQuery={autoCompleteInputHandler}
         inputProps={{ "aria-label": "search" }}
         input={{ paddingLeft: 0 }}
-        sx={{ input: { paddingLeft: 0 }, width: "100%", paddingLeft: 1 }}
+        sx={{
+          input: { paddingLeft: 0 },
+          width: "100%",
+          paddingLeft: 0,
+          marginRight: 0,
+          paddingBottom: 2,
+        }}
         autoHighlight
       />
 
