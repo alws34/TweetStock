@@ -22,6 +22,9 @@ const Search = styled("div")(({ theme }) => ({
 export default function NavSearchBar(props) {
   const [searchQuery, setSearchQuery] = useState(null);
 
+  useEffect(() => searchQuery && props.onSubmit(searchQuery), [searchQuery]);
+  //searchQuery && props.onSubmit(searchQuery);
+
   const autoCompleteInputHandler = (e) => {
     setSearchQuery(e);
     console.log(e);
@@ -48,7 +51,7 @@ export default function NavSearchBar(props) {
         autoHighlight
       />
 
-      <SearchIcon
+      {/* <SearchIcon
         onClick={() => props.onSubmit(searchQuery)}
         onMouseEnter={(e) => {
           e.target.style.background = "rgb(255, 255, 255, 0.5)";
@@ -57,7 +60,7 @@ export default function NavSearchBar(props) {
         onMouseLeave={(e) => {
           e.target.style.background = "none";
         }}
-      />
+      /> */}
     </Search>
   );
 }
