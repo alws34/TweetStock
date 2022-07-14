@@ -27,12 +27,14 @@ body {
   background: linear-gradient(to bottom, #000, #000 60%, #fff 60%, #fff 100%);
   background-clip: text;
   -webkit-background-clip: text;
-  color: transparent;
+  /* color: transparent; */
   background-repeat: no-repeat;
   /* transition: background 0.2s ease-out;
   white-space: nowrap; */
-  color: #356cc5;
+  color: #3b8ad9 /*#356cc5*/;
   max-width: 100%;
+
+  font-weight: bolder;
 }
 
 @media screen and (min-width: 800px) {

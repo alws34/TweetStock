@@ -15,8 +15,11 @@ export default function StockDetails(props) {
       <Box
         className="BoxItem"
         sx={{
-          bgcolor: global.config.theme === "dark" ? "#424242" : "#d3dbe8",
-          color: global.config.theme === "dark" ? "white" : "#black",
+          bgcolor:
+            global.config.theme === "dark"
+              ? global.config.darkBG
+              : global.config.lightBG,
+          color: global.config.theme === "dark" ? "white" : "black",
           p: 0.4,
           m: 0.4,
           marginLeft: 0,

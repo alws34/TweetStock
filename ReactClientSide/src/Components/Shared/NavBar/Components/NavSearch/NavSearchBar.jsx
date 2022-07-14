@@ -33,10 +33,6 @@ export default function NavSearchBar(props) {
   return (
     <Search
       sx={{
-        //display: "flex",
-        //justifyContent: "space-around",
-        justifyContent: "center",
-        alignItems: "top",
         padding: 1,
         marginLeft: 2,
         paddingTop: 0,

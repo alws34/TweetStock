@@ -3,6 +3,7 @@ import { Button, Typography } from "@mui/material";
 import ReadMoreIcon from "@mui/icons-material/ReadMore";
 import { navPaths } from "../../../Configs/navPaths";
 import { useNavigate } from "react-router-dom";
+import "../StockChartStyles.css"
 
 export default function StockChartPanel(props) {
   const navigate = useNavigate();
@@ -45,12 +46,11 @@ export default function StockChartPanel(props) {
 
   return (
     <div
+      className="stockChartPanelContainer"
       style={{
         textAlign: "center",
         display: "flex",
         justifyContent: "space-around",
-
-        //flexDirection: "column",
       }}
     >
       <Time />
