@@ -16,20 +16,22 @@ export default function PredictionWithTweets(props) {
   }
   return (
     <div className="predictionWithTweets">
-      <div className="predictionContainer">
-        <Prediction
-          isLoading={predictionResponse === null}
-          size={"400px"}
-          ticker={ticker}
-          dir={
-            predictionResponse &&
-            predictionResponse["Prediction"]["prediction"] === 1
-              ? "up"
-              : "down"
-          }
-        ></Prediction>
-      </div>
-      <div className="tweetsAndTableContainer">
+      {predictionResponse === false ? (
+        "no pred"
+      ) : (
+        <div className="predictionContainer">
+          <Prediction
+            isLoading={predictionResponse === null}
+            size={"400px"}
+            ticker={ticker}
+            dir={
+              predictionResponse &&
+              predictionResponse["Prediction"]["prediction"] === 1
+                ? "up"
+                : "down"
+            }
+          ></Prediction>
+          {/* <div className="tweetsAndTableContainer">
         {tweetsArr &&
           tweetsArr.length > 0 &&
           tweetsArr.map((tweet) => {
@@ -44,7 +46,9 @@ export default function PredictionWithTweets(props) {
               </div>
             );
           })}
-      </div>
+      </div> */}
+        </div>
+      )}
     </div>
   );
 }

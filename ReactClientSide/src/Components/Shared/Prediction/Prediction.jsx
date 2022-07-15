@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import Lottie from "react-lottie";
 import MovingComponent from "react-moving-text";
-import upChart from "./Images/up_chart_v1.json";
-import downChart from "./Images/down_chart_v1.json";
+import upChart from "./Images/up_chart_v2.json";
+import downChart from "./Images/down_chart_v2.json";
 import hat_ph from "./Images/pred_ph_hat.json";
 
 export default function Prediction(props) {
   //const [isLoading, setIsLoading] = useState(props.dir === null ? true : false);
 
   //const pred_here = () => setIsLoading(false);
+  const pred_prefix_text = `${props.ticker} Prediction`;
 
   const Loading = (props) => {
     const loading_lottie_opts = {
@@ -21,11 +22,14 @@ export default function Prediction(props) {
       },
     };
     return (
-      <Lottie
-        options={loading_lottie_opts}
-        height={props.height}
-        width={props.width}
-      />
+      <MovingComponent>
+        <Lottie
+          options={loading_lottie_opts}
+          height={props.height}
+          width={props.width}
+        />
+        <p style={{ margin: 0 }}>{pred_prefix_text}...</p>
+      </MovingComponent>
     );
   };
 
@@ -67,8 +71,10 @@ export default function Prediction(props) {
           fillmode="forward"
         >
           <Lottie options={symbol_lottie_opts} width={props.width} />
-          <p style={{ margin: 0 }}>{props.dir}</p>
         </MovingComponent>
+        <p style={{ margin: 0 }}>
+          {pred_prefix_text + " - " + props.dir.toUpperCase()}
+        </p>
       </div>
     );
   };
@@ -81,7 +87,7 @@ export default function Prediction(props) {
         dsplay: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: props.size,
+        //height: props.size - 100,
         width: props.size,
       }}
     >

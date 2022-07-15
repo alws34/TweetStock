@@ -11,10 +11,11 @@ export default function NavSearchBarAutocomplete(props) {
         id="navSearch"
         clearOnEscape={true}
         autoSelect={true}
-        options={tickerOptions.sort(
-          (a, b) => -b.ticker[0].localeCompare(a.ticker[0])
-        )}
-        groupBy={(option) => option.ticker[0].toUpperCase()}
+        options={tickerOptions}
+        // options={tickerOptions.sort(
+        //   (a, b) => -b.ticker[0].localeCompare(a.ticker[0])
+        // )}
+        // groupBy={(option) => option.ticker[0].toUpperCase()}
         getOptionLabel={(option) => option.title + " - " + option.ticker}
         onChange={(event, newOption) => {
           props.setSearchQuery(newOption.ticker);
