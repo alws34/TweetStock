@@ -39,27 +39,24 @@ export default function StockDetailsPage() {
       }
     }
     return res[lastKey];
-
-    //opt 2 - get highest date
-    //var highest = res[Object.keys(res).sort().pop()];
-    //return highest;
   };
 
   const fetchLastPrediction = () => {
     console.log(ticker);
     if (!ticker) return false;
-    let t = ticker.toUpperCase();
+    let upper_case_ticker = ticker.toUpperCase();
     if (
-      t !== "TSLA" &&
-      t !== "AMZN" &&
-      t !== "AAPL" &&
-      t !== "GOOG" &&
-      t !== "MSFT"
+      upper_case_ticker !== "TSLA" &&
+      upper_case_ticker !== "AMZN" &&
+      upper_case_ticker !== "AAPL" &&
+      upper_case_ticker !== "GOOG" &&
+      upper_case_ticker !== "MSFT"
     ) {
+      setPredictionResponse(false);
       return false;
     } else {
       // Attach an asynchronous callback to read the data at our posts reference
-      const dbRef = getRealTimeDBRef("/PredictionDB/" + t);
+      const dbRef = getRealTimeDBRef("/PredictionDB/" + upper_case_ticker);
       onValue(
         dbRef,
         (snapshot) => {
@@ -105,7 +102,7 @@ export default function StockDetailsPage() {
 
   useEffect(() => {
     console.clear();
-
+    setPredictionResponse(null);
     //console.log("use effect", ticker);
     data ? setStockData(data) : fetchStockDetails();
     fetchLastPrediction();
@@ -121,6 +118,10 @@ export default function StockDetailsPage() {
         <LoadingCircle />
       ) : (
         <div>
+          <PredictionWithTweets
+            ticker={ticker}
+            predictionResponse={predictionResponse}
+          />
           <Row xs={1} md={2}>
             <Col style={{ flexGrow: 0, marginTop: 10 }}>
               <StockChart
@@ -143,10 +144,6 @@ export default function StockDetailsPage() {
             </Col>
           </Row>
           {isLoggedIn && <LoggedUserFeatures ticker={ticker} />}
-          <PredictionWithTweets
-            ticker={ticker}
-            predictionResponse={predictionResponse}
-          />
         </div>
       )}
     </div>
