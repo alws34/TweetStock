@@ -1,0 +1,17 @@
+00:00:40::		TSM.get_prediction says: Reached max iterations threshold
+
+00:00:54::		Going to sleep for 900 seconds (15.0 minutes)... @00:00:54
+
+00:15:54::		Woke up @00:15:54
+
+00:15:54::		DB_Worker.Main loop says:	Going to sleep for 7200 seconds (120.0 minutes)... @00:15:54
+
+02:15:54::		Woke up @02:15:54
+
+02:15:56::		nyse.open_at_time says:
+The provided timestamp is not covered by the schedule  ---ValueError@is_valid_day
+
+02:16:12::		Market is closed.
+
+02:16:12::		sleeping for 854.0 minutes -- 14.233333333333333 hours
+

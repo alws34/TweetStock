@@ -21,6 +21,6 @@
   },
   "peacock.color": "1e293b",
   "python.analysis.extraPaths": [
-    "./FlaskServer"
+    "./DataWork"
   ]
 }
