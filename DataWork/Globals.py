@@ -17,7 +17,7 @@ SCALING = 'min_max'
 TWITTER_RESPONSE_CODES = GET_TWITTER_CODES()
 delimiter, prefix = get_prefix_path()
 INCLUDE_REPLIES = True
-MAX_UPDATE_HOUR = 9
+MAX_UPDATE_HOUR = 21
 
 
 MT_SCALING_PARAMS = {
