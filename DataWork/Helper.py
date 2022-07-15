@@ -75,10 +75,10 @@ def write_to_log(msg):
 def get_prefix_path():
     if os_name == 'nt':
         delimiter = '\\'
-        prefix = 'C:\\Users\\alws3\\Desktop\\tweetstock\\FlaskServer\\'
+        prefix = f'{getcwd()}\\DataWork\\'
     elif os_name == 'posix':
         delimiter = '/'
-        prefix = '/home/pi/FinalProject/FlaskServer/'
+        prefix = '/home/pi/FinalProject/DataWork/'
 
     return delimiter, prefix
 
@@ -133,8 +133,8 @@ def get_user_data_paths(user):
         'alon': {
             'users_path': "D:\\Google Drive\\Alon\\לימודים\\Final Project\\Data\\Self Collected\\",
             'user_path2': 'D:\\Google Drive\\Alon\\לימודים\\Final Project\\Data\\Self Collected\\',
-            'Networks_Save_Path': 'D:\\Google Drive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\Networks\\',
-            'initialized_df_path': f'D:\\Google Drive\\Alon\\לימודים\\TweetStockApp\\FlaskServer\\Data\\CSVs\\{initialized_df_csv_file}'
+            'Networks_Save_Path': 'D:\\Google Drive\\Alon\\לימודים\\TweetStockApp\\DataWork\\Data\\Networks\\',
+            'initialized_df_path': f'D:\\Google Drive\\Alon\\לימודים\\TweetStockApp\\DataWork\\Data\\CSVs\\{initialized_df_csv_file}'
         },
         'pi': {
             'users_path': f"{prefix}Data/CSVs/Initial_Data{delimiter}",

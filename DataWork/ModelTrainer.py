@@ -480,7 +480,7 @@ class ModelTrainer:
 
     def run_auto_retraining(self, iterations_for_each_stock=DEFAULT_RETRAINING_ITERATIONS, new_test_rand=False):
         # fill in with model param paths for each stock!
-        root_dir = '/home/pi/FinalProject/FlaskServer/SelectedModels'
+        root_dir = '/home/pi/FinalProject/DataWork/SelectedModels'
         models_params_tickers = ['AMZN', 'AAPL', 'GOOG', 'MSFT', 'TSLA']
         delimiter, prefix = Helper.get_prefix_path()
 
@@ -524,19 +524,19 @@ if __name__ == '__main__':
     delimiter, prefix = Helper.get_prefix_path()
     user = 'pi'  # availables: 'alon','pi'
     try_folder_name = 'final_01_07'
-    #inited_df_csv_path = '/home/pi/FinalProject/FlaskServer/Data/CSVs/initialized_df.csv'
+    #inited_df_csv_path = '/home/pi/FinalProject/DataWork/Data/CSVs/initialized_df.csv'
     save_path = f"{Helper.get_user_data_paths(user=user)['Networks_Save_Path']}{try_folder_name}{delimiter}"
     mt = ModelTrainer(user=user, saving_path=save_path)
 
     #df = mt.init_data()
-    #Helper.save_df_to_csv(df=df, path='/home/pi/FinalProject/FlaskServer/Data/CSVs/', file_name='new_initialized_df')
+    #Helper.save_df_to_csv(df=df, path='/home/pi/FinalProject/DataWork/Data/CSVs/', file_name='new_initialized_df')
 
     '''Train model (all models from a directory)'''
     # mt.run_auto_training(acc_saving_threshold=0.6)
 
     '''Train specific model'''
     # mt.init_features_from_csv(
-    #     "C:\\Users\\alws3\\Desktop\\AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
+    #     f"{os.getcwd()}\\AAPL_acc_0.6_npast_3_epoch_15_opt_rmsprop_num_2584_params.csv")
     # mt.set_model_epochs(200)
 
     '''Model Comparisons'''
@@ -556,4 +556,4 @@ if __name__ == '__main__':
 
     '''run single train iteration'''
     # mt.train_model()
-    # mt.save(saving_path='/home/pi/FinalProject/FlaskServer/Data/Networks/test', model_name='testeeeett')
+    # mt.save(saving_path='/home/pi/FinalProject/DataWork/Data/Networks/test', model_name='testeeeett')

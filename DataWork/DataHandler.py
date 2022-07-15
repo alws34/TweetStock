@@ -230,7 +230,7 @@ def mt_get_price_diff(stocks_df):
     temp_stocks.reset_index(drop=True, inplace=True)
 
     Helper.save_dict_to_csv(
-        temp, '/home/pi/FinalProject/FlaskServer/Data/Networks/test/', 'price_diff')
+        temp, '/home/pi/FinalProject/DataWork/Data/Networks/test/', 'price_diff')
 
     return temp_stocks
 
