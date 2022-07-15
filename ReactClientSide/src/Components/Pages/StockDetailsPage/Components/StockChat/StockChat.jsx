@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getLoggedUser } from "../../../../Configs/getLoggedUser";
 import PageHeader from "../../../../Shared/PageHeader/PageHeader";
-import { RealTimeDB } from "../../../../Configs/FirebaseConfig";
+import { getRealTimeDBRef } from "../../../../Configs/FirebaseConfig";
 import { Chat, ChatMessage } from "@progress/kendo-react-conversational-ui";
 import "@progress/kendo-theme-default/dist/all.css";
 import { ref, onValue, push } from "firebase/database";
@@ -27,7 +27,7 @@ export default function StockChat(props) {
   } catch (e) {
     console.log(e);
   }
-  const dbRef = ref(RealTimeDB, ticker);
+  const dbRef = getRealTimeDBRef("/ChatDB/" + ticker);
   const [messages, setMessages] = useState(initialMessages);
   const CustomChatMessage = (props) => (
     <ChatMessage {...props} dateFormat={"t"} />
