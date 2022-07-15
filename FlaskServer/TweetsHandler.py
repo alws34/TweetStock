@@ -105,15 +105,22 @@ class TweetsHandler:
                 resource='tweets/search/recent', params=prms)
         except TwitterRequestError as tre_tweets:
             if tre_tweets.status_code == self.responses['Too Many Requests']:
-                err_msg = f"Tweeter Status code Returned {tre_tweets.status_code}", 'SLEEPING....'
+                err_msg = f"Tweeter Status code Returned {tre_tweets.status_code} SLEEPING...."
                 Helper.logger(err_msg)
                 sleep(SLEEP_TIME)
                 Helper.Woke_Up()
                 return tre_tweets.status_code
-            # else:
-            #     err_msg = f'CODE: {tre_tweets.status_code}'
-            #     Helper.logger(err_msg)
-            #     return None
+
+            if tre_tweets.status_code == self.responses['Service Unavailable']:
+                err_msg = f"Tweeter Status code Returned {tre_tweets.status_code} SLEEPING...."
+                Helper.logger(err_msg)
+                sleep(SLEEP_TIME)
+                Helper.Woke_Up()
+                return tre_tweets.status_code
+            else:
+                err_msg = f'Tweeter Status code Returned {tre_tweets.status_code}'
+                Helper.logger(err_msg)
+                return None
         except TwitterConnectionError as TCE:
             err_msg = f"TwitterConnectionError @fetch_live_tweets_v2 --- {TCE}"
             Helper.logger(err_msg)
@@ -151,6 +158,7 @@ class TweetsHandler:
                         sleep(SLEEP_TIME)
                         Helper.Woke_Up()
                         continue
+
                     elif 'text' in users_result and users_result['text'] in self.responses.keys():
                         return None
                     else:
@@ -189,13 +197,18 @@ class TweetsHandler:
             tweets = self.fetch_live_tweets_v2(start_date=start_date, end_date=end_date, max_results=MAX_TWEETS_RESULTS,
                                                n_past=N_PAST)
         if tweets == None:
-            Helper.logger("Couldnt get tweets @get_tweets()")
+            Helper.logger("Couldnt get tweets @fetch_and_filter_data(), Tweets returned None")
             return None, None
 
         if tweets == self.responses['Service Unavailable']:
             Helper.logger(
-                f"Couldnt get tweets @get_tweets(), Code Returned {self.responses['Service Unavailable']} robably due to TwitterConnection Error. See Log for more details.")
+                f"Couldnt get tweets @fetch_and_filter_data(), Code Returned {self.responses['Service Unavailable']} robably due to TwitterConnection Error.")
             return None, None
+        elif tweets in self.responses.values():
+            Helper.logger(
+                f"Couldnt get tweets @fetch_and_filter_data(), Code Returned {tweets} robably due to TwitterConnection Error.")
+            return None, None
+
 
         new_end_date = Helper.get_min_date(data=tweets)
 

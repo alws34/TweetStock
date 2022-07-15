@@ -26,3 +26,92 @@
 
 17:16:49::		Going to sleep for 900 seconds (15.0 minutes)... @17:16:49
 
+17:31:49::		Woke up @17:31:49
+
+17:35:37::		{'title': 'Service Unavailable', 'detail': 'Service Unavailable', 'type': 'about:blank', 'status': 503}
+
+17:35:37::		MAJOR ERROR!
+CODE SHOULDNT GET HERE @fetch_live_tweets_v2
+
+17:35:37::		Couldnt get tweets @get_tweets()
+
+17:35:37::		TSM.get_prediction says: problem with end date @get_prediction()/while loop (got no tweets when fetched)
+
+18:03:17::		Filtered all tweets @filter_tweets()
+
+18:05:03::		Filtered all users @filter_users()
+
+18:06:49::		TSM.get_prediction says: Reached max iterations threshold
+
+18:06:52::		Going to sleep for 900 seconds (15.0 minutes)... @18:06:52
+
+18:58:46::		Filtered all tweets @filter_tweets()
+
+18:59:39::		TSM.get_prediction says: Reached max iterations threshold
+
+18:59:45::		Going to sleep for 900 seconds (15.0 minutes)... @18:59:45
+
+19:14:45::		Woke up @19:14:45
+
+19:19:52::		TSM.get_prediction says: Reached max iterations threshold
+
+19:20:02::		Going to sleep for 900 seconds (15.0 minutes)... @19:20:02
+
+19:35:02::		Woke up @19:35:02
+
+19:36:45::		Filtered all users @filter_users()
+
+19:39:27::		Filtered all tweets @filter_tweets()
+
+19:39:27::		TSM.get_prediction says: Reached max iterations threshold
+
+19:39:37::		Going to sleep for 900 seconds (15.0 minutes)... @19:39:37
+
+19:54:37::		Woke up @19:54:37
+
+19:59:29::		TSM.get_prediction says: Reached max iterations threshold
+
+19:59:41::		Going to sleep for 900 seconds (15.0 minutes)... @19:59:41
+
+20:14:41::		Woke up @20:14:41
+
+20:17:25::		Filtered all users @filter_users()
+
+20:19:14::		TSM.get_prediction says: Reached max iterations threshold
+
+20:19:27::		Going to sleep for 900 seconds (15.0 minutes)... @20:19:27
+
+20:34:27::		Woke up @20:34:27
+
+20:34:27::		DB_Worker.Main loop says:	Going to sleep for 7200 seconds (120.0 minutes)... @20:34:27
+
+22:34:27::		Woke up @22:34:27
+
+22:39:22::		TSM.get_prediction says: Reached max iterations threshold
+
+22:39:34::		Going to sleep for 900 seconds (15.0 minutes)... @22:39:34
+
+22:54:34::		Woke up @22:54:34
+
+22:59:47::		TSM.get_prediction says: Reached max iterations threshold
+
+22:59:59::		Going to sleep for 900 seconds (15.0 minutes)... @22:59:59
+
+23:14:59::		Woke up @23:14:59
+
+23:17:41::		Filtered all tweets @filter_tweets()
+
+23:19:35::		TSM.get_prediction says: Reached max iterations threshold
+
+23:19:48::		Going to sleep for 900 seconds (15.0 minutes)... @23:19:48
+
+23:34:48::		Woke up @23:34:48
+
+23:40:38::		TSM.get_prediction says: Reached max iterations threshold
+
+23:40:53::		Going to sleep for 900 seconds (15.0 minutes)... @23:40:53
+
+23:55:53::		Woke up @23:55:53
+
+23:59:37::		Filtered all users @filter_users()
+

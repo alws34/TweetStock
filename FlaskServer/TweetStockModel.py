@@ -58,6 +58,7 @@ class TweetStockModel:
             if end_date == None:
                 logger(
                     "TSM.get_prediction says: problem with end date @get_prediction()/while loop (got no tweets when fetched)")
+                start_date, end_date = self.get_n_past_date()   
 
             if tweets != None:
                 for tweet in tweets:
