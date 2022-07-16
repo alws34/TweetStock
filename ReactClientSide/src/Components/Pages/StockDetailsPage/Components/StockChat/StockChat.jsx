@@ -5,6 +5,7 @@ import { getRealTimeDBRef } from "../../../../Configs/FirebaseConfig";
 import { Chat, ChatMessage } from "@progress/kendo-react-conversational-ui";
 import "@progress/kendo-theme-default/dist/all.css";
 import { ref, onValue, push } from "firebase/database";
+import "../../../../Configs/Global";
 
 const bot = {
   id: 0,
@@ -68,6 +69,16 @@ export default function StockChat(props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(attachMsgListener, [ticker]);
 
+  useEffect(() => {
+    global.config.theme === "dark"
+      ? document
+          .querySelector(".popup-content")
+          .classList.add("darkChatContainer")
+      : document
+          .querySelector("#popup-root")
+          .classList.remove("darkChatContainer");
+  }, [global.config.theme]);
+
   let u = getLoggedUser();
   let user = {};
   user["avatarUrl"] = u["Picture"];
@@ -75,9 +86,17 @@ export default function StockChat(props) {
   user["id"] = u["Id"];
 
   return (
-    <div style={{ margin: 10 }}>
+    <div
+      className={
+        global.config.theme === "dark"
+          ? "darkChatContainer"
+          : "whiteChatContainer"
+      }
+      style={{ margin: 10 }}
+    >
       <PageHeader text={`$${ticker} Chat`} />
       <Chat
+        className={global.config.theme === "dark" ? "darkChat" : "whiteChat"}
         user={user}
         messages={messages} //GETMessages
         onMessageSend={AddNewMessage} //SetMessages
