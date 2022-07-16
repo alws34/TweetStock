@@ -109,7 +109,7 @@ class DB_Worker:
 
 
 # -------------------------------Helpers------------------------------------- #
-    def is_valid_day(self,):
+    def is_valid_day(self):
         '''
         This method converts israel's time to NY time, 
         and checks if the current date and time is during stock excange open hours (NYSE & NASDAQ)
