@@ -111,6 +111,7 @@ export default function StockDetailsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticker, data]);
 
+
   return (
     <div className="container-fluid">
       <PageHeader text={`${tickerDisplayName} Details`} />

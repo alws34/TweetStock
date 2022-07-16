@@ -62,15 +62,23 @@ export default function PredictionWithTweets(props) {
                 : "down"
             }
           ></Prediction>
-          <PredictionStatsPopUp
-            tweetsArr={tweetsArr}
-            predictionData={statsTableData}
-            lastUpdated={
-              predictionResponse &&
-              predictionResponse["Prediction"]["last_update"]
-            }
-            ticker={ticker}
-          />
+          {predictionResponse !== null && (
+            <PredictionStatsPopUp
+              tweetsArr={tweetsArr}
+              predictionData={statsTableData}
+              lastUpdated={
+                predictionResponse &&
+                predictionResponse["Prediction"]["last_update"]
+              }
+              ticker={ticker}
+              dir={
+                predictionResponse &&
+                predictionResponse["Prediction"]["prediction"] === 1
+                  ? "up"
+                  : "down"
+              }
+            />
+          )}
         </div>
       )}
     </div>

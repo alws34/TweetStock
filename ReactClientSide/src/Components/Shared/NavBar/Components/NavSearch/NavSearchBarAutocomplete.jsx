@@ -5,21 +5,27 @@ import { tickerOptions, capitalizeFirstLetters } from "./TickerOptions";
 import "../../../../Configs/Global";
 
 export default function NavSearchBarAutocomplete(props) {
+  const [value, setValue] = useState("");
+
   return (
     <div>
       <Autocomplete
-        disableClearable={true}
+        disableClearable={false}
         id="navSearch"
         clearOnEscape={true}
         autoSelect={true}
+        value={value}
         options={tickerOptions}
         // options={tickerOptions.sort(
         //   (a, b) => -b.ticker[0].localeCompare(a.ticker[0])
         // )}
         // groupBy={(option) => option.ticker[0].toUpperCase()}
-        getOptionLabel={(option) => option.title + " - " + option.ticker}
+        getOptionLabel={(option) =>
+          option === "" ? "" : option.title + " - " + option.ticker
+        }
         onChange={(event, newOption) => {
           props.setSearchQuery(newOption.ticker);
+          setValue(value);
         }}
         renderOption={(props, option) => (
           <Box
@@ -44,7 +50,6 @@ export default function NavSearchBarAutocomplete(props) {
               ...params.inputProps,
               autoComplete: "off", // disable autocomplete and autofill
             }}
-            style={{ width: "100%" }}
           />
         )}
       />

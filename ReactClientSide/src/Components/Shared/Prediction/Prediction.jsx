@@ -28,7 +28,7 @@ export default function Prediction(props) {
           height={props.height}
           width={props.width}
         />
-        <p style={{ margin: 0 }}>{pred_prefix_text}...</p>
+        <p style={{ margin: 0 }}>Fetching {pred_prefix_text}...</p>
       </MovingComponent>
     );
   };
@@ -72,9 +72,9 @@ export default function Prediction(props) {
         >
           <Lottie options={symbol_lottie_opts} width={props.width} />
         </MovingComponent>
-        <p style={{ margin: 0 }}>
+        {/* <p style={{ margin: 0 }}>
           {pred_prefix_text + " - " + props.dir.toUpperCase()}
-        </p>
+        </p> */}
       </div>
     );
   };

@@ -80,7 +80,9 @@ export function PredictionStatsPopUp(props) {
   return (
     <div>
       <Button variant="contained" onClick={handleClickOpen}>
-        Statistics
+        {props.ticker && props.dir
+          ? `${props.ticker} Prediction - ${props.dir}`
+          : ""}
       </Button>
       <BootstrapDialog
         className="predStatsPopUp"
