@@ -1,11 +1,11 @@
 import React from "react";
 import ReactTable from "./ReactTable";
 
-export default function PredTable(props) {
+export default function PredictionTable(props) {
   if (!props.hasOwnProperty("tweet")) {
     return "";
   }
-  const tweet = props.tweet;
+  const tableData = props.tableData;
 
   const tweet_data = [{}];
   const user_data = [{}];
@@ -62,20 +62,6 @@ export default function PredTable(props) {
     {
       Header: "Sentiment",
       columns: sentiment_columns,
-      // columns: [
-      //   {
-      //     Header: "Positive",
-      //     accessor: "pos",
-      //   },
-      //   {
-      //     Header: "Neutral",
-      //     accessor: "neu",
-      //   },
-      //   {
-      //     Header: "Negative",
-      //     accessor: "neg",
-      //   },
-      // ],
     },
   ];
   return (

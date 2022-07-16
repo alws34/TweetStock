@@ -1,21 +1,17 @@
 import React from "react";
-import "../StockDetailsPageStyles.css";
-import Tweet from "../../../Shared/Tweet/Tweet";
-import PredTable from "./PredictionStatsTable/PredictionTable";
-import Prediction from "../../../Shared/Prediction/Prediction";
 import Divider from "@mui/material/Divider";
-
-//import * as React from 'react';
 import PropTypes from "prop-types";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
+import Tweet from "../../../../Shared/Tweet/Tweet";
+import PredictionTable from "./PredictionTable";
+
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -55,7 +51,7 @@ BootstrapDialogTitle.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
-export function CustomizedDialogs(props) {
+export function PredictionStatsPopUp(props) {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -64,28 +60,50 @@ export function CustomizedDialogs(props) {
   const handleClose = () => {
     setOpen(false);
   };
+  const theme_sx = {
+    backgroundColor:
+      global.config.theme === "dark"
+        ? global.config.darkBG
+        : global.config.lightBG,
+    color: global.config.theme === "dark" ? "white" : "black",
+  };
 
   return (
     <div>
-      <Button variant="outlined" onClick={handleClickOpen}>
-        Open dialog
+      <Button variant="contained" onClick={handleClickOpen}>
+        Statistics
       </Button>
       <BootstrapDialog
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
         open={open}
-        style={{ backgroundColor: "black" }}
+        //sx={{ backgroundColor: "black" }}
       >
         <BootstrapDialogTitle
           dividers
           id="customized-dialog-title"
           onClose={handleClose}
+          sx={theme_sx}
         >
           Prediction based on:
         </BootstrapDialogTitle>
-        <Divider />
-        test
-        <DialogContent dividers>
+        <Divider
+          sx={{
+            backgroundColor: global.config.theme === "dark" ? "white" : "black",
+          }}
+        />
+
+        <Typography sx={theme_sx}>
+          <PredictionTable tableData={""} />
+        </Typography>
+
+        <Divider
+          sx={{
+            backgroundColor: global.config.theme === "dark" ? "white" : "black",
+          }}
+        />
+
+        <DialogContent sx={theme_sx} dividers>
           <div className="tweetsAndTableContainer">
             {props.tweetsArr &&
               props.tweetsArr.length > 0 &&
@@ -120,41 +138,6 @@ export function CustomizedDialogs(props) {
           </Typography> */}
         </DialogContent>
       </BootstrapDialog>
-    </div>
-  );
-}
-
-export default function PredictionWithTweets(props) {
-  const predictionResponse = props.predictionResponse;
-  const ticker = props.ticker;
-  var tweetsArr = [];
-  if (predictionResponse) {
-    Object.keys(predictionResponse["Tweets"]).forEach((key, index) => {
-      var tweet = predictionResponse["Tweets"][key];
-      tweetsArr.push(tweet);
-    });
-  }
-
-  return (
-    <div className="predictionWithTweets">
-      {predictionResponse === false ? (
-        "no pred"
-      ) : (
-        <div className="predictionContainer">
-          <Prediction
-            isLoading={predictionResponse === null}
-            size={"400px"}
-            ticker={ticker}
-            dir={
-              predictionResponse &&
-              predictionResponse["Prediction"]["prediction"] === 1
-                ? "up"
-                : "down"
-            }
-          ></Prediction>
-          <CustomizedDialogs tweetsArr={tweetsArr} />
-        </div>
-      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Autocomplete, Box } from "@mui/material";
 import TextField from "@material-ui/core/TextField";
 import { tickerOptions, capitalizeFirstLetters } from "./TickerOptions";
+import "../../../../Configs/Global";
 
 export default function NavSearchBarAutocomplete(props) {
   return (
@@ -21,7 +22,17 @@ export default function NavSearchBarAutocomplete(props) {
           props.setSearchQuery(newOption.ticker);
         }}
         renderOption={(props, option) => (
-          <Box {...props} component="li">
+          <Box
+            {...props}
+            component="li"
+            sx={{
+              backgroundColor:
+                global.config.theme === "dark"
+                  ? global.config.darkBG
+                  : global.config.lightBG,
+              color: global.config.theme === "dark" ? "white" : "black",
+            }}
+          >
             {capitalizeFirstLetters(option.title)} - {option.ticker}
           </Box>
         )}
