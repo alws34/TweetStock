@@ -1,12 +1,9 @@
 import os
-#import tensorflow as tf
 import matplotlib.pyplot as plt
-from numpy import append
 import Helper
 import DataHandler
 from glob import glob
 from pandas import read_csv as pd_read_csv
-from tensorflow import convert_to_tensor as ctt, float32 as tf_float32
 from keras.layers import Dense
 from keras.models import Sequential
 from tensorflow.keras.utils import to_categorical

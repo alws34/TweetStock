@@ -1,8 +1,6 @@
-from pandas import set_option as pdSetOption, to_datetime as pd_datetime, DataFrame as pdDataFrame
+from pandas import set_option as pdSetOption, DataFrame as pdDataFrame
 from keras.models import load_model
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from datetime import datetime as dt, timedelta
-from pathlib import Path as pathlib_Path
 import DataHandler
 from Globals import *
 from Helper import logger
