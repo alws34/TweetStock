@@ -56,7 +56,6 @@ BootstrapDialogTitle.propTypes = {
 export function PredictionStatsPopUp(props) {
   const [open, setOpen] = React.useState(false);
   const predStats = props.predictionData;
-  console.log(predStats);
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -69,6 +68,13 @@ export function PredictionStatsPopUp(props) {
         ? global.config.darkBG
         : global.config.lightBG,
     color: global.config.theme === "dark" ? "white" : "black",
+  };
+
+  const getDateFromPredResponse = (pred_formatted_date) => {
+    if (!pred_formatted_date) return "";
+    let splitted = pred_formatted_date.split("_");
+    let res = `${splitted[0]}/${splitted[1]}/${splitted[2]} at ${splitted[3]}:${splitted[4]}`;
+    return res;
   };
 
   return (
@@ -88,8 +94,20 @@ export function PredictionStatsPopUp(props) {
           id="customized-dialog-title"
           onClose={handleClose}
           sx={theme_sx}
+          // style={{
+          //   display: "flex",
+          //   alignItems: "space-around",
+          //   justifyContent: "space-around",
+          // }}
         >
-          Prediction based on:
+          <p style={{ fontSize: 15, fontWeight: "bold", marginRight: 3 }}>
+            Last Updated:{" "}
+            {predStats &&
+              predStats[0] &&
+              getDateFromPredResponse(props.lastUpdated)}
+          </p>
+          <Divider />
+          {props.ticker} Prediction based on:
         </BootstrapDialogTitle>
         <Divider
           sx={{
@@ -98,7 +116,7 @@ export function PredictionStatsPopUp(props) {
         />
 
         <Typography sx={theme_sx}>
-          <PredictionTable tableData={""} />
+          <PredictionTable tableData={predStats} />
         </Typography>
 
         <Divider
