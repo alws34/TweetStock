@@ -24,12 +24,12 @@ export default function HomePage() {
       }
     )
       .then((res) => {
-        //console.log("homepage=", res);
         return res.json();
       })
       .then(
         (result) => {
           let stocks = result.finance.result[0].quotes;
+          console.log("homepage=", stocks);
           setTrendingStocks(stocks);
         },
         (error) => {

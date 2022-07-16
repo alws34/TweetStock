@@ -59,7 +59,7 @@ export default function StockChart(props) {
   // const fetchStocks = async () => {
   //   const response = await fetch(stocksUrl);
   //   return response.json();
-  // }; 
+  // };
 
   const isInvalidStock = (stock) => {
     return (
@@ -78,7 +78,11 @@ export default function StockChart(props) {
             //console.log(data);
             const stock = data.chart.result[0];
 
-            if (isInvalidStock(stock)) setIsStockValid(false);
+            if (isInvalidStock(stock)) {
+              setIsStockValid(false);
+              props.updateInvalidStocksCounter &&
+                props.updateInvalidStocksCounter();
+            }
             setPrevPrice(price);
             setPrice(stock.meta.regularMarketPrice.toFixed(2));
             setPriceTime(new Date(stock.meta.regularMarketTime * 1000));
