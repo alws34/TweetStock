@@ -1,57 +1,14 @@
 import React from "react";
 import Divider from "@mui/material/Divider";
-import PropTypes from "prop-types";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
 import Tweet from "../../../../Shared/Tweet/Tweet";
 import PredictionTable from "./PredictionTable";
-
-const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  "& .MuiDialogContent-root": {
-    padding: theme.spacing(2),
-  },
-  "& .MuiDialogActions-root": {
-    padding: theme.spacing(1),
-  },
-  "& .css-1t1j96h-MuiPaper-root-MuiDialog-paper": {
-    borderRadius: 10,
-  },
-}));
-
-const BootstrapDialogTitle = (props) => {
-  const { children, onClose, ...other } = props;
-
-  return (
-    <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
-      {children}
-      {onClose ? (
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      ) : null}
-    </DialogTitle>
-  );
-};
-
-BootstrapDialogTitle.propTypes = {
-  children: PropTypes.node,
-  onClose: PropTypes.func.isRequired,
-};
+import {
+  BootstrapDialog,
+  BootstrapDialogTitle,
+} from "../../../../Shared/PopupItems/BootstrapPopupItems";
 
 export function PredictionStatsPopUp(props) {
   const [open, setOpen] = React.useState(false);
@@ -69,7 +26,6 @@ export function PredictionStatsPopUp(props) {
         : global.config.lightBG,
     color: global.config.theme === "dark" ? "white" : "black",
   };
-
   const getDateFromPredResponse = (pred_formatted_date) => {
     if (!pred_formatted_date) return "";
     let splitted = pred_formatted_date.split("_");
@@ -89,18 +45,12 @@ export function PredictionStatsPopUp(props) {
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
         open={open}
-        //sx={{ backgroundColor: "black" }}
       >
         <BootstrapDialogTitle
           dividers
           id="customized-dialog-title"
           onClose={handleClose}
           sx={theme_sx}
-          // style={{
-          //   display: "flex",
-          //   alignItems: "space-around",
-          //   justifyContent: "space-around",
-          // }}
         >
           <p style={{ fontSize: 15, fontWeight: "bold", marginRight: 3 }}>
             Last Updated:{" "}
