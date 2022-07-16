@@ -31,7 +31,12 @@ export default function PredictionWithTweets(props) {
                 : "down"
             }
           ></Prediction>
-          <PredictionStatsPopUp tweetsArr={tweetsArr} />
+          <PredictionStatsPopUp
+            tweetsArr={tweetsArr}
+            predictionData={
+              predictionResponse && predictionResponse["Prediction"]
+            }
+          />
         </div>
       )}
     </div>

@@ -12,13 +12,15 @@ import Typography from "@mui/material/Typography";
 import Tweet from "../../../../Shared/Tweet/Tweet";
 import PredictionTable from "./PredictionTable";
 
-
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
     padding: theme.spacing(2),
   },
   "& .MuiDialogActions-root": {
     padding: theme.spacing(1),
+  },
+  "& .css-1t1j96h-MuiPaper-root-MuiDialog-paper": {
+    borderRadius: 10,
   },
 }));
 
@@ -53,7 +55,8 @@ BootstrapDialogTitle.propTypes = {
 
 export function PredictionStatsPopUp(props) {
   const [open, setOpen] = React.useState(false);
-
+  const predStats = props.predictionData;
+  console.log(predStats);
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -74,6 +77,7 @@ export function PredictionStatsPopUp(props) {
         Statistics
       </Button>
       <BootstrapDialog
+        className="predStatsPopUp"
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
         open={open}
@@ -113,29 +117,10 @@ export function PredictionStatsPopUp(props) {
                     <Typography gutterBottom>
                       <Tweet tweetId={tweet["tweet_id"]} />
                     </Typography>
-                    {/* <div>
-                      <PredTable tweet={tweet}></PredTable>
-                    </div> */}
                   </div>
                 );
               })}
           </div>
-
-          {/* <Typography gutterBottom>
-            Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-            dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta
-            ac consectetur ac, vestibulum at eros.
-          </Typography>
-          <Typography gutterBottom>
-            Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
-            Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor
-            auctor.
-          </Typography>
-          <Typography gutterBottom>
-            Aenean lacinia bibendum nulla sed consectetur. Praesent commodo
-            cursus magna, vel scelerisque nisl consectetur et. Donec sed odio
-            dui. Donec ullamcorper nulla non metus auctor fringilla.
-          </Typography> */}
         </DialogContent>
       </BootstrapDialog>
     </div>

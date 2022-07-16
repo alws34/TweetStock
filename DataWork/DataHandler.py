@@ -266,7 +266,7 @@ def tsm_get_scale_and_mean(df, feature_set, n_past=N_PAST, scaling=SCALING):
                 f = df[col] * df["s_compound"]
                 scaler = MinMaxScaler()
                 scaler.fit(TSM_SCALING_PARAMS[col])
-                df_dict[col].append(scaler.fit_transform(
+                df_dict[col].append(scaler.transform(
                     np_array(f).reshape(-1, 1)).mean())
             elif col == 's_compound':
                 df_dict[col] = []
