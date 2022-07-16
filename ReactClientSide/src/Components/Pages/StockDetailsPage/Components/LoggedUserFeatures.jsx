@@ -7,6 +7,7 @@ import { FavoriteBorder, Favorite } from "@mui/icons-material";
 import PopupStockChat from "./StockChat/PopupStockChat";
 import { apiUrlFavorites } from "../../../Configs/apiUrlsKeys";
 import { getLoggedUser } from "../../../Configs/getLoggedUser";
+import PopularTweetsPopup from "./PopularTweetsPopup";
 
 export default function LoggedUserFeatures(props) {
   const navigate = useNavigate();
@@ -109,7 +110,7 @@ export default function LoggedUserFeatures(props) {
       <Row>
         <Col>
           <div className="featuresContainer">
-            <Button
+            {/* <Button
               variant="contained"
               size="medium"
               onClick={() =>
@@ -117,7 +118,8 @@ export default function LoggedUserFeatures(props) {
               }
             >
               Popular Tweets
-            </Button>
+            </Button> */}
+            <PopularTweetsPopup ticker={ticker} />
             <Checkbox
               onClick={(e) => handleCheckFav(e)}
               sx={{ color: "red" }}

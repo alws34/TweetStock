@@ -17,6 +17,7 @@ import "../../Configs/Global";
 import { getNameFromTicker } from "../../Shared/NavBar/Components/NavSearch/TickerOptions";
 import { ref, onValue, push } from "firebase/database";
 import { getRealTimeDBRef } from "../../Configs/FirebaseConfig";
+import { PopularTweetsPopup } from "./Components/PopularTweetsPopup";
 
 export default function StockDetailsPage() {
   const [stockData, setStockData] = useState(null);
@@ -110,7 +111,6 @@ export default function StockDetailsPage() {
     //fetchFlaskStockPrediction(ticker);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticker, data]);
-
 
   return (
     <div className="container-fluid">
