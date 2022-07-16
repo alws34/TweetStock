@@ -110,15 +110,6 @@ export default function LoggedUserFeatures(props) {
       <Row>
         <Col>
           <div className="featuresContainer">
-            {/* <Button
-              variant="contained"
-              size="medium"
-              onClick={() =>
-                navigate(navPaths["popular tweets"], { state: ticker })
-              }
-            >
-              Popular Tweets
-            </Button> */}
             <PopularTweetsPopup ticker={ticker} />
             <Checkbox
               onClick={(e) => handleCheckFav(e)}
