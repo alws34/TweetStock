@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { navPaths } from "../../../Configs/navPaths";
 import {
   Button,
@@ -17,18 +17,20 @@ export default function FavoriteStockCard(props) {
   const stockData = props.stockData;
   var name = stockData.displayName;
   if (name && name.includes(".com")) {
-        name = name.slice(0, -4);
+    name = name.slice(0, -4);
   }
-  const [stockImageSrc, setStockImageSrc] = useState(`https://logo.clearbit.com/${name}.com?size=80&greyscale=false`);
+  const [stockImageSrc, setStockImageSrc] = useState(
+    `https://logo.clearbit.com/${name}.com?size=80&greyscale=false`
+  );
   const defaultImageSrc = `https://i5.walmartimages.com/asr/538e6ee9-b8ce-4c50-bb78-e0ef9ca3e5d7.d92a2e915d667614f121ea11f0d1ec7e.jpeg`;
-  
+
   const CardImage = () => {
     return (
       <CardMedia
         className="cardImage"
         component="img"
         image={stockImageSrc}
-        onError={()=> setStockImageSrc(defaultImageSrc)}
+        onError={() => setStockImageSrc(defaultImageSrc)}
       />
     );
   };
@@ -95,7 +97,7 @@ export default function FavoriteStockCard(props) {
   };
 
   const navigateToStockDetailsPage = () => {
-    navigate(navPaths["about"], {
+    navigate(navPaths["stock details"], {
       state: {
         ticker: stockData.symbol,
         data: null,
@@ -104,7 +106,7 @@ export default function FavoriteStockCard(props) {
   };
 
   return (
-    <Card className="favoriteStockCard" sx={{borderRadius: '7.5px'}}>
+    <Card className="favoriteStockCard" sx={{ borderRadius: "7.5px" }}>
       <CardActionArea onClick={navigateToStockDetailsPage}>
         <CardImage />
         <CardContent className="favoriteCardContentWrapper">
