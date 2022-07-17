@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import "../../../../Configs/Global";
 
 export default function HamburgerNav(props) {
   return (
@@ -35,7 +36,17 @@ export default function HamburgerNav(props) {
         }}
       >
         {props.pages.map((page) => (
-          <MenuItem key={page} onClick={() => props.handleCloseNavMenu(page)}>
+          <MenuItem
+            sx={{
+              backgroundColor:
+                global.config.theme === "dark"
+                  ? global.config.darkBG
+                  : global.config.lightBG,
+              color: global.config.theme === "dark" ? "white" : "black",
+            }}
+            key={page}
+            onClick={() => props.handleCloseNavMenu(page)}
+          >
             <Typography textAlign="center">{page}</Typography>
           </MenuItem>
         ))}

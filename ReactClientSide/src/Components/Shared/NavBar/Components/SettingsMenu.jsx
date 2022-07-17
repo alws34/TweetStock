@@ -13,6 +13,7 @@ import {
   Avatar,
 } from "@mui/material";
 import { isLoggedUser, getLoggedUser } from "../../../Configs/getLoggedUser";
+import "../../../Configs/Global";
 const MySwal = withReactContent(Swal);
 const navs = navPaths;
 
@@ -100,7 +101,17 @@ export default function SettingsMenu() {
         onClose={handleCloseUserMenu}
       >
         {settings.map((setting) => (
-          <MenuItem key={setting} onClick={() => handleCloseUserMenu(setting)}>
+          <MenuItem
+            sx={{
+              backgroundColor:
+                global.config.theme === "dark"
+                  ? global.config.darkBG
+                  : global.config.lightBG,
+              color: global.config.theme === "dark" ? "white" : "black",
+            }}
+            key={setting}
+            onClick={() => handleCloseUserMenu(setting)}
+          >
             <Typography textAlign="center">{setting}</Typography>
           </MenuItem>
         ))}
