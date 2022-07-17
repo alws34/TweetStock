@@ -131,11 +131,12 @@ export default function StockChart(props) {
       style={{
         margin: "auto",
         marginTop: "2.5vh",
-        marginBottom: "2.5vh",
-        borderBottom: "1.5px solid",
-        borderTop: "1.5px solid",
-        borderRadius: "7.5px",
+        //marginBottom: "2.5vh",
+        borderBottom: "3.5px solid",
+        //borderTop: "3.5px solid",
+        //borderRadius: "7.5px",
         padding: "3vw",
+        paddingBottom: "2vh",
         maxWidth: "1250px",
       }}
       className={"chartContainer"}
@@ -158,6 +159,7 @@ export default function StockChart(props) {
         prevPrice={prevPrice}
         priceTime={priceTime}
         predictionDir={direction}
+        predictionAccuracy={props.predictionAccuracy}
       />
     </div>
   ) : (

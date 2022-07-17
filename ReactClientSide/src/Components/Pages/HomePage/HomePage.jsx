@@ -57,6 +57,7 @@ export default function HomePage() {
           stock_name={stockData.ticker}
           stock_ticker={stockData.ticker}
           predictionDir={stockData.predictionDir}
+          predictionAccuracy={100}
         />
       ))}
     </div>

@@ -4,13 +4,14 @@ import ReadMoreIcon from "@mui/icons-material/ReadMore";
 import { navPaths } from "../../../Configs/navPaths";
 import { useNavigate } from "react-router-dom";
 import "../StockChartStyles.css";
+import "../../../Configs/Global";
 
 export default function StockChartPanel(props) {
   const navigate = useNavigate();
   const directionEmojis = {
-    1: "🚀",
-    "-1": "💩",
-    "": "",
+    1: ["⬆", "#00B746"],
+    "-1": ["⬇", "#EF403C"],
+    "": ["", ""],
   };
 
   const StockButton = () => (
@@ -29,11 +30,8 @@ export default function StockChartPanel(props) {
       </Button>
     </div>
   );
-  const Price = () => (
-    <Typography>
-      {props.price} $ {directionEmojis[props.predictionDir]}
-    </Typography>
-  );
+  const Price = () => <Typography>{props.price}$</Typography>;
+
   const Time = () => (
     <Typography>
       {props.priceTime &&
@@ -44,18 +42,62 @@ export default function StockChartPanel(props) {
     </Typography>
   );
 
+  const PredictionDir = () => {
+    if (!directionEmojis[props.predictionDir]) return "";
+    return (
+      <Typography style={{ color: directionEmojis[props.predictionDir][1] }}>
+        Prediction: {directionEmojis[props.predictionDir][0]}
+      </Typography>
+    );
+  };
+
+  const PredictionAccuracy = () => {
+    return (
+      <Typography>
+        Accuracy: {props.predictionAccuacy ? "100" : "100"}%
+      </Typography>
+    );
+  };
+
   return (
     <div
-      className="stockChartPanelContainer"
       style={{
         textAlign: "center",
         display: "flex",
-        justifyContent: "space-around",
+        justifyContent: "space-between",
+        flexDirection: "column",
       }}
     >
-      <Time />
-      <Price />
-      {!props.hideInfoPanel && <StockButton />}
+      <div
+        className="stockChartPanelContainer"
+        style={{
+          textAlign: "center",
+          display: "flex",
+          justifyContent: "space-around",
+          //borderTop: "1px solid white",
+          paddingBottom: 10,
+        }}
+      >
+        <PredictionAccuracy />
+        <PredictionDir />
+      </div>
+      <div
+        className="stockChartPanelContainer"
+        style={{
+          textAlign: "center",
+          display: "flex",
+          justifyContent: "space-around",
+          borderTop:
+            global.config.theme === "dark"
+              ? "1px solid white"
+              : "1px solid black",
+          paddingTop: 8,
+        }}
+      >
+        <Time />
+        <Price />
+        {!props.hideInfoPanel && <StockButton />}
+      </div>
     </div>
   );
 }
