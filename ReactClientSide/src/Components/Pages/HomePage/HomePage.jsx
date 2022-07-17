@@ -8,6 +8,21 @@ export default function HomePage() {
   const stocks = ["AAPL", "AMZN", "GOOG", "MSFT", "TSLA"];
   const [stocksData, setStocksData] = React.useState([]);
 
+  const getStockAccuracy = (stock) => {
+    let total = 0;
+    let correct = 0;
+    Object.keys(stock).forEach((key) => {
+      total++;
+      if (
+        stock[key]["Prediction"]["prediction"] ===
+        stock[key]["Volatility"]["Actual_volatility"]
+      )
+        correct++;
+    });
+    let accuracy = correct / total;
+    return accuracy * 100;
+  };
+
   const getLatestUpdate = (res) => {
     // should return the last updated db object
     //(res -> firebase db result json of single stock containing dates)
@@ -30,12 +45,15 @@ export default function HomePage() {
         let res = snapshot.val();
         Object.keys(res).forEach((key) => {
           let latestUpdate = getLatestUpdate(res[key]);
-          console.log(latestUpdate);
+          let acc = getStockAccuracy(res[key]);
+
           setStocksData((prev) => [
             ...prev,
             {
               ticker: key,
               predictionDir: latestUpdate["Prediction"]["prediction"],
+              accuracy: acc,
+              nPredictionDays: Object.keys(res).length,
             },
           ]);
         });
@@ -57,7 +75,8 @@ export default function HomePage() {
           stock_name={stockData.ticker}
           stock_ticker={stockData.ticker}
           predictionDir={stockData.predictionDir}
-          predictionAccuracy={100}
+          predictionAccuracy={stockData.accuracy}
+          nPredictionDays={stockData.nPredictionDays}
         />
       ))}
     </div>

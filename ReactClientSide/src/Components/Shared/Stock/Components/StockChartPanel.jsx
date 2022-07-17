@@ -13,7 +13,6 @@ export default function StockChartPanel(props) {
     "-1": ["⬇", "#EF403C"],
     "": ["", ""],
   };
-
   const StockButton = () => (
     <div style={{ textAlign: "center", marginBottom: "vh" }}>
       <Button
@@ -51,10 +50,11 @@ export default function StockChartPanel(props) {
     );
   };
 
-  const PredictionAccuracy = () => {
+  const PredictionAccuracy = (props) => {
+    if (!props.accuracy || !props.nPredictionDays) return false;
     return (
       <Typography>
-        Accuracy: {props.predictionAccuacy ? "100" : "100"}%
+        Accuracy: {props.accuracy}% ({props.nPredictionDays} Days)
       </Typography>
     );
   };
@@ -78,7 +78,10 @@ export default function StockChartPanel(props) {
           paddingBottom: 10,
         }}
       >
-        <PredictionAccuracy />
+        <PredictionAccuracy
+          nPredictionDays={props.nPredictionDays}
+          accuracy={props.predictionAccuracy}
+        />
         <PredictionDir />
       </div>
       <div

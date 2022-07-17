@@ -22,6 +22,7 @@ import { PopularTweetsPopup } from "./Components/PopularTweetsPopup";
 export default function StockDetailsPage() {
   const [stockData, setStockData] = useState(null);
   const [predictionResponse, setPredictionResponse] = useState(null);
+  const [stockAccuracy, setStockAccuracy] = useState("");
 
   const isLoggedIn = isLoggedUser();
   let ticker = useLocation().state.ticker;
@@ -40,6 +41,21 @@ export default function StockDetailsPage() {
       }
     }
     return res[lastKey];
+  };
+
+  const getStockAccuracy = (stock) => {
+    let total = 0;
+    let correct = 0;
+    Object.keys(stock).forEach((key) => {
+      total++;
+      if (
+        stock[key]["Prediction"]["prediction"] ===
+        stock[key]["Volatility"]["Actual_volatility"]
+      )
+        correct++;
+    });
+    let accuracy = correct / total;
+    return accuracy * 100;
   };
 
   const fetchLastPrediction = () => {
@@ -62,6 +78,13 @@ export default function StockDetailsPage() {
         dbRef,
         (snapshot) => {
           let res = snapshot.val();
+          let acc = getStockAccuracy(res);
+          let nPredictionDays = Object.keys(res).length;
+          console.log(acc);
+          setStockAccuracy({
+            accuracy: acc + "",
+            nPredictionDays: nPredictionDays,
+          });
           let latestUpdate = getLatestUpdate(res);
           console.log(latestUpdate);
           setPredictionResponse(latestUpdate);
@@ -133,6 +156,8 @@ export default function StockDetailsPage() {
                 }
                 stock_ticker={ticker}
                 hideInfoPanel={true}
+                predictionAccuracy={stockAccuracy["accuracy"]}
+                nPredictionDays={stockAccuracy["nPredictionDays"]}
               />
             </Col>
             <Col

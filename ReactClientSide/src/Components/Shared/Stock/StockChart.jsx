@@ -13,15 +13,11 @@ export default function StockChart(props) {
       data: [],
     },
   ]);
+
   const [price, setPrice] = useState(null);
   const [prevPrice, setPrevPrice] = useState(-1);
   const [priceTime, setPriceTime] = useState(null);
   const [isStockValid, setIsStockValid] = useState(true);
-
-  //const [theme, setTheme] = useState(global.config.theme);
-  //console.log(global.config.theme);
-
-  //useEffect(() => setTheme(global.config.theme), []);
 
   const chart_options = {
     theme: {
@@ -55,11 +51,6 @@ export default function StockChart(props) {
     },
   };
   const stocksUrl = `https://yahoo-finance-api.vercel.app/${props.stock_ticker}`;
-
-  // const fetchStocks = async () => {
-  //   const response = await fetch(stocksUrl);
-  //   return response.json();
-  // };
 
   const isInvalidStock = (stock) => {
     return (
@@ -119,11 +110,6 @@ export default function StockChart(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.stock_ticker, global.config.theme]);
 
-  // const direction = useMemo(
-  //   () => (prevPrice < price ? "up" : prevPrice > price ? "down" : ""),
-  //   [prevPrice, price]
-  // );
-
   const direction = props.predictionDir;
 
   return isStockValid ? (
@@ -131,10 +117,7 @@ export default function StockChart(props) {
       style={{
         margin: "auto",
         marginTop: "2.5vh",
-        //marginBottom: "2.5vh",
         borderBottom: "3.5px solid",
-        //borderTop: "3.5px solid",
-        //borderRadius: "7.5px",
         padding: "3vw",
         paddingBottom: "2vh",
         maxWidth: "1250px",
@@ -160,6 +143,7 @@ export default function StockChart(props) {
         priceTime={priceTime}
         predictionDir={direction}
         predictionAccuracy={props.predictionAccuracy}
+        nPredictionDays={props.nPredictionDays}
       />
     </div>
   ) : (
