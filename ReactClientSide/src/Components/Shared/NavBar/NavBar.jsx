@@ -25,8 +25,8 @@ export default function NavBar() {
   const navigate = useNavigate();
 
   const pages = isLoggedUser()
-    ? ["Home", "News", "Favorite Stocks"]
-    : ["Home", "News"];
+    ? ["Home", "News", "Trending Stocks", "Favorite Stocks", "About"]
+    : ["Home", "News", "Trending Stocks", "About"];
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -34,7 +34,6 @@ export default function NavBar() {
   const handleCloseNavMenu = (page) => {
     try {
       navigate(navs[page.toLowerCase()]);
-      
     } catch (error) {
       console.log(error);
     }
@@ -72,7 +71,7 @@ export default function NavBar() {
             let s = result.quoteResponse.result[0];
             if (1) {
               //(s.displayName) {
-              navigate(navs["about"], {
+              navigate(navs["stock details"], {
                 state: {
                   ticker: ticker,
                   data: s,

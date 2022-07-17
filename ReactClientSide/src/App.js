@@ -2,6 +2,7 @@ import "./App.css";
 import React, { useEffect, useState } from "react";
 import NavBar from "./Components/Shared/NavBar/NavBar";
 import HomePage from "./Components/Pages/HomePage/HomePage";
+import TrendingStocksPage from "./Components/Pages/TrendingStocksPage/TrendingStocksPage";
 import StockDetailsPage from "./Components/Pages/StockDetailsPage/StockDetailsPage";
 import SignUp from "./Components/Pages/SignUpPage/SignUpPage";
 import SignIn from "./Components/Pages/SignInPage/SignInPage";
@@ -12,6 +13,8 @@ import { Routes, Route } from "react-router-dom";
 import { getRememberMe } from "./Components/Configs/getLoggedUser";
 import "./Components/Configs/Global";
 import ProfilePage from "./Components/Pages/ProfilePage/ProfilePage";
+import AboutPage from "./Components/Pages/AboutPage/AboutPage";
+
 import { navPaths } from "./Components/Configs/navPaths";
 
 import IconButton from "@mui/material/IconButton";
@@ -80,7 +83,10 @@ export default function App() {
 
         <Routes>
           <Route path={navPaths["home"]} element={<HomePage />} />
-          <Route path={navPaths["about"]} element={<StockDetailsPage />} />
+          <Route
+            path={navPaths["stock details"]}
+            element={<StockDetailsPage />}
+          />
           <Route path={navPaths["news"]} element={<NewsPage />} />
           <Route
             path={navPaths["favorite stocks"]}
@@ -93,6 +99,11 @@ export default function App() {
           <Route path={navPaths["sign up"]} element={<SignUp />} />
           <Route path={navPaths["sign in"]} element={<SignIn />} />
           <Route path={navPaths["profile"]} element={<ProfilePage />} />
+          <Route
+            path={navPaths["trending stocks"]}
+            element={<TrendingStocksPage />}
+          />
+          <Route path={navPaths["about"]} element={<AboutPage />} />
         </Routes>
       </Paper>
     </ThemeProvider>

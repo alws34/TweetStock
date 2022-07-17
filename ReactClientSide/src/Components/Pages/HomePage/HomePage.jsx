@@ -1,59 +1,18 @@
-import React, { useEffect, useState } from "react";
-import TrendingStocksContainer from "./Components/TrendingStocksContainer";
+import React from "react";
+import StockChart from "../../Shared/Stock/StockChart";
 import PageHeader from "../../Shared/PageHeader/PageHeader";
-import LoadingCircle from "../../Shared/LoadingCircle";
-import { rapidApiKey } from "../../Configs/apiUrlsKeys";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
 
 export default function HomePage() {
-  const [trendingStocks, setTrendingStocks] = useState(null);
-  const MySwal = withReactContent(Swal);
-  const STOCK_GRAPHS_COUNT = 5;
-
-  const getTrendingStocks = () => {
-    fetch(
-      `https://stock-data-yahoo-finance-alternative.p.rapidapi.com/v1/finance/trending/US?count=${STOCK_GRAPHS_COUNT}`,
-      {
-        method: "GET",
-        headers: {
-          "x-rapidapi-host":
-            "stock-data-yahoo-finance-alternative.p.rapidapi.com",
-          "x-rapidapi-key": rapidApiKey,
-        },
-      }
-    )
-      .then((res) => {
-        return res.json();
-      })
-      .then(
-        (result) => {
-          let stocks = result.finance.result[0].quotes;
-          console.log("homepage=", stocks);
-          setTrendingStocks(stocks);
-        },
-        (error) => {
-          MySwal.fire({
-            icon: "error",
-            title: "Oops... Something went wrong",
-            text: "We couldn't Get Trending stocks at this time...",
-            footer: "please try Refreshing the page or try again later",
-          });
-        }
-      );
-  };
-
-  useEffect(getTrendingStocks, []);
+  const stocks = ["AAPL", "AMZN", "GOOG", "MSFT", "TSLA"];
 
   return (
-    <div className="HomePage">
-      <PageHeader text="Trending Stocks" />
+    <div className="HomePageContainer">
+      <PageHeader text={"Home Page"} />
+      <p>Predictions available for the following stocks</p>
 
-      {trendingStocks ? (
-        <TrendingStocksContainer trendingStocks={trendingStocks} />
-      ) : (
-        <LoadingCircle />
-      )}
+      {stocks.map((ticker) => (
+        <StockChart key={ticker} stock_name={ticker} stock_ticker={ticker} />
+      ))}
     </div>
   );
 }
