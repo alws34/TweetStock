@@ -39,7 +39,6 @@ export default function NavSearchBar(props) {
       }}
     >
       <NavSearchBarAutocomplete
-        //onKeyPress={(e) => console.log(e)} //e.key === "Enter" && props.onSubmit(searchQuery)}
         id="navSearch"
         setSearchQuery={autoCompleteInputHandler}
         inputProps={{ "aria-label": "search" }}
@@ -53,8 +52,11 @@ export default function NavSearchBar(props) {
         }}
         autoHighlight
       />
+    </Search>
+  );
+}
 
-      {/* <SearchIcon
+/* <SearchIcon
         onClick={() => props.onSubmit(searchQuery)}
         onMouseEnter={(e) => {
           e.target.style.background = "rgb(255, 255, 255, 0.5)";
@@ -63,7 +65,4 @@ export default function NavSearchBar(props) {
         onMouseLeave={(e) => {
           e.target.style.background = "none";
         }}
-      /> */}
-    </Search>
-  );
-}
+      /> */

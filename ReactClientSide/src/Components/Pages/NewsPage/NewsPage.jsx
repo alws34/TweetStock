@@ -9,6 +9,7 @@ import "../../Configs/Global";
 
 export default function NewsPage() {
   const [news, setNews] = useState(null);
+  const [ticker, setTicker] = useState(null);
   const MySwal = withReactContent(Swal);
   const displayErrorMsg = (text, footer) => {
     return MySwal.fire({
@@ -28,6 +29,7 @@ export default function NewsPage() {
     const key = "o0z0bQyW2KjLH9vqOEJazLZ76ztmTW8o";
     const limit = 15;
     const t = ticker ? ticker : "";
+    setTicker(ticker);
     const apiUrl = `https://api.polygon.io/v2/reference/news?ticker=${t}&limit=${limit}&apiKey=${key}`;
     fetch(apiUrl, {
       method: "GET",
@@ -72,7 +74,7 @@ export default function NewsPage() {
 
   return (
     <div className="newsPage">
-      <PageHeader text={"News"} />
+      <PageHeader text={ticker ? ticker + " News" : "General Stock News"} />
       <NewsSearchBar fetchNews={fetchNews} />
       <NewsCardsContainer news={news} />
     </div>
