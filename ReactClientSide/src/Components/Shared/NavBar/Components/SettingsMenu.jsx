@@ -33,6 +33,11 @@ export default function SettingsMenu() {
     localStorage.clear(); // makes the user a guest
     navigate(navs["logout"]);
     return MySwal.fire({
+      background:
+        global.config.theme === "dark"
+          ? global.config.darkBG
+          : global.config.lightBG,
+      color: global.config.theme === "dark" ? "white" : "black",
       position: "center",
       icon: "success",
       title: "Successfuly logged out",
@@ -45,6 +50,11 @@ export default function SettingsMenu() {
     //if (typeof setting != "string") return;
     if (setting === "Logout") {
       MySwal.fire({
+        background:
+          global.config.theme === "dark"
+            ? global.config.darkBG
+            : global.config.lightBG,
+        color: global.config.theme === "dark" ? "white" : "black",
         title: "Are you sure?",
         showDenyButton: false,
         showCancelButton: true,

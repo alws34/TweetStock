@@ -25,7 +25,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import FormPageButtons from "../../Shared/Forms/FormPageButtons";
-
+import "../../Configs/Global";
 //import CountrySelect from "../Functional Components/CountrySelect";
 
 const MySwal = withReactContent(Swal);
@@ -64,6 +64,11 @@ export default function ProfilePage() {
           console.log("fetch PUT= ", result);
           if (!result) {
             MySwal.fire({
+              background:
+                global.config.theme === "dark"
+                  ? global.config.darkBG
+                  : global.config.lightBG,
+              color: global.config.theme === "dark" ? "white" : "black",
               icon: "error",
               title: "Oops...",
               text: "Failed to update profile",
@@ -71,6 +76,11 @@ export default function ProfilePage() {
           } else {
             updateSuccess(user);
             MySwal.fire({
+              background:
+                global.config.theme === "dark"
+                  ? global.config.darkBG
+                  : global.config.lightBG,
+              color: global.config.theme === "dark" ? "white" : "black",
               position: "center",
               icon: "success",
               title: "Profile Updated!",
@@ -123,6 +133,11 @@ export default function ProfilePage() {
     user = updated_user;
 
     MySwal.fire({
+      background:
+        global.config.theme === "dark"
+          ? global.config.darkBG
+          : global.config.lightBG,
+      color: global.config.theme === "dark" ? "white" : "black",
       title: "Do you want to save the changes?",
       showDenyButton: true,
       showCancelButton: true,
@@ -133,7 +148,15 @@ export default function ProfilePage() {
       if (result.isConfirmed) {
         updateUser();
       } else if (result.isDenied) {
-        MySwal.fire("Changes are not saved", "", "info");
+        MySwal.fire({
+          background:
+            global.config.theme === "dark"
+              ? global.config.darkBG
+              : global.config.lightBG,
+          color: global.config.theme === "dark" ? "white" : "black",
+          title: "Changes are not saved",
+          icon: "info",
+        });
       }
     });
   };

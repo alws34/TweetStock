@@ -62,6 +62,11 @@ export default function SignUp() {
           console.log("fetch POST= ", result);
           if (result === -1) {
             MySwal.fire({
+              background:
+                global.config.theme === "dark"
+                  ? global.config.darkBG
+                  : global.config.lightBG,
+              color: global.config.theme === "dark" ? "white" : "black",
               icon: "error",
               title: "Oops...",
               text: "Email adress already taken",
@@ -70,6 +75,11 @@ export default function SignUp() {
           } else {
             signUpSuccess();
             MySwal.fire({
+              background:
+                global.config.theme === "dark"
+                  ? global.config.darkBG
+                  : global.config.lightBG,
+              color: global.config.theme === "dark" ? "white" : "black",
               position: "center",
               icon: "success",
               title: "Succesfuly signed up",

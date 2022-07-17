@@ -76,6 +76,11 @@ export default function SignIn() {
     console.log("sign in", fetched_user);
     navigate(navPaths["home"]);
     return MySwal.fire({
+      background:
+        global.config.theme === "dark"
+          ? global.config.darkBG
+          : global.config.lightBG,
+      color: global.config.theme === "dark" ? "white" : "black",
       position: "center",
       icon: "success",
       title: `Successfuly logged In\nWelcome back ${fetched_user.FirstName}!`,
@@ -86,6 +91,11 @@ export default function SignIn() {
 
   const signInNotFound = () => {
     return MySwal.fire({
+      background:
+        global.config.theme === "dark"
+          ? global.config.darkBG
+          : global.config.lightBG,
+      color: global.config.theme === "dark" ? "white" : "black",
       icon: "error",
       title: "Oops...",
       text: "Wrong Username or Password!",

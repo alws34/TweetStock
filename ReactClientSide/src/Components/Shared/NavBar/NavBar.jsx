@@ -44,6 +44,11 @@ export default function NavBar() {
     const apiUrlStocks = `https://stock-data-yahoo-finance-alternative.p.rapidapi.com/v6/finance/quote?symbols=${ticker}%2CETH-USD`;
     const displayErrorMsg = (text, footer) => {
       return MySwal.fire({
+        background:
+          global.config.theme === "dark"
+            ? global.config.darkBG
+            : global.config.lightBG,
+        color: global.config.theme === "dark" ? "white" : "black",
         icon: "error",
         title: "Oops...",
         text: text,

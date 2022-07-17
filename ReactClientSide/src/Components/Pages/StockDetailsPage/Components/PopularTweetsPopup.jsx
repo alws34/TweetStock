@@ -43,18 +43,16 @@ export default function PopularTweetsPopup(props) {
   } catch (e) {
     console.log(e);
   }
-  useEffect(() => {
-    fetchTwitterPopularTweets(ticker);
-    //fetchFlaskStockPrediction(ticker);
-  }, []);
+
   const handleClickOpen = () => {
     setOpen(true);
+    fetchTwitterPopularTweets(ticker);
   };
   const handleClose = () => {
     setOpen(false);
   };
   const handleNoTweetsFound = () => {
-    return 1;
+    setOpen(false);
   };
   const theme_sx = {
     backgroundColor:
@@ -80,13 +78,17 @@ export default function PopularTweetsPopup(props) {
           console.log("fetch res= ", res.statuses);
           let tweets = res.statuses;
           if (tweets.length === 0) {
+            handleNoTweetsFound();
             return MySwal.fire({
+              background:
+                global.config.theme === "dark"
+                  ? global.config.darkBG
+                  : global.config.lightBG,
+              color: global.config.theme === "dark" ? "white" : "black",
               icon: "error",
               title: "Oops...",
               text: "No popular tweets were found about this stock!",
               footer: "Please try searching another one...",
-            }).then((result) => {
-              handleNoTweetsFound();
             });
           } else {
             setTweetsArr(tweets, () => setIsLoading(false));
@@ -136,6 +138,8 @@ export default function PopularTweetsPopup(props) {
         <DialogContent sx={theme_sx} dividers>
           {isLoading ? (
             <LoadingCircle />
+          ) : tweetsArr.length === 0 ? (
+            "test"
           ) : (
             <TweetsContainer tweets={tweetsArr} />
           )}

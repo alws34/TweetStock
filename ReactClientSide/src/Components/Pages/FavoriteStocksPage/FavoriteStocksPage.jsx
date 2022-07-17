@@ -10,6 +10,8 @@ import { apiUrlFavorites, rapidApiKey } from "../../Configs/apiUrlsKeys";
 import { getLoggedUser, isLoggedUser } from "../../Configs/getLoggedUser";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import "../../Configs/Global";
+
 const MySwal = withReactContent(Swal);
 
 export default function FavoriteStocksPage() {
@@ -91,6 +93,11 @@ export default function FavoriteStocksPage() {
         if (!res.ok) {
           fetchFavoriteStocks();
           MySwal.fire({
+            background:
+              global.config.theme === "dark"
+                ? global.config.darkBG
+                : global.config.lightBG,
+            color: global.config.theme === "dark" ? "white" : "black",
             icon: "error",
             title: "Oops...",
             text: "Something went wrong",

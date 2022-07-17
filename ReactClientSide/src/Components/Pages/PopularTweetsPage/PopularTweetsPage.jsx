@@ -8,6 +8,7 @@ import { useStateWithCallbackLazy } from "use-state-with-callback";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import "../../Configs/Global";
 
 export default function PopularTweets(props) {
   const MySwal = withReactContent(Swal);
@@ -44,6 +45,11 @@ export default function PopularTweets(props) {
           let tweets = res.statuses;
           if (tweets.length === 0) {
             return MySwal.fire({
+              background:
+                global.config.theme === "dark"
+                  ? global.config.darkBG
+                  : global.config.lightBG,
+              color: global.config.theme === "dark" ? "white" : "black",
               icon: "error",
               title: "Oops...",
               text: "No popular tweets were found about this stock!",

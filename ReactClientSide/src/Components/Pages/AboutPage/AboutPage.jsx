@@ -1,5 +1,7 @@
 import React from "react";
 import PageHeader from "../../Shared/PageHeader/PageHeader";
+import marked from "marked";
+import fetchJsonp from "fetch-jsonp";
 
 export default function AboutPage() {
   return (
@@ -16,11 +18,11 @@ export default function AboutPage() {
         <br />
         <br />
         The stocks that we monitor are:
-        <br />-{" "}
+        <br />-
         <a href="https://finance.yahoo.com/quote/AMZN/">Amazon [(AMZN)]</a>
-        <br />-{" "}
+        <br />-
         <a href="https://finance.yahoo.com/quote/AAPL/">Apple [(AAPL)]</a>
-        <br />-{" "}
+        <br />-
         <a href="https://finance.yahoo.com/quote/GOOG/">Google [(GOOG)]</a>
         <br />-
         <a href="https://finance.yahoo.com/quote/MSFT/">Microsoft [(MSFT)]</a>

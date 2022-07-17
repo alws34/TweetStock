@@ -36,6 +36,11 @@ export default function HomePage() {
         },
         (error) => {
           MySwal.fire({
+            background:
+              global.config.theme === "dark"
+                ? global.config.darkBG
+                : global.config.lightBG,
+            color: global.config.theme === "dark" ? "white" : "black",
             icon: "error",
             title: "Oops... Something went wrong",
             text: "We couldn't Get Trending stocks at this time...",

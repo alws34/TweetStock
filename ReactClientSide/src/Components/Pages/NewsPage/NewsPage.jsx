@@ -5,12 +5,18 @@ import PageHeader from "../../Shared/PageHeader/PageHeader";
 import NewsSearchBar from "./Components/NewsSearchBar";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import "../../Configs/Global";
 
 export default function NewsPage() {
   const [news, setNews] = useState(null);
   const MySwal = withReactContent(Swal);
   const displayErrorMsg = (text, footer) => {
     return MySwal.fire({
+      background:
+        global.config.theme === "dark"
+          ? global.config.darkBG
+          : global.config.lightBG,
+      color: global.config.theme === "dark" ? "white" : "black",
       icon: "error",
       title: "Oops...",
       text: text,
