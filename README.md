@@ -21,7 +21,7 @@ The stocks that we monitor are:
 - Google [(GOOG)](https://finance.yahoo.com/quote/GOOG/)
 <br><br>
 
-In order to achieve that, we developed an Web App that includes:
+In order to achieve that, we developed a Web Application that includes:
 
 ## Client Side
 #### Programming languages & Technologies used:
