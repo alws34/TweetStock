@@ -127,6 +127,10 @@ export default function StockDetailsPage() {
             <Col style={{ flexGrow: 0, marginTop: 10 }}>
               <StockChart
                 stock_name={stockData.displayName}
+                predictionDir={
+                  predictionResponse &&
+                  predictionResponse["Prediction"]["prediction"]
+                }
                 stock_ticker={ticker}
                 hideInfoPanel={true}
               />

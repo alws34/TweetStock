@@ -3,13 +3,13 @@ import { Button, Typography } from "@mui/material";
 import ReadMoreIcon from "@mui/icons-material/ReadMore";
 import { navPaths } from "../../../Configs/navPaths";
 import { useNavigate } from "react-router-dom";
-import "../StockChartStyles.css"
+import "../StockChartStyles.css";
 
 export default function StockChartPanel(props) {
   const navigate = useNavigate();
   const directionEmojis = {
-    up: "🚀",
-    down: "💩",
+    1: "🚀",
+    "-1": "💩",
     "": "",
   };
 
@@ -20,7 +20,7 @@ export default function StockChartPanel(props) {
         color="primary"
         variant="contained"
         onClick={() =>
-          navigate(navPaths["about"], {
+          navigate(navPaths["stock details"], {
             state: { ticker: props.stock_ticker, data: null },
           })
         }
@@ -31,7 +31,7 @@ export default function StockChartPanel(props) {
   );
   const Price = () => (
     <Typography>
-      {props.price} $ {directionEmojis[props.direction]}
+      {props.price} $ {directionEmojis[props.predictionDir]}
     </Typography>
   );
   const Time = () => (

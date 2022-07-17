@@ -119,10 +119,12 @@ export default function StockChart(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.stock_ticker, global.config.theme]);
 
-  const direction = useMemo(
-    () => (prevPrice < price ? "up" : prevPrice > price ? "down" : ""),
-    [prevPrice, price]
-  );
+  // const direction = useMemo(
+  //   () => (prevPrice < price ? "up" : prevPrice > price ? "down" : ""),
+  //   [prevPrice, price]
+  // );
+
+  const direction = props.predictionDir;
 
   return isStockValid ? (
     <div
@@ -155,7 +157,7 @@ export default function StockChart(props) {
         price={price}
         prevPrice={prevPrice}
         priceTime={priceTime}
-        direction={direction}
+        predictionDir={direction}
       />
     </div>
   ) : (
