@@ -6,6 +6,8 @@ import NewsSearchBar from "./Components/NewsSearchBar";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import "../../Configs/Global";
+import { getNameFromTicker } from "../../Shared/NavBar/Components/NavSearch/TickerOptions";
+import { Button } from "react-bootstrap";
 
 export default function NewsPage() {
   const [news, setNews] = useState(null);
@@ -74,8 +76,20 @@ export default function NewsPage() {
 
   return (
     <div className="newsPage">
-      <PageHeader text={ticker ? ticker + " News" : "General Stock News"} />
+      <PageHeader
+        text={
+          ticker ? getNameFromTicker(ticker) + " News" : "General Stock News"
+        }
+      />
       <NewsSearchBar fetchNews={fetchNews} />
+      {ticker ? (
+        <Button onClick={() => fetchGeneralNews()} style={{ marginBottom: 15 }}>
+          General Stock News
+        </Button>
+      ) : (
+        ""
+      )}
+
       <NewsCardsContainer news={news} />
     </div>
   );
