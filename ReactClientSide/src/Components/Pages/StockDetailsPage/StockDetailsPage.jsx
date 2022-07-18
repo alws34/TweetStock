@@ -62,7 +62,7 @@ export default function StockDetailsPage() {
       if (e !== BreakException) throw e;
     }
     let accuracy = correct / total;
-    return accuracy * 100;
+    return { accuracy: accuracy * 100, nDays: total };
   };
 
   const fetchLastPrediction = () => {
@@ -84,11 +84,11 @@ export default function StockDetailsPage() {
         dbRef,
         (snapshot) => {
           let res = snapshot.val();
-          let acc = getStockAccuracy(res);
-          let nPredictionDays = Object.keys(res).length;
+          console.log(res);
+          let accResult = getStockAccuracy(res);
           setStockAccuracy({
-            accuracy: acc + "",
-            nPredictionDays: nPredictionDays,
+            accuracy: accResult.accuracy + "",
+            nPredictionDays: accResult.nDays,
           });
           let latestUpdate = getLatestUpdate(res);
           setPredictionResponse(latestUpdate);
