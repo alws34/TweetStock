@@ -78,7 +78,6 @@ export default function LoggedUserFeatures(props) {
       })
       .then(
         (result) => {
-          console.log("fetch favorite stocks arr= ", result);
           //if stock ticker exist in arr then favChecked is true.
           result = result.map((ticker) => ticker.toUpperCase());
           const isChecked =
