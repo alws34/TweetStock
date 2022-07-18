@@ -27,7 +27,6 @@ export default function NavSearchBar(props) {
 
   const autoCompleteInputHandler = (e) => {
     setSearchQuery(e);
-    console.log(e);
   };
 
   return (

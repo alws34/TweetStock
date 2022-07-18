@@ -18,7 +18,6 @@ export default function PopularTweets(props) {
   let ticker = useLocation().state;
   try {
     ticker = ticker.toUpperCase();
-    console.log(ticker);
   } catch (e) {
     console.log(e);
   }
@@ -41,7 +40,6 @@ export default function PopularTweets(props) {
       .then(
         (result) => {
           let res = JSON.parse(result);
-          console.log("fetch res= ", res.statuses);
           let tweets = res.statuses;
           if (tweets.length === 0) {
             return MySwal.fire({

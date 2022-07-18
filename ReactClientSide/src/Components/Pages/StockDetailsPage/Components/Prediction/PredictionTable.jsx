@@ -52,7 +52,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 export default function CustomizedTables(props) {
   
   const tableData = props.tableData;
-  console.log(tableData);
 
   return (
     <TableContainer style={{ width: "100%", margin: "auto" }} component={Paper}>

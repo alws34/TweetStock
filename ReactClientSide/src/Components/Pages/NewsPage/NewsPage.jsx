@@ -41,12 +41,10 @@ export default function NewsPage() {
       }),
     })
       .then((res) => {
-        console.log("res=", res);
         return res.json();
       })
       .then(
         (result) => {
-          console.log("fetch News= ", result.results);
           if (result.results === undefined) {
             displayErrorMsg(
               `Too many requests...`,

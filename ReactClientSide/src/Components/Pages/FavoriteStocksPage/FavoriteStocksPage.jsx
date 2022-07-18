@@ -31,12 +31,10 @@ export default function FavoriteStocksPage() {
       }),
     })
       .then((res) => {
-        //console.log("res=", res);
         return res.json();
       })
       .then(
         (favTickers) => {
-          console.log("fetch favorite stocks arr= ", favTickers);
           setNoFavoriteStocks(favTickers.length === 0);
 
           favTickers.forEach((ticker) =>
@@ -65,7 +63,6 @@ export default function FavoriteStocksPage() {
       .then((res) => res.json())
       .then(
         (result) => {
-          console.log("fetch apiStock= ", result.quoteResponse.result);
           let newStockData = result.quoteResponse.result[0];
           setStocksDataArr((oldArr) => [...oldArr, newStockData]);
         },
@@ -77,7 +74,6 @@ export default function FavoriteStocksPage() {
 
   //DELETE Fav stock from DB:
   const deleteFavoriteStock = (ticker) => {
-    console.log(ticker);
     setStocksDataArr((prevData) =>
       prevData.filter((stock) => stock.symbol !== ticker)
     );
@@ -89,7 +85,6 @@ export default function FavoriteStocksPage() {
       }),
     }).then(
       (res) => {
-        console.log("res=", res);
         if (!res.ok) {
           fetchFavoriteStocks();
           MySwal.fire({

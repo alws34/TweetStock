@@ -24,7 +24,6 @@ export default function LoggedUserFeatures(props) {
 
   //POST Fav stock from DB:
   const postFavoriteStock = (favoriteStock) => {
-    //console.log(JSON.stringify(favStock));
     fetch(apiUrlFavorites, {
       method: "POST",
       body: JSON.stringify(favoriteStock),
@@ -34,7 +33,6 @@ export default function LoggedUserFeatures(props) {
       }),
     })
       .then((res) => {
-        console.log("res=", res);
         return res.ok;
       })
       .then(
@@ -42,7 +40,6 @@ export default function LoggedUserFeatures(props) {
           if (!result) {
             setIsFavoriteChecked(false);
           }
-          console.log("fetch post favorite_= ", result);
         },
         (error) => {
           console.log("err post favorite=", error);
@@ -87,7 +84,6 @@ export default function LoggedUserFeatures(props) {
           const isChecked =
             result.includes(ticker.toUpperCase()) ||
             result.includes(ticker.toLowerCase());
-          console.log("fav fetch test", isChecked, ticker);
           setIsFavoriteChecked(isChecked);
         },
         (error) => {

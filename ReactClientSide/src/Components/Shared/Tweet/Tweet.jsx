@@ -9,7 +9,6 @@ export default function Tweet(props) {
   //const theme = global.config.theme;
 
   useEffect(() => {
-    console.log(props.tweetId);
     setTheme(global.config.theme);
   }, [global.config.theme]);
 

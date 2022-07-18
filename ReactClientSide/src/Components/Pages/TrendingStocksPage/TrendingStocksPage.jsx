@@ -31,7 +31,6 @@ export default function HomePage() {
       .then(
         (result) => {
           let stocks = result.finance.result[0].quotes;
-          console.log("homepage=", stocks);
           setTrendingStocks(stocks);
         },
         (error) => {

@@ -24,7 +24,6 @@ export default function StockChat(props) {
   let ticker = props.ticker;
   try {
     ticker = ticker.toUpperCase();
-    console.log(ticker);
   } catch (e) {
     console.log(e);
   }
@@ -37,7 +36,6 @@ export default function StockChat(props) {
   const AddNewMessage = (event) => {
     let new_msg = event.message;
     let date = new Date();
-    console.log(date);
     new_msg["timestamp"] = date + "";
     // push the msg to the db
     push(dbRef, new_msg);
@@ -50,7 +48,6 @@ export default function StockChat(props) {
 
       for (var key in msgs) {
         let msg = msgs[key];
-        // console.log(msg);
         let date = new Date(msg.timestamp);
         new_msgs.push({
           author: msg.author,
@@ -59,7 +56,6 @@ export default function StockChat(props) {
         });
       }
 
-      console.log(new_msgs);
       setMessages(new_msgs);
     });
   };

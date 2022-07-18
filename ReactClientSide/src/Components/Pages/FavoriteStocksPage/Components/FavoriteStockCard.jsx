@@ -13,7 +13,6 @@ import { useNavigate } from "react-router-dom";
 
 export default function FavoriteStockCard(props) {
   const navigate = useNavigate();
-  console.log(props.stockData);
   const stockData = props.stockData;
   var name = stockData.displayName;
   if (name && name.includes(".com")) {

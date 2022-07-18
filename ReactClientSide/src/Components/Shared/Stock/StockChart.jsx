@@ -66,7 +66,6 @@ export default function StockChart(props) {
         fetch(stocksUrl)
           .then((res) => res.json())
           .then((data) => {
-            //console.log(data);
             const stock = data.chart.result[0];
 
             if (isInvalidStock(stock)) {

@@ -44,10 +44,8 @@ export default function Camera(props) {
   });
 
   const setImage = (blobFile) => {
-    console.log(blobFile);
     // either use compressFile() or blobToBase64()
     compressFile(blobFile).then((compressedBase64File) => {
-      console.log(compressedBase64File);
       props.setParentImg(compressedBase64File);
     });
   };
@@ -70,7 +68,6 @@ export default function Camera(props) {
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
           onClick={() => {
-            console.log(webRef.current.getScreenshot());
             return props.setParentImg(webRef.current.getScreenshot());
           }}
         >

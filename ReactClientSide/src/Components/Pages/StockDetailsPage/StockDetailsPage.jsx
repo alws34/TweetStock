@@ -59,7 +59,6 @@ export default function StockDetailsPage() {
   };
 
   const fetchLastPrediction = () => {
-    console.log(ticker);
     if (!ticker) return false;
     let upper_case_ticker = ticker.toUpperCase();
     if (
@@ -80,13 +79,11 @@ export default function StockDetailsPage() {
           let res = snapshot.val();
           let acc = getStockAccuracy(res);
           let nPredictionDays = Object.keys(res).length;
-          console.log(acc);
           setStockAccuracy({
             accuracy: acc + "",
             nPredictionDays: nPredictionDays,
           });
           let latestUpdate = getLatestUpdate(res);
-          console.log(latestUpdate);
           setPredictionResponse(latestUpdate);
         },
         (errorObject) => {
@@ -109,12 +106,10 @@ export default function StockDetailsPage() {
       }
     )
       .then((res) => {
-        // console.log('res=', res);
         return res.json();
       })
       .then(
         (result) => {
-          //console.log("fetch apiStock= ", result.quoteResponse.result[0]);
           let s = result.quoteResponse.result[0];
           setStockData(s);
         },
@@ -127,7 +122,6 @@ export default function StockDetailsPage() {
   useEffect(() => {
     console.clear();
     setPredictionResponse(null);
-    //console.log("use effect", ticker);
     data ? setStockData(data) : fetchStockDetails();
     fetchLastPrediction();
 

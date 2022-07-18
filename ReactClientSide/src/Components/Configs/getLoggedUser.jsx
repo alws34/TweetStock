@@ -5,7 +5,6 @@ export const getLoggedUser = () => {
   if (localStorage["TweetStock"]) {
     let tweetStock = JSON.parse(localStorage["TweetStock"]);
     logged_user = tweetStock["user"];
-    console.log("sign", logged_user);
   } else {
     logged_user = {
       Address: null,
@@ -33,7 +32,6 @@ export const getRememberMe = () => {
 };
 
 export const saveUserLocalStorage = (user, remember_me) => {
-  console.log(user);
   localStorage.setItem(
     "TweetStock",
     JSON.stringify({

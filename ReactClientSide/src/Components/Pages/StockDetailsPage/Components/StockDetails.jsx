@@ -91,8 +91,6 @@ export default function StockDetails(props) {
       : data.regularMarketPrice,
   };
 
-  console.log(lines1, lines2);
-
   return (
     <div className="stockDetailsContainer">
       <Row>

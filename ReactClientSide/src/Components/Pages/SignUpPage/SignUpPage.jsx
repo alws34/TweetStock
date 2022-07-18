@@ -35,13 +35,10 @@ export default function SignUp() {
   const navigate = useNavigate();
   let user = {};
   const [img, setImg] = useState(null);
-  //const [encodeImg, setEncodeImg] = useState("");
   const [country, setCountry] = useState(null);
-  // const webRef = useRef(null);
 
   const getCountry = (countryProp) => {
     setCountry(countryProp);
-    console.log(country);
   };
 
   const postUser = (user) => {
@@ -54,12 +51,10 @@ export default function SignUp() {
       }),
     })
       .then((res) => {
-        console.log("res=", res);
         return res.json();
       })
       .then(
         (result) => {
-          console.log("fetch POST= ", result);
           if (result === -1) {
             MySwal.fire({
               background:
@@ -112,8 +107,6 @@ export default function SignUp() {
       Address: country,
       Picture: img ? img : default_profile_img,
     };
-
-    console.log("handle submit", user);
 
     postUser(user);
   };
@@ -198,91 +191,3 @@ export default function SignUp() {
     // </ThemeProvider>
   );
 }
-
-// const showImage = () => {
-//   let imgBefore = btoa(webRef.current.getScreenshot(), "Base64");
-//   setEncodeImg(imgBefore);
-//   let imgAfter = atob(imgBefore, "Base64");
-//   setImg(imgAfter);
-//   setImg(webRef.current.getScreenshot());
-//   console.log(imgBefore);
-//   console.log(imgAfter);
-//   console.log(webRef.current.getScreenshot())
-//   console.log("shoot");
-// };
-
-// const ButtonsContainer = () => (
-//   <div className="buttonsContainer">
-//     <Button
-//       type="submit"
-//       fullWidth
-//       variant="contained"
-//       sx={{ mt: 3, mb: 2 }}
-//       color="success"
-//     >
-//       Sign Up
-//     </Button>
-//     <Grid container>
-//       <Grid item>
-//         <Button onClick={() => navigate(navPaths["sign in"])} variant="body2">
-//           <Link>Already have an account? Sign In</Link>
-//         </Button>
-//       </Grid>
-//     </Grid>
-//   </div>
-// );
-
-/* <FormField
-      xs={12}
-      sm={6}
-      label="First Name"
-      autoComplete="given-name"
-      fieldName="firstName"
-      fieldValue={user.FirstName}
-      inputProps={{
-        minlength: 2,
-        maxlength: 15,
-      }}
-      sx={{
-        autoFocus: true,
-        required: true,
-      }}
-    />
-    <FormField
-      xs={12}
-      sm={6}
-      label="Last Name"
-      autoComplete="family-name"
-      fieldName="lastName"
-      fieldValue={user.LastName}
-      inputProps={{
-        minlength: 2,
-        maxlength: 15,
-      }}
-      sx={{ required: true }}
-    />
-    <FormField
-      xs={12}
-      label="Email Address"
-      autoComplete="email"
-      fieldName="email"
-      fieldValue={user.Email}
-      inputProps={{
-        pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
-      }}
-      sx={{ required: true }}
-    />
-
-    <FormField
-      xs={12}
-      label="Password"
-      autoComplete="new-password"
-      fieldName="password"
-      inputProps={{
-        minlength: 6,
-      }}
-      sx={{
-        type: "password",
-        required: true,
-      }}
-    /> */

@@ -39,7 +39,6 @@ export default function PopularTweetsPopup(props) {
   let ticker = props.ticker;
   try {
     ticker = ticker.toUpperCase();
-    console.log(ticker);
   } catch (e) {
     console.log(e);
   }
@@ -75,7 +74,6 @@ export default function PopularTweetsPopup(props) {
       .then(
         (result) => {
           let res = JSON.parse(result);
-          console.log("fetch res= ", res.statuses);
           let tweets = res.statuses;
           if (tweets.length === 0) {
             handleNoTweetsFound();

@@ -31,7 +31,6 @@ export default function SignIn() {
   const [remember_me, setRememberMe] = useState(true);
 
   const { state } = useLocation();
-  console.log("state", state);
   const default_user_email = state ? state.email : null;
   const default_user_pass = state ? state.pass : null;
 
@@ -50,7 +49,6 @@ export default function SignIn() {
       }),
     })
       .then((res) => {
-        console.log("res=", res);
         if (res.status === 200) {
           return res.json();
         } else return false;
@@ -70,10 +68,7 @@ export default function SignIn() {
   };
 
   const signInSuccess = (fetched_user) => {
-    console.log("fetch user= ", fetched_user);
-    //setUser(fetched_user);
     saveUserLocalStorage(fetched_user, remember_me);
-    console.log("sign in", fetched_user);
     navigate(navPaths["home"]);
     return MySwal.fire({
       background:

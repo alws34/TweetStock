@@ -39,12 +39,11 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   let user = getLoggedUser();
   const [img, setImg] = useState(user.Picture);
-  const [country, setCountry] = useState(user.Address);
+  // const [country, setCountry] = useState(user.Address);
 
-  const getCountry = (countryProp) => {
-    setCountry(countryProp);
-    console.log(country);
-  };
+  // const getCountry = (countryProp) => {
+  //   setCountry(countryProp);
+  // };
 
   const updateUser = () => {
     fetch(apiUrlUsers, {
@@ -56,12 +55,10 @@ export default function ProfilePage() {
       }),
     })
       .then((res) => {
-        console.log("res=", res);
         return res.ok;
       })
       .then(
         (result) => {
-          console.log("fetch PUT= ", result);
           if (!result) {
             MySwal.fire({
               background:
@@ -98,7 +95,6 @@ export default function ProfilePage() {
   const updateSuccess = (updated_user) => {
     let passWasUpdated = updated_user.Password !== "-1";
     if (passWasUpdated) {
-      //console.log(updated_user);
       localStorage.clear();
       navigate(navPaths["sign in"]);
     } else {
@@ -212,9 +208,6 @@ export default function ProfilePage() {
                   sx={formValues[formVal][4]}
                 />
               ))}
-              {/* <Grid item xs={12}>
-                <CountrySelect id="country" sendToForm={getCountry} />
-              </Grid> */}
 
               <Grid item xs={12}>
                 <Camera img={img} setParentImg={setImg} />
@@ -227,7 +220,6 @@ export default function ProfilePage() {
               navPathKey={"home"}
               buttonColor={"success"}
             />
-            {/* <ButtonsContainer /> */}
           </Box>
         </Box>
         <Copyright sx={{ mt: 5 }} />
@@ -235,83 +227,3 @@ export default function ProfilePage() {
     </ThemeProvider>
   );
 }
-
-// const ButtonsContainer = () => {
-//   return (
-//     <div className="buttonsContainer">
-//       <Button
-//         type="submit"
-//         fullWidth
-//         variant="contained"
-//         sx={{ mt: 3, mb: 2 }}
-//         color="success"
-//       >
-//         Update Profile
-//       </Button>
-//       <Grid container justifyContent="flex-end">
-//         <Grid item>
-//           <Button
-//             onClick={() => navigate(navPaths["home"])}
-//             variant="body2"
-//             //color="secondary"
-//           >
-//             Home Page
-//           </Button>
-//         </Grid>
-//       </Grid>
-//     </div>
-//   );
-// };
-
-// <FormField
-//   xs={12}
-//   sm={6}
-//   label="First Name"
-//   autoComplete="given-name"
-//   fieldName="firstName"
-//   fieldValue={user.FirstName}
-//   inputProps={{
-//     minlength: 2,
-//     maxlength: 15,
-//   }}
-//   sx={{
-//     autoFocus: true,
-//   }}
-// />
-
-// <FormField
-//   xs={12}
-//   sm={6}
-//   label="Last Name"
-//   autoComplete="family-name"
-//   fieldName="lastName"
-//   fieldValue={user.LastName}
-//   inputProps={{
-//     minlength: 2,
-//     maxlength: 15,
-//   }}
-// />
-
-// <FormField
-//   xs={12}
-//   label="Email"
-//   autoComplete="email"
-//   fieldName="email"
-//   fieldValue={user.Email}
-//   inputProps={{
-//     readOnly: true,
-//   }}
-// />
-
-// <FormField
-//   xs={12}
-//   label="Password"
-//   autoComplete="new-password"
-//   fieldName="password"
-//   inputProps={{
-//     minlength: 6,
-//   }}
-//   sx={{
-//     type: "password",
-//   }}
-// />

@@ -64,37 +64,28 @@ export default function NavBar() {
       },
     })
       .then((res) => {
-        console.log("res=", res);
-        console.log("ok", res.ok);
         return res.json();
       })
       .then(
         (result) => {
           try {
-            console.log("fetch apiStock= ", result.quoteResponse.result[0]);
-
             let s = result.quoteResponse.result[0];
-            if (1) {
-              //(s.displayName) {
-              navigate(navs["stock details"], {
-                state: {
-                  ticker: ticker,
-                  data: s,
-                },
-              });
-            } else {
-              displayErrorMsg(
-                "Ticker search query wasnt found!",
-                "Please try again, in the correct format (TSLA, MSFT, AAPL)"
-              );
-            }
+            navigate(navs["stock details"], {
+              state: {
+                ticker: ticker,
+                data: s,
+              },
+            });
           } catch (error) {
             console.log("error fetching stock details", result);
-            displayErrorMsg("Something went wrong...", "Please try again");
+            displayErrorMsg(
+              "Something went wrong...\nTicker not found",
+              "Please try again"
+            );
           }
         },
         (error) => {
-          console.log("err post=", error);
+          console.log("err fetching stock=", error);
           displayErrorMsg("Something went wrong...", "Please try again");
         }
       );
@@ -105,9 +96,6 @@ export default function NavBar() {
       <Container maxWidth="xxl">
         <Toolbar disableGutters>
           <NavBarLogo />
-          {/* Todo: either combine both of navs elments (hamburder+spreaded) togather
-                    or implement settings menu the same as the navbars (meaning the page will 
-                    handle its state and not itself) */}
           <HamburgerNav
             pages={pages}
             anchorElNav={anchorElNav}
