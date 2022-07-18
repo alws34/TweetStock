@@ -50,8 +50,8 @@ export default function StockChart(props) {
       },
     },
   };
-  const stocksUrl = `https://yahoo-finance-api.vercel.app/${props.stock_ticker}`;
-
+  const stocksUrl = `https://yahoo-finance-api.vercel.app/${props.stock_ticker}?range=1mo`;
+  // const stocksUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${props.stock_ticker}`;
   const isInvalidStock = (stock) => {
     return (
       stock.meta.instrumentType === "CRYPTOCURRENCY" ||
@@ -67,7 +67,7 @@ export default function StockChart(props) {
           .then((res) => res.json())
           .then((data) => {
             const stock = data.chart.result[0];
-
+            console.log(stock);
             if (isInvalidStock(stock)) {
               setIsStockValid(false);
               props.updateInvalidStocksCounter &&
@@ -79,9 +79,9 @@ export default function StockChart(props) {
 
             const quote = stock.indicators.quote[0];
             const hours = 3;
-            const hours_in_ms = hours * 60 * 60 * 1000;
+            const hours_in_s = hours * 60 * 60;
             const prices = stock.timestamp.map((timestamp, index) => ({
-              x: new Date(timestamp * 1000 + hours_in_ms),
+              x: new Date((timestamp + hours_in_s) * 1000),
               y: [
                 quote.open[index],
                 quote.high[index],

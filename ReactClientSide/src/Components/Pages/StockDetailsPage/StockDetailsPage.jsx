@@ -46,14 +46,21 @@ export default function StockDetailsPage() {
   const getStockAccuracy = (stock) => {
     let total = 0;
     let correct = 0;
-    Object.keys(stock).forEach((key) => {
-      total++;
-      if (
-        stock[key]["Prediction"]["prediction"] ===
-        stock[key]["Volatility"]["Actual_volatility"]
-      )
-        correct++;
-    });
+    var BreakException = {};
+    try {
+      Object.keys(stock).forEach((key) => {
+        if (stock[key]["Volatility"] === undefined) throw BreakException;
+
+        total++;
+        if (
+          stock[key]["Prediction"]["prediction"] ===
+          stock[key]["Volatility"]["Actual_volatility"]
+        )
+          correct++;
+      });
+    } catch (e) {
+      if (e !== BreakException) throw e;
+    }
     let accuracy = correct / total;
     return accuracy * 100;
   };
