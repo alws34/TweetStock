@@ -61,25 +61,3 @@ export default function StockSearchBar(props) {
     </div>
   );
 }
-/* <CssBaseline />
-      <TextField
-        style={{ border: "1px solid", borderRadius: "5px" }}
-        id="outlined-basic"
-        onChange={inputHandler}
-        onKeyPress={(e) => e.key === "Enter" && fetchNewsByTicker()}
-        variant="filled"
-        fullWidth
-        label="Search Stock News"
-      />
-      <SearchIcon
-        //fontSize="5vw"
-        style={{ margin: "auto", marginLeft: "0.8vw", fontSize: "5vw" }}
-        onClick={fetchNewsByTicker}
-        onMouseEnter={(e) => {
-          e.target.style.background = grey[400];
-          e.target.style.borderRadius = "5px";
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.background = "none";
-        }} 
-      />*/
