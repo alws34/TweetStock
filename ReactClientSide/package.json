@@ -49,7 +49,10 @@
     "sweetalert2": "^11.4.0",
     "sweetalert2-react-content": "^4.2.0",
     "use-state-with-callback": "^2.0.3",
-    "web-vitals": "^2.1.2"
+    "web-vitals": "^2.1.2",
+    "yahoo-finance2": "^2.3.4",
+    "yahoo-finserve": "^1.0.3",
+    "yahoo-stock-api": "^1.1.10"
   },
   "scripts": {
     "start": "react-scripts start",

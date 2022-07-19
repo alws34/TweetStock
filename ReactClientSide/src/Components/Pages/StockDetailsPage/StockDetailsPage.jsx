@@ -87,7 +87,7 @@ export default function StockDetailsPage() {
           console.log(res);
           let accResult = getStockAccuracy(res);
           setStockAccuracy({
-            accuracy: accResult.accuracy + "",
+            accuracy: accResult.accuracy,
             nPredictionDays: accResult.nDays,
           });
           let latestUpdate = getLatestUpdate(res);

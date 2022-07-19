@@ -27,7 +27,7 @@ export default function HomePage() {
       if (e !== BreakException) throw e;
     }
     let accuracy = correct / total;
-    return { accuracy: accuracy * 100,nDays: total};
+    return { accuracy: accuracy * 100, nDays: total };
   };
 
   const getLatestUpdate = (res) => {
@@ -51,7 +51,6 @@ export default function HomePage() {
       (snapshot) => {
         let res = snapshot.val();
         Object.keys(res).forEach((key) => {
-          console.log(res);
           let latestUpdate = getLatestUpdate(res[key]);
           let accResult = getStockAccuracy(res[key]);
 
