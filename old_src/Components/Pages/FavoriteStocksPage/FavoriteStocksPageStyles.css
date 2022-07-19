@@ -1,0 +1,45 @@
+.favoriteStocksCardsContainer {
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(200px, auto));
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.noFavoriteStocksContainer {
+  text-align: center;
+}
+
+.favoriteStockCard {
+  max-width: 200px;
+  margin: 1px;
+  margin-left: 5px;
+  border-radius: 10px;
+  margin: 1.2vh;
+}
+
+.favoriteStockCard .cardImage {
+  height: 200px;
+  width: 200px;
+  background-color: white;
+  border-bottom: 1px solid grey;
+}
+
+.favoriteStockCard .cardHeader {
+  text-align: center;
+  /* width: max-content; */
+}
+
+.favoriteStockCard .cardDetails {
+  white-space: pre-wrap;
+}
+
+.favoriteStockCard .cardButtonsContainer {
+  display: flex;
+  justify-content: space-around;
+}
+
+.favoriteCardContentWrapper{
+  height: 188px;
+}

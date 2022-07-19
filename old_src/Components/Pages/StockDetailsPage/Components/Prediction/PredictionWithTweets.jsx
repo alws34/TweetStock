@@ -19,21 +19,19 @@ export default function PredictionWithTweets(props) {
       s_compound: "Sentiment Score:",
     };
 
-    predictionResponse["Tweets"] &&
-      Object.keys(predictionResponse["Tweets"]).forEach((key, index) => {
-        tweetsArr.push(predictionResponse["Tweets"][key]);
-      });
+    Object.keys(predictionResponse["Tweets"]).forEach((key, index) => {
+      tweetsArr.push(predictionResponse["Tweets"][key]);
+    });
 
-    predictionResponse["Prediction"] &&
-      Object.keys(predictionResponse["Prediction"]).forEach((key, index) => {
-        if (renames[key] !== undefined)
-          statsTableData.push({
-            label: renames[key] === undefined ? key : renames[key],
-            value: Number.parseFloat(
-              predictionResponse["Prediction"][key]
-            ).toFixed(3),
-          });
-      });
+    Object.keys(predictionResponse["Prediction"]).forEach((key, index) => {
+      if (renames[key] !== undefined)
+        statsTableData.push({
+          label: renames[key] === undefined ? key : renames[key],
+          value: Number.parseFloat(
+            predictionResponse["Prediction"][key]
+          ).toFixed(3),
+        });
+    });
     statsTableData.push({
       label: "Prediction:",
       value:

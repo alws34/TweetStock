@@ -1,0 +1,71 @@
+.PageHeader * {
+  padding: 0;
+  margin: 0;
+  /* box-sizing: border-box; */
+}
+
+.PageHeader > html,
+body {
+  font-family: "Fira Code", monospace;
+  width: 100%;
+  /* height: 100%; */
+  font-size: 20px;
+}
+
+.PageHeader main {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.PageHeader p {
+  cursor: pointer;
+  position: relative;
+  /* display: inline-block; */
+  font-size: 6.2vw;
+  background: linear-gradient(to bottom, #000, #000 60%, #fff 60%, #fff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  /* color: transparent; */
+  background-repeat: no-repeat;
+  /* transition: background 0.2s ease-out;
+  white-space: nowrap; */
+  color: #3b8ad9 /*#356cc5*/;
+  max-width: 100%;
+
+  font-weight: bolder;
+}
+
+@media screen and (min-width: 800px) {
+  .PageHeader p {
+    font-size: 50px;
+  }
+}
+.PageHeader > div {
+  max-width: 500px;
+  overflow-x: visible;
+}
+/* .PageHeader span {
+  position: relative;
+}
+
+.PageHeader span:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: #b8d0f8;
+  bottom: 10px;
+  transition: all 0.2s ease-out;
+  border-radius: 3px;
+} */
+
+.PageHeader p:hover {
+  background-position: 0px 10px;
+}
+
+/* .PageHeader span:hover:before {
+  transform: translateY(10px);
+} */

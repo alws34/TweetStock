@@ -1,0 +1,15 @@
+.blogcard{
+    margin: 16px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px #ccc;
+    padding: 16px;
+    box-sizing: border-box;
+    background-color: crimson;
+  }
+
+@media (min-width: 992px){
+  .blogcard{
+    width: 45%;
+    display: inline-block;
+  }
+}

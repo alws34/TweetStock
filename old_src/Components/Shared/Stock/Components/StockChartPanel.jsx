@@ -29,8 +29,7 @@ export default function StockChartPanel(props) {
       </Button>
     </div>
   );
-  const Price = () =>
-    props.price ? <Typography>{props.price}$</Typography> : null;
+  const Price = () => <Typography>{props.price}$</Typography>;
 
   const Time = () => (
     <Typography>
@@ -46,9 +45,7 @@ export default function StockChartPanel(props) {
     if (!directionEmojis[props.predictionDir]) return "";
     return (
       <Typography style={{ color: directionEmojis[props.predictionDir][1] }}>
-        {directionEmojis[props.predictionDir][0]}
-        <br />
-        Prediction
+        Prediction: {directionEmojis[props.predictionDir][0]}
       </Typography>
     );
   };
@@ -57,9 +54,7 @@ export default function StockChartPanel(props) {
     if (!props.accuracy || !props.nPredictionDays) return false;
     return (
       <Typography>
-        {Math.round((parseFloat(props.accuracy) + Number.EPSILON) * 100) / 100}%
-        <br />
-        Accuracy ({props.nPredictionDays} Days)
+        Accuracy: {props.accuracy}% ({props.nPredictionDays} Days)
       </Typography>
     );
   };
@@ -73,28 +68,28 @@ export default function StockChartPanel(props) {
         flexDirection: "column",
       }}
     >
-      {props.price && props.priceTime && (
-        <div
-          className="stockChartPanelContainer"
-          style={{
-            textAlign: "center",
-            display: "flex",
-            justifyContent: "space-around",
-            //borderTop: "1px solid white",
-            paddingBottom: 10,
-          }}
-        >
-          <Time />
-          <Price />
-        </div>
-      )}
       <div
         className="stockChartPanelContainer"
         style={{
           textAlign: "center",
           display: "flex",
           justifyContent: "space-around",
-          alignItems: "center",
+          //borderTop: "1px solid white",
+          paddingBottom: 10,
+        }}
+      >
+        <PredictionAccuracy
+          nPredictionDays={props.nPredictionDays}
+          accuracy={props.predictionAccuracy}
+        />
+        <PredictionDir />
+      </div>
+      <div
+        className="stockChartPanelContainer"
+        style={{
+          textAlign: "center",
+          display: "flex",
+          justifyContent: "space-around",
           borderTop:
             global.config.theme === "dark"
               ? "1px solid white"
@@ -102,12 +97,8 @@ export default function StockChartPanel(props) {
           paddingTop: 8,
         }}
       >
-        <PredictionAccuracy
-          nPredictionDays={props.nPredictionDays}
-          accuracy={props.predictionAccuracy}
-        />
-
-        <PredictionDir />
+        <Time />
+        <Price />
         {!props.hideInfoPanel && <StockButton />}
       </div>
     </div>

@@ -46,23 +46,16 @@ export default function StockDetailsPage() {
   const getStockAccuracy = (stock) => {
     let total = 0;
     let correct = 0;
-    var BreakException = {};
-    try {
-      Object.keys(stock).forEach((key) => {
-        if (stock[key]["Volatility"] === undefined) throw BreakException;
-
-        total++;
-        if (
-          stock[key]["Prediction"]["prediction"] ===
-          stock[key]["Volatility"]["Actual_volatility"]
-        )
-          correct++;
-      });
-    } catch (e) {
-      if (e !== BreakException) throw e;
-    }
+    Object.keys(stock).forEach((key) => {
+      total++;
+      if (
+        stock[key]["Prediction"]["prediction"] ===
+        stock[key]["Volatility"]["Actual_volatility"]
+      )
+        correct++;
+    });
     let accuracy = correct / total;
-    return { accuracy: accuracy * 100, nDays: total };
+    return accuracy * 100;
   };
 
   const fetchLastPrediction = () => {
@@ -84,11 +77,11 @@ export default function StockDetailsPage() {
         dbRef,
         (snapshot) => {
           let res = snapshot.val();
-          console.log(res);
-          let accResult = getStockAccuracy(res);
+          let acc = getStockAccuracy(res);
+          let nPredictionDays = Object.keys(res).length;
           setStockAccuracy({
-            accuracy: accResult.accuracy,
-            nPredictionDays: accResult.nDays,
+            accuracy: acc + "",
+            nPredictionDays: nPredictionDays,
           });
           let latestUpdate = getLatestUpdate(res);
           setPredictionResponse(latestUpdate);

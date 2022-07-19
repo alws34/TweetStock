@@ -1,0 +1,113 @@
+/* ----LoggedUserFeatures---- */
+.loggedUserFeatures .featuresContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+/*----------------------------------*/
+
+/* ----PredictionWithTweets---- */
+.predictionWithTweets .predictionContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.predictionWithTweets .tweetsAndTableContainer {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.predictionWithTweets .tweetsAndTableContainer > div {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.predictionWithTweets .tweetsAndTableContainer > div > div {
+  margin: 0px;
+}
+/*--------PredictionWithTweets END---------*/
+
+/* ----POPUP STOCK CHAT---- */
+#popup-root .popup-content {
+  width: 325px;
+  max-width: 77%;
+  max-height: 650px;
+  border-radius: 10px;
+  margin-bottom: 5px;
+  border: 2px solid #9fbcee;
+}
+
+#popup-root .popup-content .k-chat {
+  max-height: 550px;
+  border-radius: 5px;
+}
+#popup-root .popup-content.darkChatContainer {
+  background: #424242;
+}
+.k-chat .k-message-list {
+  border-bottom: 1px solid black;
+}
+.darkChatContainer .k-chat .k-message-list {
+  border-bottom: 1px solid white;
+}
+.darkChat div {
+  background-color: #121212;
+  color: white;
+}
+.darkChat div.k-bubble {
+  background-color: #424242;
+  color: white;
+}
+
+.whiteChatContainer {
+  /* background: #d8d8d8; */
+  border-radius: 5px;
+}
+
+.whiteChat div {
+  background-color: #d8d8d8;
+  color: black;
+}
+.whiteChat div.k-bubble {
+  color: black;
+}
+
+/* #pop-root .popup-content div {
+  max-height: 650px;
+  min-height: 350px;
+} */
+@keyframes anvil {
+  0% {
+    transform: scale(1) translateY(0px);
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(241, 241, 241, 0);
+  }
+  1% {
+    transform: scale(0.96) translateY(10px);
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(241, 241, 241, 0);
+  }
+  100% {
+    transform: scale(1) translateY(0px);
+    opacity: 1;
+    box-shadow: 0 0 500px rgba(241, 241, 241, 0);
+  }
+}
+.popup-content {
+  -webkit-animation: anvil 0.3s cubic-bezier(0.38, 0.1, 0.36, 0.9) forwards;
+}
+/*----------POPUP STOCK CHAT END------------*/
+
+/*------------STOCK DETAILS----------*/
+.stockDetailsContainer {
+  margin-top: 5vh;
+}
+/*---------STOCK DETAILS END-------------*/
+.predStatsPopUp {
+  border-radius: 10px;
+}
