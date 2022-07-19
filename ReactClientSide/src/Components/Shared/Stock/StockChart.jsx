@@ -18,7 +18,6 @@ export default function StockChart(props) {
   ]);
 
   const [price, setPrice] = useState(null);
-  const [prevPrice, setPrevPrice] = useState(-1);
   const [priceTime, setPriceTime] = useState(null);
   const [isStockValid, setIsStockValid] = useState(true);
   const [timeoutId, setTimeoutId] = useState(null);
@@ -100,17 +99,12 @@ export default function StockChart(props) {
     fetch("https://investing4.p.rapidapi.com/stocks/historical-data", options)
       .then((response) => response.json())
       .then((response) => {
-        setPrevPrice(null);
         setPrice(null);
         setPriceTime(null);
-        console.log(response);
 
         const prices = response.data.historical.map((stockDayObj) => {
-          console.log(stockDayObj.date);
           let preFormattedDate = stockDayObj.date.split("/");
-          console.log(preFormattedDate);
           let formattedDate = `${preFormattedDate[1]}/${preFormattedDate[0]}/${preFormattedDate[2]}`;
-          console.log(formattedDate);
           return {
             x: new Date(formattedDate),
             y: [
@@ -141,19 +135,12 @@ export default function StockChart(props) {
     setClickedBtn("live");
     try {
       fetchRecentPrices().then((data) => {
-        let today = new Date();
-        console.log(
-          `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`
-        );
-
         const stock = data.chart.result[0];
-
         if (isInvalidStock(stock)) {
           setIsStockValid(false);
           props.updateInvalidStocksCounter &&
             props.updateInvalidStocksCounter();
         }
-        setPrevPrice(price);
         setPrice(stock.meta.regularMarketPrice.toFixed(2));
         setPriceTime(new Date(stock.meta.regularMarketTime * 1000));
 
@@ -254,7 +241,6 @@ export default function StockChart(props) {
         stock_ticker={props.stock_ticker}
         hideInfoPanel={props.hideInfoPanel}
         price={price}
-        prevPrice={prevPrice}
         priceTime={priceTime}
         predictionDir={direction}
         predictionAccuracy={props.predictionAccuracy}
