@@ -108,6 +108,8 @@
 
 21:35:13::		Going to sleep for 5160 seconds (86.0 minutes)... @21:35:13
 
+<<<<<<< HEAD
+=======
 23:01:00::      Woke up @23:01:00
 
 23:01:12::		nyse.open_at_time says: The provided timestamp is not covered by the schedule  ---ValueError@is_valid_day
@@ -116,3 +118,4 @@
 
 23:01:14::		Going to sleep for 62880 seconds (1048.0 minutes)... @23:01:14
 
+>>>>>>> 35a96d4dba5111e0e3b579ef0a40e2f573ee9d72

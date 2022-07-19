@@ -30,6 +30,15 @@ export default function AboutPage() {
         <a href="https://finance.yahoo.com/quote/TSLA/">Tesla [(TSLA)]</a>
         <br />
         <br />
+        <div>
+          <h1>Developed by:</h1>
+          <br />
+          <h3>Alon Weiss</h3>
+          <br/>
+          <h3>Guy Yaron</h3>
+          <br/>
+          <h3>Hadar Tayar</h3>
+        </div>
       </div>
     </div>
   );
