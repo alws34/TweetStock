@@ -345,7 +345,6 @@ env/lib/python3.9/site-packages/tensorflow/python/_pywrap_tensorflow_internal.so
 Tensorflow/*.whl
 env/*
 *.img
-DataWork/CONFIGS/*
 DataWork/Data/CSVs/Initial_Data/*
 DataWork/OLD/*
 DataWork/SelectedModels (For Retraining)/*
