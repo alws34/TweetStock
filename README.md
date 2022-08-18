@@ -7,7 +7,7 @@
 
 # TweetStock
 
-This is ours final project in Computer Science B.Sc at Ruppin Academic Center 🇮🇱.
+This is our final project in Computer Science B.Sc at Ruppin Academic Center 🇮🇱.
 <br>
 [Live Web App Available here](https://proj.ruppin.ac.il/bgroup57/test2/tar1/build/)
 <br><br>
